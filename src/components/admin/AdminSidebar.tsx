@@ -5,30 +5,29 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, BookOpen, ClipboardCheck, Users,
-  Settings, HelpCircle, LogOut, GraduationCap, Menu, X, ChevronRight, Plus,
+  LayoutDashboard, Users, BookOpen, MessageSquare,
+  Sparkles, Settings, LogOut, Shield, Menu, X, ChevronRight,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
-interface Props {
-  fullName: string
-  pendingCount?: number
-}
-
 const NAV = [
-  { href: '/teacher',              label: 'Dashboard',               icon: LayoutDashboard, exact: true },
-  { href: '/teacher/courses',      label: 'Kurslarim',               icon: BookOpen },
-  { href: '/teacher/tasks/review', label: 'Topshiriqlar tekshirish', icon: ClipboardCheck, badgeKey: 'pending' },
-  { href: '/teacher/students',     label: "O'quvchilarim",            icon: Users },
-  { href: '/teacher/settings',     label: 'Sozlamalar',              icon: Settings },
-  { href: '/teacher/help',         label: 'Yordam',                  icon: HelpCircle },
+  { href: '/admin',            label: 'Dashboard',       icon: LayoutDashboard, exact: true },
+  { href: '/admin/users',      label: 'Foydalanuvchilar', icon: Users },
+  { href: '/admin/courses',    label: 'Kurslar',          icon: BookOpen },
+  { href: '/admin/forum',      label: 'Forum',            icon: MessageSquare },
+  { href: '/admin/motivation', label: 'Motivatsiya',      icon: Sparkles },
+  { href: '/admin/settings',   label: 'Sozlamalar',       icon: Settings },
 ]
 
+interface Props {
+  fullName: string
+  email: string
+}
+
 function NavItem({
-  href, label, icon: Icon, badge, exact, onClick,
+  href, label, icon: Icon, exact, onClick,
 }: {
-  href: string; label: string; icon: React.ElementType
-  badge?: number; exact?: boolean; onClick?: () => void
+  href: string; label: string; icon: React.ElementType; exact?: boolean; onClick?: () => void
 }) {
   const pathname = usePathname()
   const active = exact ? pathname === href : pathname.startsWith(href)
@@ -39,31 +38,25 @@ function NavItem({
       onClick={onClick}
       className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
         active
-          ? 'bg-emerald-600/80 text-white shadow-lg shadow-emerald-900/30'
+          ? 'bg-purple-600/90 text-white shadow-lg shadow-purple-900/40'
           : 'text-white/50 hover:text-white hover:bg-white/5'
       }`}
     >
       {active && (
         <motion.div
-          layoutId="teacherNav"
-          className="absolute inset-0 bg-emerald-600/80 rounded-xl -z-10"
+          layoutId="adminNav"
+          className="absolute inset-0 bg-purple-600/90 rounded-xl -z-10"
           transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
         />
       )}
       <Icon className="h-4 w-4 flex-shrink-0" />
       <span className="flex-1">{label}</span>
-      {badge && badge > 0 ? (
-        <span className="bg-amber-500 text-white text-xs font-bold h-5 min-w-5 px-1 rounded-full flex items-center justify-center">
-          {badge > 99 ? '99+' : badge}
-        </span>
-      ) : active ? (
-        <ChevronRight className="h-3.5 w-3.5 opacity-60" />
-      ) : null}
+      {active && <ChevronRight className="h-3.5 w-3.5 opacity-60" />}
     </Link>
   )
 }
 
-function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose?: () => void }) {
+function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => void }) {
   const router = useRouter()
 
   const handleSignOut = async () => {
@@ -73,20 +66,25 @@ function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose
     router.refresh()
   }
 
-  const initials = fullName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  const initials = fullName
+    .split(' ')
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   return (
     <div className="flex flex-col h-full select-none">
       {/* Logo */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-        <Link href="/teacher" className="flex items-center gap-2.5" onClick={onClose}>
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-1.5 rounded-lg shadow-md shadow-emerald-900/40">
-            <GraduationCap className="h-4 w-4 text-white" />
+        <Link href="/admin" className="flex items-center gap-2.5">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-1.5 rounded-lg shadow-md shadow-purple-900/40">
+            <Shield className="h-4 w-4 text-white" />
           </div>
           <div>
             <span className="font-bold text-white text-sm">FreelancerSchool</span>
-            <span className="ml-2 text-xs bg-emerald-900/60 text-emerald-300 px-1.5 py-0.5 rounded-full">
-              O&apos;qituvchi
+            <span className="ml-2 text-xs bg-purple-900/60 text-purple-300 px-1.5 py-0.5 rounded-full">
+              Admin
             </span>
           </div>
         </Link>
@@ -97,47 +95,26 @@ function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose
         )}
       </div>
 
-      {/* Profil */}
+      {/* Admin profil */}
       <div
         className="mx-3 mt-4 rounded-2xl p-4"
-        style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)' }}
+        style={{ background: 'rgba(139,92,246,0.07)', border: '1px solid rgba(139,92,246,0.15)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0 shadow-lg">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0 shadow-lg shadow-purple-900/40">
             {initials}
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-white text-sm font-semibold truncate">{fullName}</p>
-            <p className="text-white/40 text-xs">O&apos;qituvchi</p>
+            <p className="text-white/40 text-xs truncate">{email}</p>
           </div>
         </div>
       </div>
 
-      {/* Yangi kurs CTA */}
-      <div className="px-3 mt-3">
-        <Link
-          href="/teacher/courses/new"
-          onClick={onClose}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90 shadow-lg shadow-emerald-900/20"
-          style={{ background: 'linear-gradient(135deg, rgba(5,150,105,0.9), rgba(4,120,87,0.9))' }}
-        >
-          <Plus className="h-4 w-4" />
-          Yangi kurs yaratish
-        </Link>
-      </div>
-
       {/* Navigatsiya */}
-      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {NAV.map(item => (
-          <NavItem
-            key={item.href}
-            href={item.href}
-            label={item.label}
-            icon={item.icon}
-            exact={item.exact}
-            badge={item.badgeKey === 'pending' ? pendingCount : undefined}
-            onClick={onClose}
-          />
+          <NavItem key={item.href} {...item} onClick={onClose} />
         ))}
       </nav>
 
@@ -155,11 +132,12 @@ function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose
   )
 }
 
-export default function TeacherSidebar(props: Props) {
+export default function AdminSidebar(props: Props) {
   const [open, setOpen] = useState(false)
 
   return (
     <>
+      {/* Mobil burger */}
       <button
         onClick={() => setOpen(true)}
         className="lg:hidden fixed top-4 left-4 z-40 h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-lg"
@@ -168,6 +146,7 @@ export default function TeacherSidebar(props: Props) {
         <Menu className="h-4 w-4" />
       </button>
 
+      {/* Desktop sidebar */}
       <aside
         className="hidden lg:flex flex-col w-[240px] flex-shrink-0 h-screen border-r border-white/5"
         style={{ background: 'rgba(7,10,20,0.7)', backdropFilter: 'blur(24px)' }}
@@ -175,6 +154,7 @@ export default function TeacherSidebar(props: Props) {
         <SidebarInner {...props} />
       </aside>
 
+      {/* Mobil overlay */}
       <AnimatePresence>
         {open && (
           <>
@@ -193,7 +173,7 @@ export default function TeacherSidebar(props: Props) {
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 26, stiffness: 300 }}
               className="lg:hidden fixed left-0 top-0 bottom-0 w-72 z-50 flex flex-col border-r border-white/10"
-              style={{ background: '#090d18' }}
+              style={{ background: '#090d18', backdropFilter: 'blur(24px)' }}
             >
               <SidebarInner {...props} onClose={() => setOpen(false)} />
             </motion.aside>
