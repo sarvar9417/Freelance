@@ -56,7 +56,7 @@ export default async function ReviewQueuePage() {
     : { data: [] }
 
   // O'quvchilar ma'lumotini alohida olish
-  const studentIds = [...new Set((submissions ?? []).map((s: any) => s.student_id as string))]
+  const studentIds = Array.from(new Set((submissions ?? []).map((s: any) => s.student_id as string)))
   const { data: students } = studentIds.length > 0
     ? await supabase.from('users').select('id, full_name, email').in('id', studentIds)
     : { data: [] }
