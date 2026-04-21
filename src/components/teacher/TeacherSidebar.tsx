@@ -178,7 +178,7 @@ export default function TeacherSidebar(props: Props) {
 
       <aside
         className="hidden lg:flex flex-col w-[240px] flex-shrink-0 h-screen border-r border-white/5"
-        style={{ background: 'rgba(7,10,20,0.7)', backdropFilter: 'blur(24px)' }}
+        style={{ background: 'rgba(7,10,20,0.7)', backdropFilter: 'blur(24px)', position: 'relative', zIndex: 20 }}
       >
         <SidebarInner {...props} />
       </aside>
