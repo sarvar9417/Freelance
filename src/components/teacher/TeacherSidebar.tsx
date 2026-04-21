@@ -9,17 +9,20 @@ import {
   Settings, HelpCircle, LogOut, GraduationCap, Menu, X, ChevronRight, Plus,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import NotificationBell from '@/components/shared/NotificationBell'
 
 interface Props {
+  userId: string
   fullName: string
   pendingCount?: number
+  unreadNotifications?: number
 }
 
 const NAV = [
   { href: '/teacher',              label: 'Dashboard',               icon: LayoutDashboard, exact: true },
   { href: '/teacher/courses',      label: 'Kurslarim',               icon: BookOpen },
   { href: '/teacher/tasks/review', label: 'Topshiriqlar tekshirish', icon: ClipboardCheck, badgeKey: 'pending' },
-  { href: '/teacher/students',     label: "O'quvchilarim",            icon: Users },
+  { href: '/teacher/students',     label: "O'quvchilarim",           icon: Users },
   { href: '/teacher/settings',     label: 'Sozlamalar',              icon: Settings },
   { href: '/teacher/help',         label: 'Yordam',                  icon: HelpCircle },
 ]
@@ -63,7 +66,9 @@ function NavItem({
   )
 }
 
-function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose?: () => void }) {
+function SidebarInner({
+  userId, fullName, pendingCount = 0, unreadNotifications = 0, onClose,
+}: Props & { onClose?: () => void }) {
   const router = useRouter()
 
   const handleSignOut = async () => {
@@ -77,7 +82,7 @@ function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose
 
   return (
     <div className="flex flex-col h-full select-none">
-      {/* Logo */}
+      {/* Logo + notification */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
         <Link href="/teacher" className="flex items-center gap-2.5" onClick={onClose}>
           <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-1.5 rounded-lg shadow-md shadow-emerald-900/40">
@@ -90,11 +95,14 @@ function SidebarInner({ fullName, pendingCount = 0, onClose }: Props & { onClose
             </span>
           </div>
         </Link>
-        {onClose && (
-          <button onClick={onClose} className="text-white/30 hover:text-white lg:hidden">
-            <X className="h-4 w-4" />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          <NotificationBell userId={userId} initialUnread={unreadNotifications} variant="teacher" />
+          {onClose && (
+            <button onClick={onClose} className="text-white/30 hover:text-white lg:hidden ml-1">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Profil */}

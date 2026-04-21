@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 // ─── Yordamchi: joriy o'qituvchini tekshirish ────────────────────────────────
 async function requireTeacher() {
@@ -133,7 +134,6 @@ export async function createLesson(courseId: string, formData: {
 
   if (!formData.title.trim()) return { error: 'Dars nomi kiritilishi shart' }
 
-  // Kurs o'qituvchiga tegishliligini tekshirish
   const { data: course } = await supabase
     .from('courses')
     .select('id')
@@ -141,7 +141,7 @@ export async function createLesson(courseId: string, formData: {
     .eq('teacher_id', userId)
     .single()
 
-  if (!course) return { error: 'Kurs topilmadi yoki ruxsat yo\'q' }
+  if (!course) return { error: "Kurs topilmadi yoki ruxsat yo'q" }
 
   const { error } = await supabase
     .from('lessons')
@@ -175,7 +175,7 @@ export async function updateLesson(lessonId: string, courseId: string, formData:
     .eq('teacher_id', userId)
     .single()
 
-  if (!course) return { error: 'Ruxsat yo\'q' }
+  if (!course) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
     .from('lessons')
@@ -204,7 +204,7 @@ export async function deleteLesson(lessonId: string, courseId: string) {
     .eq('teacher_id', userId)
     .single()
 
-  if (!course) return { error: 'Ruxsat yo\'q' }
+  if (!course) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
     .from('lessons')
@@ -242,7 +242,7 @@ export async function createTask(courseId: string, formData: {
     .eq('teacher_id', userId)
     .single()
 
-  if (!course) return { error: 'Ruxsat yo\'q' }
+  if (!course) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
     .from('tasks')
@@ -280,7 +280,7 @@ export async function updateTask(taskId: string, courseId: string, formData: {
     .eq('teacher_id', userId)
     .single()
 
-  if (!course) return { error: 'Ruxsat yo\'q' }
+  if (!course) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
     .from('tasks')
@@ -310,7 +310,7 @@ export async function deleteTask(taskId: string, courseId: string) {
     .eq('teacher_id', userId)
     .single()
 
-  if (!course) return { error: 'Ruxsat yo\'q' }
+  if (!course) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
     .from('tasks')
@@ -331,17 +331,16 @@ export async function reviewSubmission(submissionId: string, score: number, feed
   const { supabase, userId } = await requireTeacher()
 
   if (!feedback.trim()) return { error: 'Izoh kiritilishi shart' }
-  if (score < 0 || score > 100) return { error: 'Baho 0-100 oralig\'ida bo\'lishi kerak' }
+  if (score < 0 || score > 100) return { error: "Baho 0-100 oralig'ida bo'lishi kerak" }
 
-  // Submission o'qituvchining kursiga tegishliligini tekshirish
   const { data: sub } = await supabase
     .from('submissions')
-    .select('task_id, tasks(course_id, courses(teacher_id))')
+    .select('task_id, student_id, tasks(course_id, title, courses(teacher_id))')
     .eq('id', submissionId)
     .single()
 
   const teacherId = (sub?.tasks as any)?.courses?.teacher_id
-  if (teacherId !== userId) return { error: 'Ruxsat yo\'q' }
+  if (teacherId !== userId) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
     .from('submissions')
@@ -354,6 +353,65 @@ export async function reviewSubmission(submissionId: string, score: number, feed
     .eq('id', submissionId)
 
   if (error) return { error: error.message }
+
+  // O'quvchiga bildirishnoma (DB trigger backup)
+  if (sub?.student_id) {
+    const admin = createAdminClient()
+    const taskTitle = (sub.tasks as any)?.title ?? 'Topshiriq'
+    await admin.from('notifications').insert({
+      user_id: sub.student_id,
+      type: 'submission_graded',
+      title: 'Topshiriq baholandi! ✅',
+      message: `"${taskTitle}" topshirig'i baholandi — ${score} ball`,
+      link: '/student/tasks',
+      data: { submissionId, score, taskId: sub.task_id },
+    }).then(() => {})
+  }
+
+  revalidatePath('/teacher/tasks/review')
+  revalidatePath('/teacher')
+  return { success: true }
+}
+
+export async function requestResubmission(submissionId: string, feedback: string) {
+  const { supabase, userId } = await requireTeacher()
+
+  if (!feedback.trim()) return { error: 'Izoh kiritilishi shart' }
+
+  const { data: sub } = await supabase
+    .from('submissions')
+    .select('task_id, student_id, tasks(course_id, title, courses(teacher_id))')
+    .eq('id', submissionId)
+    .single()
+
+  const teacherId = (sub?.tasks as any)?.courses?.teacher_id
+  if (teacherId !== userId) return { error: "Ruxsat yo'q" }
+
+  const { error } = await supabase
+    .from('submissions')
+    .update({
+      feedback: feedback.trim(),
+      status: 'revision',
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', submissionId)
+
+  if (error) return { error: error.message }
+
+  // O'quvchiga bildirishnoma
+  if (sub?.student_id) {
+    const admin = createAdminClient()
+    const taskTitle = (sub.tasks as any)?.title ?? 'Topshiriq'
+    await admin.from('notifications').insert({
+      user_id: sub.student_id,
+      type: 'submission_revision',
+      title: 'Qayta topshirish talab qilinadi 🔄',
+      message: `"${taskTitle}" topshirig'ini qayta ko'rib chiqing`,
+      link: '/student/tasks',
+      data: { submissionId, taskId: sub.task_id },
+    }).then(() => {})
+  }
+
   revalidatePath('/teacher/tasks/review')
   return { success: true }
 }
@@ -382,33 +440,5 @@ export async function updateTeacherProfile(formData: {
 
   if (error) return { error: error.message }
   revalidatePath('/teacher')
-  return { success: true }
-}
-
-export async function requestResubmission(submissionId: string, feedback: string) {
-  const { supabase, userId } = await requireTeacher()
-
-  if (!feedback.trim()) return { error: 'Izoh kiritilishi shart' }
-
-  const { data: sub } = await supabase
-    .from('submissions')
-    .select('task_id, tasks(course_id, courses(teacher_id))')
-    .eq('id', submissionId)
-    .single()
-
-  const teacherId = (sub?.tasks as any)?.courses?.teacher_id
-  if (teacherId !== userId) return { error: 'Ruxsat yo\'q' }
-
-  const { error } = await supabase
-    .from('submissions')
-    .update({
-      feedback: feedback.trim(),
-      status: 'revision',
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq('id', submissionId)
-
-  if (error) return { error: error.message }
-  revalidatePath('/teacher/tasks/review')
   return { success: true }
 }

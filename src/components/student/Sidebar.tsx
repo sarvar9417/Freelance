@@ -7,24 +7,30 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, ClipboardList, BarChart2,
   MessageSquare, User, LogOut, GraduationCap, Menu, X,
-  Zap, Flame, ChevronRight,
+  Zap, Flame, ChevronRight, Trophy, Library,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import NotificationBell from '@/components/shared/NotificationBell'
 
 const NAV = [
-  { href: '/student',          label: 'Dashboard',         icon: LayoutDashboard, exact: true  },
-  { href: '/student/courses',  label: 'Kurslarim',         icon: BookOpen,        badge: null  },
-  { href: '/student/tasks',    label: 'Topshiriqlarim',    icon: ClipboardList,   badge: 3     },
-  { href: '/student/progress', label: 'Progressim',        icon: BarChart2,       badge: null  },
-  { href: '/student/forum',    label: 'Forum',             icon: MessageSquare,   badge: null  },
-  { href: '/profile',           label: 'Profil',            icon: User,            badge: null  },
+  { href: '/student',             label: 'Dashboard',        icon: LayoutDashboard, exact: true },
+  { href: '/student/courses',     label: 'Kurslar katalogi', icon: Library,         badge: null },
+  { href: '/student/my-courses',  label: 'Mening kurslarim', icon: BookOpen,        badge: null },
+  { href: '/student/tasks',       label: 'Topshiriqlarim',   icon: ClipboardList,   badge: null },
+  { href: '/student/progress',    label: 'Progressim',       icon: BarChart2,       badge: null },
+  { href: '/student/leaderboard', label: 'Reyting',          icon: Trophy,          badge: null },
+  { href: '/student/forum',       label: 'Forum',            icon: MessageSquare,   badge: null },
+  { href: '/student/profile',     label: 'Profil',           icon: User,            badge: null },
 ]
 
 interface Props {
+  userId: string
   fullName: string
   xp: number
+  level?: number
   streak: number
   pendingTasks?: number
+  unreadNotifications?: number
 }
 
 function NavItem({
@@ -66,7 +72,9 @@ function NavItem({
   )
 }
 
-function SidebarInner({ fullName, xp, streak, pendingTasks = 3, onClose }: Props & { onClose?: () => void }) {
+function SidebarInner({
+  userId, fullName, xp, level = 1, streak, pendingTasks = 0, unreadNotifications = 0, onClose,
+}: Props & { onClose?: () => void }) {
   const router = useRouter()
 
   const handleSignOut = async () => {
@@ -88,7 +96,7 @@ function SidebarInner({ fullName, xp, streak, pendingTasks = 3, onClose }: Props
 
   return (
     <div className="flex flex-col h-full select-none">
-      {/* Logo */}
+      {/* Logo + notification */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-lg shadow-md shadow-blue-900/40">
@@ -96,11 +104,14 @@ function SidebarInner({ fullName, xp, streak, pendingTasks = 3, onClose }: Props
           </div>
           <span className="font-bold text-white text-sm">FreelancerSchool</span>
         </Link>
-        {onClose && (
-          <button onClick={onClose} className="text-white/30 hover:text-white lg:hidden">
-            <X className="h-4 w-4" />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          <NotificationBell userId={userId} initialUnread={unreadNotifications} variant="student" />
+          {onClose && (
+            <button onClick={onClose} className="text-white/30 hover:text-white lg:hidden ml-1">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* User card */}
@@ -111,7 +122,7 @@ function SidebarInner({ fullName, xp, streak, pendingTasks = 3, onClose }: Props
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-white text-sm font-semibold truncate">{fullName}</p>
-            <p className="text-white/40 text-xs">O&apos;quvchi</p>
+            <p className="text-white/40 text-xs">Level {level} · O&apos;quvchi</p>
           </div>
         </div>
 
