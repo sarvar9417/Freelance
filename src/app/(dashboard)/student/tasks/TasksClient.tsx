@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ClipboardList, Clock, CheckCircle2, RotateCcw, AlertCircle,
   ChevronDown, Upload, X, Loader2, Star, Calendar, Search, Zap,
+  Paperclip, Download, MessageSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -16,6 +17,7 @@ interface Task {
   deadline: string | null
   max_score: number
   allowed_formats: string[] | null
+  task_file_urls: string[] | null
   course_id: string
   lesson_id: string | null
   course: { id: string; title: string; emoji: string | null } | null
@@ -38,9 +40,25 @@ const TOAST_STYLE = {
   backdropFilter: 'blur(20px)',
 }
 
-function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onRefresh: () => void }) {
+function getFileName(url: string) {
+  return decodeURIComponent(url.split('/').pop()?.split('?')[0] ?? url).replace(/^\d+_/, '')
+}
+
+function getFileIcon(url: string) {
+  const ext = url.split('.').pop()?.toLowerCase() ?? ''
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return '🖼️'
+  if (ext === 'pdf') return '📄'
+  if (['doc', 'docx'].includes(ext)) return '📝'
+  if (['zip', 'rar'].includes(ext)) return '📦'
+  if (['mp4', 'mov', 'avi'].includes(ext)) return '🎬'
+  if (['xlsx', 'xls'].includes(ext)) return '📊'
+  return '📎'
+}
+
+function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [files, setFiles] = useState<File[]>([])
+  const [comment, setComment] = useState('')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -52,12 +70,36 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
   const isUrgent  = daysLeft !== null && daysLeft >= 0 && daysLeft <= 2
 
   const statusEntry = sub ? (STATUS_MAP[sub.status as keyof typeof STATUS_MAP] ?? STATUS_MAP.pending) : null
+  const taskFiles = task.task_file_urls?.filter(Boolean) ?? []
+  const allowedFormats = task.allowed_formats ?? []
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files ?? [])
+    if (!selected.length) return
+
+    if (allowedFormats.length > 0) {
+      const invalid = selected.filter(f => {
+        const ext = f.name.split('.').pop()?.toLowerCase() ?? ''
+        return !allowedFormats.includes(ext)
+      })
+      if (invalid.length > 0) {
+        setError(
+          `Ruxsat etilmagan format: ${invalid.map(f => `.${f.name.split('.').pop()}`).join(', ')}. ` +
+          `Ruxsat etilgan: ${allowedFormats.map(f => `.${f}`).join(', ')}`
+        )
+        e.target.value = ''
+        return
+      }
+    }
+
+    setFiles(selected)
+    setError('')
+  }
 
   const handleSubmit = () => {
     if (files.length === 0) { setError('Fayl yuklang'); return }
     setError('')
     startTransition(async () => {
-      // 1. Fayllarni server API orqali yuklash
       try {
         const formData = new FormData()
         formData.append('taskId', task.id)
@@ -68,11 +110,10 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
         if (!uploadRes.ok) { setError(uploadData.error ?? 'Fayl yuklashda xatolik'); return }
         const fileUrls: string[] = uploadData.urls
 
-      // 2. API orqali topshirish (XP + bildirishnoma)
         const res = await fetch('/api/submissions/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskId: task.id, fileUrls }),
+          body: JSON.stringify({ taskId: task.id, fileUrls, studentComment: comment.trim() || null }),
         })
         const data = await res.json()
 
@@ -82,6 +123,7 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
         }
 
         setFiles([])
+        setComment('')
         setExpanded(false)
 
         toast.success(`+${data.xpGained} XP — Topshiriq yuborildi! 📤`, {
@@ -105,6 +147,8 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
       }
     })
   }
+
+  const acceptAttr = allowedFormats.length > 0 ? allowedFormats.map(f => `.${f}`).join(',') : undefined
 
   return (
     <motion.div
@@ -176,6 +220,27 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
                 <p className="text-white/60 text-sm leading-relaxed">{task.description}</p>
               )}
 
+              {/* O'qituvchi biriktirgan fayllar */}
+              {taskFiles.length > 0 && (
+                <div className="rounded-xl p-3 space-y-2"
+                  style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.12)' }}>
+                  <p className="text-blue-400/70 text-xs font-medium flex items-center gap-1.5">
+                    <Paperclip className="h-3 w-3" /> O&apos;qituvchi materiallari
+                  </p>
+                  {taskFiles.map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 transition-all group">
+                      <span className="text-base">{getFileIcon(url)}</span>
+                      <span className="text-white/60 text-xs truncate flex-1 group-hover:text-white transition-colors">
+                        {getFileName(url)}
+                      </span>
+                      <Download className="h-3 w-3 text-blue-400/50 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* Mavjud submission ma'lumoti */}
               {sub && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-xs text-white/30">
@@ -197,22 +262,34 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
                 </div>
               )}
 
+              {/* Fayl yuklash va topshirish */}
               {(!sub || sub.status === 'revision') && (
                 <div className="space-y-3">
+                  {/* Format cheklovi */}
+                  {allowedFormats.length > 0 && (
+                    <p className="text-white/30 text-xs">
+                      Ruxsat etilgan formatlar: {allowedFormats.map(f => `.${f}`).join(', ')}
+                    </p>
+                  )}
+
                   <div
                     onClick={() => fileRef.current?.click()}
                     className="border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors hover:border-blue-500/40"
                     style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
                     <Upload className="h-5 w-5 text-white/30 mx-auto mb-1.5" />
                     <p className="text-white/40 text-xs">Fayl yuklash uchun bosing</p>
-                    {task.allowed_formats && task.allowed_formats.length > 0 && (
+                    {allowedFormats.length > 0 && (
                       <p className="text-white/20 text-xs mt-0.5">
-                        {task.allowed_formats.map(f => `.${f}`).join(', ')}
+                        {allowedFormats.map(f => `.${f}`).join(', ')}
                       </p>
                     )}
-                    <input ref={fileRef} type="file" multiple className="hidden"
-                      onChange={e => setFiles(Array.from(e.target.files ?? []))} />
+                    <input
+                      ref={fileRef} type="file" multiple className="hidden"
+                      accept={acceptAttr}
+                      onChange={handleFileChange}
+                    />
                   </div>
+
                   {files.map((f, i) => (
                     <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg"
                       style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
@@ -223,7 +300,24 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
                       </button>
                     </div>
                   ))}
+
+                  {/* O'quvchi izohi */}
+                  <div>
+                    <label className="text-white/30 text-xs mb-1.5 flex items-center gap-1">
+                      <MessageSquare className="h-3 w-3" /> O&apos;qituvchiga xabar (ixtiyoriy)
+                    </label>
+                    <textarea
+                      value={comment}
+                      onChange={e => setComment(e.target.value)}
+                      placeholder="Topshiriq haqida izoh yoki savol..."
+                      rows={2}
+                      className="w-full px-3 py-2 rounded-xl text-xs text-white placeholder-white/20 outline-none focus:ring-1 focus:ring-amber-500/40 resize-none"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                    />
+                  </div>
+
                   {error && <p className="text-red-400 text-xs">{error}</p>}
+
                   <button onClick={handleSubmit} disabled={isPending || files.length === 0}
                     className="w-full py-2.5 rounded-xl text-sm font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2"
                     style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.8), rgba(217,119,6,0.8))' }}>
@@ -240,7 +334,7 @@ function TaskCard({ task, userId, onRefresh }: { task: Task; userId: string; onR
   )
 }
 
-export default function TasksClient({ tasks, userId }: { tasks: Task[]; userId: string }) {
+export default function TasksClient({ tasks }: { tasks: Task[]; userId: string }) {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
@@ -303,7 +397,7 @@ export default function TasksClient({ tasks, userId }: { tasks: Task[]; userId: 
       ) : (
         <div className="space-y-3">
           {filtered.map(task => (
-            <TaskCard key={task.id} task={task} userId={userId} onRefresh={() => router.refresh()} />
+            <TaskCard key={task.id} task={task} onRefresh={() => router.refresh()} />
           ))}
         </div>
       )}

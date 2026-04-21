@@ -321,6 +321,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- ─── 6. TOPSHIRIQ TIZIMI YANGILIKLARI ────────────────────────────────────
+-- O'qituvchi topshiriqqa fayl biriktirishi uchun
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS task_file_urls text[] DEFAULT '{}';
+
+-- O'quvchi topshirayotganda izoh/xabar qoldirishi uchun
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS student_comment text;
+
 -- ═══════════════════════════════════════════════════════════════════════════
 -- STORAGE BUCKET (qo'lda yaratish kerak)
 -- Dashboard → Storage → New Bucket → Name: task-files → Public: true

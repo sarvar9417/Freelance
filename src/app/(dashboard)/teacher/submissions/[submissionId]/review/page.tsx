@@ -13,9 +13,8 @@ export default async function SubmissionReviewPage({ params }: { params: { submi
   const { data: sub } = await supabase
     .from('submissions')
     .select(`
-      id, student_id, task_id, submitted_at, status, score, feedback, file_urls,
-      users!student_id(full_name, email, avatar_url),
-      tasks(id, title, description, max_score, allowed_formats, deadline,
+      id, student_id, task_id, submitted_at, status, score, feedback, file_urls, student_comment,
+      tasks(id, title, description, max_score, allowed_formats, deadline, task_file_urls,
         courses(id, title, emoji, teacher_id)
       )
     `)
@@ -29,7 +28,12 @@ export default async function SubmissionReviewPage({ params }: { params: { submi
 
   if (course?.teacher_id !== user.id && profile?.role !== 'admin') redirect('/teacher/tasks/review')
 
-  const student = sub.users as any
+  // O'quvchi ma'lumotini alohida olish (FK auth.users ga — join ishlamaydi)
+  const { data: student } = await supabase
+    .from('users')
+    .select('full_name, email, avatar_url')
+    .eq('id', sub.student_id)
+    .single()
 
   return (
     <SubmissionReviewClient
@@ -42,11 +46,13 @@ export default async function SubmissionReviewPage({ params }: { params: { submi
         score: sub.score,
         feedback: sub.feedback ?? '',
         file_urls: (sub.file_urls as string[]) ?? [],
+        student_comment: sub.student_comment ?? '',
         student_name: student?.full_name ?? "O'quvchi",
         student_email: student?.email ?? '',
         student_avatar: student?.avatar_url ?? null,
         task_title: task?.title ?? '—',
         task_description: task?.description ?? '',
+        task_file_urls: (task?.task_file_urls as string[]) ?? [],
         max_score: task?.max_score ?? 100,
         allowed_formats: task?.allowed_formats ?? [],
         deadline: task?.deadline ?? null,

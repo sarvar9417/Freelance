@@ -20,11 +20,13 @@ interface Submission {
   score: number | null
   feedback: string
   file_urls: string[]
+  student_comment: string
   student_name: string
   student_email: string
   student_avatar: string | null
   task_title: string
   task_description: string
+  task_file_urls: string[]
   max_score: number
   allowed_formats: string[]
   deadline: string | null
@@ -174,7 +176,42 @@ export default function SubmissionReviewClient({ submission: s }: { submission: 
             ) : (
               <p className="text-white/25 text-sm italic">Tavsif yo&apos;q</p>
             )}
+
+            {/* O'qituvchi biriktirgan fayllar */}
+            {s.task_file_urls.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <p className="text-white/40 text-xs font-medium mb-2 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5" /> O&apos;qituvchi fayllari
+                  <span className="ml-auto bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">{s.task_file_urls.length} ta</span>
+                </p>
+                <div className="space-y-1.5">
+                  {s.task_file_urls.map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-all group"
+                      style={{ background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.12)' }}>
+                      <span className="text-lg">{getFileIcon(url)}</span>
+                      <span className="text-white/60 text-xs truncate flex-1 group-hover:text-white transition-colors">
+                        {getFileName(url)}
+                      </span>
+                      <Download className="h-3.5 w-3.5 text-blue-400/40 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
+
+          {/* O'quvchi izohi */}
+          {s.student_comment && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+              className="rounded-2xl p-5"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <p className="text-white/40 text-xs font-medium mb-2 flex items-center gap-1.5">
+                <MessageSquare className="h-3.5 w-3.5" /> O&apos;quvchi xabari
+              </p>
+              <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">{s.student_comment}</p>
+            </motion.div>
+          )}
 
           {/* Submitted files */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}

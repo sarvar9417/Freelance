@@ -228,6 +228,7 @@ export async function createTask(courseId: string, formData: {
   deadline: string
   max_score: number
   allowed_formats: string[]
+  task_file_urls?: string[]
 }) {
   const { supabase, userId } = await requireTeacher()
 
@@ -254,6 +255,7 @@ export async function createTask(courseId: string, formData: {
       deadline: formData.deadline,
       max_score: formData.max_score,
       allowed_formats: formData.allowed_formats,
+      task_file_urls: formData.task_file_urls ?? [],
     })
 
   if (error) return { error: error.message }
@@ -268,6 +270,7 @@ export async function updateTask(taskId: string, courseId: string, formData: {
   deadline: string
   max_score: number
   allowed_formats: string[]
+  task_file_urls?: string[]
 }) {
   const { supabase, userId } = await requireTeacher()
 
@@ -291,6 +294,7 @@ export async function updateTask(taskId: string, courseId: string, formData: {
       deadline: formData.deadline,
       max_score: formData.max_score,
       allowed_formats: formData.allowed_formats,
+      task_file_urls: formData.task_file_urls ?? [],
     })
     .eq('id', taskId)
     .eq('course_id', courseId)

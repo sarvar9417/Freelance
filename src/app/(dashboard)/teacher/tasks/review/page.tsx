@@ -46,14 +46,21 @@ export default async function ReviewQueuePage() {
   const taskMap = Object.fromEntries((taskRows ?? []).map(t => [t.id, t]))
   const courseMap = Object.fromEntries((courses ?? []).map(c => [c.id, c]))
 
-  // Topshirilgan ishlar
+  // Topshirilgan ishlar (users bilan join ishlatilmaydi — FK auth.users ga, public.users ga emas)
   const { data: submissions } = taskIds.length > 0
     ? await supabase
         .from('submissions')
-        .select('id, student_id, task_id, submitted_at, status, score, file_urls, users!student_id(full_name, email, avatar_url)')
+        .select('id, student_id, task_id, submitted_at, status, score, file_urls')
         .in('task_id', taskIds)
         .order('submitted_at', { ascending: false })
     : { data: [] }
+
+  // O'quvchilar ma'lumotini alohida olish
+  const studentIds = [...new Set((submissions ?? []).map((s: any) => s.student_id as string))]
+  const { data: students } = studentIds.length > 0
+    ? await supabase.from('users').select('id, full_name, email').in('id', studentIds)
+    : { data: [] }
+  const studentMap = Object.fromEntries((students ?? []).map(s => [s.id, s]))
 
   const enriched = (submissions ?? []).map((s: any) => ({
     id: s.id,
@@ -63,8 +70,8 @@ export default async function ReviewQueuePage() {
     status: s.status,
     score: s.score,
     file_urls: s.file_urls ?? [],
-    student_name: s.users?.full_name ?? "O'quvchi",
-    student_email: s.users?.email ?? '',
+    student_name: studentMap[s.student_id]?.full_name ?? "O'quvchi",
+    student_email: studentMap[s.student_id]?.email ?? '',
     task_title: taskMap[s.task_id]?.title ?? '—',
     max_score: taskMap[s.task_id]?.max_score ?? 100,
     course_title: courseMap[taskMap[s.task_id]?.course_id]?.title ?? '—',

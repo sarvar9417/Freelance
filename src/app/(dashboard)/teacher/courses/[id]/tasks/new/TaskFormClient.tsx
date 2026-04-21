@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Save, Loader2, Calendar, Star, BookOpen, FileCheck } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Calendar, Star, BookOpen, FileCheck, Paperclip, X, Download } from 'lucide-react'
 import { createTask } from '../../../../actions'
 
 const FORMAT_OPTIONS = ['pdf', 'doc', 'docx', 'zip', 'jpg', 'png', 'mp4', 'xlsx']
@@ -22,10 +22,18 @@ interface Props {
   taskId?: string
 }
 
+function getFileName(url: string) {
+  return decodeURIComponent(url.split('/').pop()?.split('?')[0] ?? url).replace(/^\d+_/, '')
+}
+
 export default function TaskFormClient({ courseId, courseTitle, lessons, initial, mode = 'create' }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const [taskFiles, setTaskFiles] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const defaultDeadline = () => {
     const d = new Date()
@@ -53,6 +61,29 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
         : [...prev.allowed_formats, fmt],
     }))
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files ?? [])
+    if (!selected.length) return
+    setUploadError('')
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('sessionId', crypto.randomUUID())
+      selected.forEach(f => fd.append('files', f))
+      const res = await fetch('/api/upload-task-files', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) { setUploadError(data.error ?? 'Fayl yuklashda xatolik'); return }
+      setTaskFiles(prev => [...prev, ...data.urls])
+    } catch {
+      setUploadError('Fayl yuklashda xatolik')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  const removeFile = (i: number) => setTaskFiles(prev => prev.filter((_, j) => j !== i))
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.title.trim()) { setError('Topshiriq nomi kiritilishi shart'); return }
@@ -69,6 +100,7 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
         deadline: new Date(form.deadline).toISOString(),
         max_score: form.max_score,
         allowed_formats: form.allowed_formats,
+        task_file_urls: taskFiles,
       })
       if (result.error) { setError(result.error); return }
       router.push(`/teacher/courses/${courseId}/tasks`)
@@ -164,7 +196,7 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
         >
           <label className="text-white/50 text-xs mb-3 flex items-center gap-1">
-            <FileCheck className="h-3 w-3" /> Ruxsat etilgan fayl formatlari *
+            <FileCheck className="h-3 w-3" /> O&apos;quvchi yuklashi mumkin bo&apos;lgan fayl formatlari *
           </label>
           <div className="flex flex-wrap gap-2">
             {FORMAT_OPTIONS.map(fmt => (
@@ -178,6 +210,56 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
               </button>
             ))}
           </div>
+          {form.allowed_formats.length > 0 && (
+            <p className="text-white/25 text-xs mt-2">
+              O&apos;quvchilar faqat tanlangan formatlarda fayl yuboraoladi
+            </p>
+          )}
+        </motion.div>
+
+        {/* O'qituvchi fayllari */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="rounded-2xl p-5"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-white/50 text-xs flex items-center gap-1">
+              <Paperclip className="h-3 w-3" /> Topshiriqqa fayl biriktirish (ixtiyoriy)
+            </label>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border"
+              style={{ background: 'rgba(59,130,246,0.08)', borderColor: 'rgba(59,130,246,0.2)', color: 'rgb(96,165,250)' }}
+            >
+              {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Paperclip className="h-3 w-3" />}
+              {uploading ? 'Yuklanmoqda...' : 'Fayl qo\'shish'}
+            </button>
+            <input ref={fileRef} type="file" multiple className="hidden" onChange={handleFileUpload} />
+          </div>
+
+          {uploadError && (
+            <p className="text-red-400 text-xs mb-2">{uploadError}</p>
+          )}
+
+          {taskFiles.length === 0 ? (
+            <p className="text-white/20 text-xs">Fayl biriktirilmagan. O&apos;quvchilar topshiriq materiallarini bu yerda ko&apos;radi.</p>
+          ) : (
+            <div className="space-y-2">
+              {taskFiles.map((url, i) => (
+                <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl"
+                  style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.12)' }}>
+                  <Download className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
+                  <span className="text-white/60 text-xs truncate flex-1">{getFileName(url)}</span>
+                  <button type="button" onClick={() => removeFile(i)}
+                    className="text-white/20 hover:text-red-400 transition-colors flex-shrink-0">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         <div className="flex gap-3">
@@ -185,7 +267,7 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
             className="flex-1 py-3 rounded-xl text-sm font-medium text-white/50 hover:text-white hover:bg-white/5 transition-all border border-white/5">
             Bekor qilish
           </button>
-          <button type="submit" disabled={isPending}
+          <button type="submit" disabled={isPending || uploading}
             className="flex-1 py-3 rounded-xl text-sm font-medium text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
             style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.8), rgba(217,119,6,0.8))' }}>
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { taskId, fileUrls } = await req.json()
+    const { taskId, fileUrls, studentComment } = await req.json()
     if (!taskId) return NextResponse.json({ error: 'taskId talab qilinadi' }, { status: 400 })
     if (!fileUrls?.length) return NextResponse.json({ error: 'Fayl yuklang' }, { status: 400 })
 
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
         student_id: user.id,
         task_id: taskId,
         file_urls: fileUrls,
+        student_comment: studentComment?.trim() || null,
         status: 'pending',
       })
 

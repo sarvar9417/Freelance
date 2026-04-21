@@ -33,7 +33,7 @@ export default async function TasksPage() {
   const [{ data: tasks }, { data: courses }] = await Promise.all([
     supabase
       .from('tasks')
-      .select('id, title, description, deadline, max_score, allowed_formats, course_id, lesson_id')
+      .select('id, title, description, deadline, max_score, allowed_formats, task_file_urls, course_id, lesson_id')
       .in('course_id', courseIds),
     supabase
       .from('courses')

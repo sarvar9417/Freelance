@@ -22,7 +22,7 @@ export default async function EditTaskPage({
 
   const { data: task } = await supabase
     .from('tasks')
-    .select('id, title, description, deadline, max_score, allowed_formats, lesson_id')
+    .select('id, title, description, deadline, max_score, allowed_formats, lesson_id, task_file_urls')
     .eq('id', params.taskId)
     .eq('course_id', params.id)
     .single()
@@ -48,6 +48,7 @@ export default async function EditTaskPage({
         deadline: task.deadline ?? '',
         max_score: task.max_score ?? 100,
         allowed_formats: (task.allowed_formats as string[]) ?? [],
+        task_file_urls: (task.task_file_urls as string[]) ?? [],
       }}
     />
   )
