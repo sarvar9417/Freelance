@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Send, Loader2, ChevronDown, AlertCircle } from 'lucide-react'
-import { createPost } from '@/lib/supabase/realtime'
+import { toast } from 'sonner'
 
 const CATEGORIES = ['Savol', 'Muhokama', 'Yangilik', 'Tavsiya', 'Yordam']
 
@@ -39,15 +39,38 @@ export default function CreatePostForm({ userId, userName, userAvatar = '' }: Pr
     setLoading(true)
     setError(null)
     try {
-      const post = await createPost({
-        title: title.trim(),
-        content: content.trim(),
-        category,
-        author_id: userId,
-        author_name: userName,
-        author_avatar: userAvatar,
+      const res = await fetch('/api/forum/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          content: content.trim(),
+          category,
+          author_name: userName,
+          author_avatar: userAvatar,
+        }),
       })
-      router.push(`/forum/post/${post.id}`)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error ?? 'Post yaratishda xatolik yuz berdi.')
+        setLoading(false)
+        return
+      }
+
+      if (data.xpGained) {
+        toast.success(`+${data.xpGained} XP — Post yaratildi! 📝`, {
+          description: data.levelUp ? `Level ${data.newLevel} ga ko'tarildingiz! 🚀` : undefined,
+          duration: 4000,
+          style: {
+            background: 'rgba(10,14,28,0.96)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff',
+          },
+        })
+      }
+
+      router.push(`/forum/post/${data.post.id}`)
     } catch {
       setError('Post yaratishda xatolik yuz berdi. Qayta urinib ko\'ring.')
       setLoading(false)

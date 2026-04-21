@@ -5,14 +5,13 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Plus, MessageSquare, TrendingUp,
-  Loader2, Wifi, Users, FileText, X,
+  Loader2, Wifi, X, FileText,
 } from 'lucide-react'
 import {
   fetchPosts, fetchTopPosts, subscribeToPosts,
   getUserPostLikes, formatTimeAgo, type ForumPost,
 } from '@/lib/supabase/realtime'
 import PostCard from '@/components/forum/PostCard'
-import { createClient } from '@/lib/supabase/client'
 
 const CATEGORIES = ['Barchasi', 'Savol', 'Muhokama', 'Yangilik', 'Tavsiya', 'Yordam']
 
@@ -24,23 +23,21 @@ const CATEGORY_COLORS: Record<string, string> = {
   Yordam:   'text-rose-400',
 }
 
-export default function ForumPage() {
-  const [posts, setPosts]           = useState<ForumPost[]>([])
-  const [topPosts, setTopPosts]     = useState<ForumPost[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [search, setSearch]         = useState('')
-  const [searchInput, setSearchInput] = useState('')
-  const [category, setCategory]     = useState('Barchasi')
-  const [userId, setUserId]         = useState<string | null>(null)
-  const [userLikes, setUserLikes]   = useState<Record<string, 'like' | 'dislike'>>({})
+interface Props {
+  userId: string
+  userName: string
+}
+
+export default function StudentForumClient({ userId, userName }: Props) {
+  const [posts, setPosts]               = useState<ForumPost[]>([])
+  const [topPosts, setTopPosts]         = useState<ForumPost[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [search, setSearch]             = useState('')
+  const [searchInput, setSearchInput]   = useState('')
+  const [category, setCategory]         = useState('Barchasi')
+  const [userLikes, setUserLikes]       = useState<Record<string, 'like' | 'dislike'>>({})
   const [newPostCount, setNewPostCount] = useState(0)
   const searchTimer = useRef<ReturnType<typeof setTimeout>>()
-
-  /* ── Foydalanuvchini aniqlash ── */
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null))
-  }, [])
 
   /* ── Postlarni yuklash ── */
   useEffect(() => {
@@ -49,7 +46,7 @@ export default function ForumPage() {
     fetchPosts({ search, category, limit: 30 })
       .then(async (data) => {
         setPosts(data)
-        if (userId && data.length > 0) {
+        if (data.length > 0) {
           const likes = await getUserPostLikes(userId, data.map(p => p.id))
           setUserLikes(likes)
         }
@@ -57,7 +54,7 @@ export default function ForumPage() {
       .finally(() => setLoading(false))
   }, [search, category, userId])
 
-  /* ── Eng ko'p muhokama qilinganlar ── */
+  /* ── Eng ko'p muhokama ── */
   useEffect(() => {
     fetchTopPosts(5).then(setTopPosts).catch(() => {})
   }, [])
@@ -71,10 +68,9 @@ export default function ForumPage() {
           setNewPostCount(n => n + 1)
           return [newPost, ...prev]
         })
-        setTopPosts(prev => {
-          const updated = [...prev, newPost].sort((a, b) => b.comment_count - a.comment_count).slice(0, 5)
-          return updated
-        })
+        setTopPosts(prev =>
+          [...prev, newPost].sort((a, b) => b.comment_count - a.comment_count).slice(0, 5)
+        )
       },
       (updatedPost) => {
         setPosts(prev => prev.map(p => p.id === updatedPost.id ? updatedPost : p))
@@ -84,7 +80,6 @@ export default function ForumPage() {
     return unsubscribe
   }, [])
 
-  /* ── Qidiruv (debounce 400ms) ── */
   const handleSearchInput = (val: string) => {
     setSearchInput(val)
     clearTimeout(searchTimer.current)
@@ -100,37 +95,27 @@ export default function ForumPage() {
   const totalComments = posts.reduce((sum, p) => sum + p.comment_count, 0)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-5xl mx-auto space-y-5">
 
-      {/* ── Sarlavha ── */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Forum</h1>
-          <p className="text-white/40 text-sm mt-1">
-            Freelancerlik haqida savol bering, tajriba ulashing
-          </p>
+          <h1 className="text-2xl font-bold text-white">Forum</h1>
+          <p className="text-white/40 text-sm mt-1">O&apos;quvchilar hamjamiyati — savol bering, tajriba ulashing</p>
         </div>
-        {userId ? (
-          <Link href="/forum/post/new">
-            <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/30 flex-shrink-0"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Post yaratish</span>
-              <span className="sm:hidden">Yangi</span>
-            </motion.button>
-          </Link>
-        ) : (
-          <Link href="/login">
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/70 border border-white/10 hover:border-white/20 hover:text-white transition-all flex-shrink-0">
-              Kirish
-            </button>
-          </Link>
-        )}
+        <Link href="/forum/post/new">
+          <motion.button
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/30 flex-shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Yangi mavzu</span>
+            <span className="sm:hidden">Yangi</span>
+          </motion.button>
+        </Link>
       </div>
 
-      {/* ── Qidiruv + Kategoriyalar ── */}
+      {/* Qidiruv + Kategoriya */}
       <div className="space-y-3">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
@@ -138,7 +123,7 @@ export default function ForumPage() {
             type="text"
             value={searchInput}
             onChange={e => handleSearchInput(e.target.value)}
-            placeholder="Postlarni qidirish..."
+            placeholder="Forum ichida qidirish..."
             className="w-full pl-10 pr-10 py-2.5 rounded-xl text-sm text-white placeholder:text-white/25 outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
           />
@@ -155,7 +140,6 @@ export default function ForumPage() {
           </AnimatePresence>
         </div>
 
-        {/* Kategoriya filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {CATEGORIES.map(cat => (
             <button
@@ -164,7 +148,7 @@ export default function ForumPage() {
               className={`flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all duration-200 ${
                 category === cat
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30'
-                  : `border text-white/50 hover:text-white/80 hover:bg-white/6 ${CATEGORY_COLORS[cat] ?? ''}`
+                  : `border text-white/50 hover:text-white/80 ${CATEGORY_COLORS[cat] ?? ''}`
               }`}
               style={category !== cat ? { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' } : {}}
             >
@@ -174,7 +158,7 @@ export default function ForumPage() {
         </div>
       </div>
 
-      {/* ── Yangi post bildirishnomasi ── */}
+      {/* Yangi post bildirishnomasi */}
       <AnimatePresence>
         {newPostCount > 0 && (
           <motion.div
@@ -183,31 +167,34 @@ export default function ForumPage() {
             style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
           >
             <Wifi className="h-3.5 w-3.5 animate-pulse" />
-            {newPostCount} ta yangi post real-time qo&apos;shildi
+            {newPostCount} ta yangi post qo&apos;shildi
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Asosiy kontent ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Asosiy kontent */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {/* Postlar ro'yxati */}
+        {/* Postlar */}
         <div className="lg:col-span-2">
           {loading ? (
-            <div className="flex items-center justify-center py-24">
+            <div className="flex items-center justify-center py-20">
               <Loader2 className="h-6 w-6 text-white/30 animate-spin" />
             </div>
           ) : posts.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="text-center py-20 rounded-2xl"
+              className="text-center py-16 rounded-2xl"
               style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' }}
             >
               <MessageSquare className="h-10 w-10 text-white/12 mx-auto mb-3" />
               <p className="text-white/40 text-sm">Post topilmadi</p>
               <p className="text-white/20 text-xs mt-1">
-                {search ? 'Boshqa kalit so\'z kiriting' : 'Kategoriya tanlang yoki post yarating'}
+                {search ? "Boshqa kalit so'z kiriting" : 'Birinchi bo\'ling — yangi mavzu oching!'}
               </p>
+              <Link href="/forum/post/new" className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl text-xs font-semibold text-blue-300 bg-blue-500/15 hover:bg-blue-500/25 transition-all">
+                <Plus className="h-3.5 w-3.5" /> Yangi mavzu
+              </Link>
             </motion.div>
           ) : (
             <div className="space-y-3">
@@ -233,9 +220,7 @@ export default function ForumPage() {
             className="rounded-2xl p-4 space-y-3"
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
           >
-            <h3 className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">
-              Statistika
-            </h3>
+            <h3 className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">Statistika</h3>
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-white/40 text-sm">
@@ -271,9 +256,7 @@ export default function ForumPage() {
                     href={`/forum/post/${post.id}`}
                     className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-colors group"
                   >
-                    <span className="text-white/20 text-[11px] font-bold mt-0.5 w-4 flex-shrink-0">
-                      {i + 1}.
-                    </span>
+                    <span className="text-white/20 text-[11px] font-bold mt-0.5 w-4 flex-shrink-0">{i + 1}.</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-white/60 text-xs leading-snug group-hover:text-white/85 transition-colors line-clamp-2">
                         {post.title}
@@ -289,24 +272,22 @@ export default function ForumPage() {
             )}
           </div>
 
-          {/* Kirish taklifi (autentifikatsiya yo'q) */}
-          {!userId && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl p-5 text-center"
-              style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}
-            >
-              <Users className="h-7 w-7 text-blue-400/50 mx-auto mb-2" />
-              <p className="text-white/40 text-xs mb-3 leading-relaxed">
-                Post yaratish va izoh yozish uchun tizimga kiring
-              </p>
-              <Link href="/login">
-                <button className="text-xs font-semibold text-blue-300 bg-blue-500/15 hover:bg-blue-500/25 px-5 py-2 rounded-xl transition-all">
-                  Kirish
-                </button>
-              </Link>
-            </motion.div>
-          )}
+          {/* Yangi mavzu CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-5 text-center"
+            style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}
+          >
+            <MessageSquare className="h-7 w-7 text-blue-400/50 mx-auto mb-2" />
+            <p className="text-white/40 text-xs mb-3 leading-relaxed">
+              Savolingiz bormi? Hamjamiyatga yozing!
+            </p>
+            <Link href="/forum/post/new">
+              <button className="text-xs font-semibold text-blue-300 bg-blue-500/15 hover:bg-blue-500/25 px-5 py-2 rounded-xl transition-all">
+                Mavzu ochish
+              </button>
+            </Link>
+          </motion.div>
         </div>
       </div>
     </div>

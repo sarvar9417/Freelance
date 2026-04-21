@@ -331,16 +331,22 @@ export async function reviewSubmission(submissionId: string, score: number, feed
   const { supabase, userId } = await requireTeacher()
 
   if (!feedback.trim()) return { error: 'Izoh kiritilishi shart' }
-  if (score < 0 || score > 100) return { error: "Baho 0-100 oralig'ida bo'lishi kerak" }
 
   const { data: sub } = await supabase
     .from('submissions')
-    .select('task_id, student_id, tasks(course_id, title, courses(teacher_id))')
+    .select('task_id, student_id, tasks(course_id, title, max_score, courses(teacher_id))')
     .eq('id', submissionId)
     .single()
 
-  const teacherId = (sub?.tasks as any)?.courses?.teacher_id
+  if (!sub) return { error: 'Topshiriq topilmadi' }
+
+  const teacherId = (sub.tasks as any)?.courses?.teacher_id
   if (teacherId !== userId) return { error: "Ruxsat yo'q" }
+
+  const maxScore = (sub.tasks as any)?.max_score ?? 100
+  if (score < 0 || score > maxScore) {
+    return { error: `Baho 0-${maxScore} oralig'ida bo'lishi kerak` }
+  }
 
   const { error } = await supabase
     .from('submissions')
@@ -354,18 +360,19 @@ export async function reviewSubmission(submissionId: string, score: number, feed
 
   if (error) return { error: error.message }
 
-  // O'quvchiga bildirishnoma (DB trigger backup)
-  if (sub?.student_id) {
+  // Bildirishnoma DB trigger (notify_submission_graded) orqali avtomatik yuboriladi.
+  // Trigger ishlamagan taqdirda zaxira sifatida qo'lda yuborish:
+  if (sub.student_id) {
     const admin = createAdminClient()
     const taskTitle = (sub.tasks as any)?.title ?? 'Topshiriq'
-    await admin.from('notifications').insert({
+    await admin.from('notifications').upsert({
       user_id: sub.student_id,
       type: 'submission_graded',
       title: 'Topshiriq baholandi! ✅',
       message: `"${taskTitle}" topshirig'i baholandi — ${score} ball`,
       link: '/student/tasks',
       data: { submissionId, score, taskId: sub.task_id },
-    }).then(() => {})
+    }, { onConflict: 'user_id,type,link', ignoreDuplicates: true }).then(() => {})
   }
 
   revalidatePath('/teacher/tasks/review')
@@ -384,7 +391,9 @@ export async function requestResubmission(submissionId: string, feedback: string
     .eq('id', submissionId)
     .single()
 
-  const teacherId = (sub?.tasks as any)?.courses?.teacher_id
+  if (!sub) return { error: 'Topshiriq topilmadi' }
+
+  const teacherId = (sub.tasks as any)?.courses?.teacher_id
   if (teacherId !== userId) return { error: "Ruxsat yo'q" }
 
   const { error } = await supabase
@@ -398,18 +407,18 @@ export async function requestResubmission(submissionId: string, feedback: string
 
   if (error) return { error: error.message }
 
-  // O'quvchiga bildirishnoma
-  if (sub?.student_id) {
+  // Bildirishnoma DB trigger (notify_submission_graded) orqali avtomatik yuboriladi.
+  if (sub.student_id) {
     const admin = createAdminClient()
     const taskTitle = (sub.tasks as any)?.title ?? 'Topshiriq'
-    await admin.from('notifications').insert({
+    await admin.from('notifications').upsert({
       user_id: sub.student_id,
       type: 'submission_revision',
       title: 'Qayta topshirish talab qilinadi 🔄',
       message: `"${taskTitle}" topshirig'ini qayta ko'rib chiqing`,
       link: '/student/tasks',
       data: { submissionId, taskId: sub.task_id },
-    }).then(() => {})
+    }, { onConflict: 'user_id,type,link', ignoreDuplicates: true }).then(() => {})
   }
 
   revalidatePath('/teacher/tasks/review')

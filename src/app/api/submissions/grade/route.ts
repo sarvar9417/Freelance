@@ -12,9 +12,6 @@ export async function POST(req: Request) {
 
     if (!submissionId) return NextResponse.json({ error: 'submissionId talab qilinadi' }, { status: 400 })
     if (!feedback?.trim()) return NextResponse.json({ error: 'Izoh kiritilishi shart' }, { status: 400 })
-    if (status === 'graded' && (score < 0 || score > 100)) {
-      return NextResponse.json({ error: 'Baho 0-100 oralig\'ida bo\'lishi kerak' }, { status: 400 })
-    }
     if (!['graded', 'revision'].includes(status)) {
       return NextResponse.json({ error: 'Status noto\'g\'ri' }, { status: 400 })
     }
@@ -22,7 +19,7 @@ export async function POST(req: Request) {
     // O'qituvchi ruxsatini tekshirish
     const { data: sub } = await supabase
       .from('submissions')
-      .select('task_id, student_id, tasks(course_id, courses(teacher_id))')
+      .select('task_id, student_id, tasks(course_id, max_score, courses(teacher_id))')
       .eq('id', submissionId)
       .single()
 
@@ -31,6 +28,11 @@ export async function POST(req: Request) {
     const teacherId = (sub.tasks as any)?.courses?.teacher_id
     if (teacherId !== user.id) {
       return NextResponse.json({ error: 'Ruxsat yo\'q' }, { status: 403 })
+    }
+
+    const maxScore: number = (sub.tasks as any)?.max_score ?? 100
+    if (status === 'graded' && (score < 0 || score > maxScore)) {
+      return NextResponse.json({ error: `Baho 0-${maxScore} oralig\'ida bo\'lishi kerak` }, { status: 400 })
     }
 
     // Baho qo'yish

@@ -65,7 +65,14 @@ export async function POST(req: Request) {
       newLevel = xpResult.newLevel
       levelUp  = xpResult.levelUp
 
-      await updateStreak(supabase, user.id)
+      const { isNew: streakUpdated } = await updateStreak(supabase, user.id)
+      if (streakUpdated) {
+        xpGained += XP_REWARDS.DAILY_STREAK
+        const streakXp = await addXP(supabase, user.id, XP_REWARDS.DAILY_STREAK)
+        newXp    = streakXp.newXp
+        newLevel  = streakXp.newLevel
+        levelUp   = levelUp || streakXp.levelUp
+      }
 
       // Kurs tugatildi (+500 XP bonus) — faqat birinchi marta 100% bo'lsa
       if (progress >= 100) {

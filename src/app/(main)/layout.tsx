@@ -2,9 +2,21 @@ import Link from 'next/link'
 import { GraduationCap, UserCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
+const ROLE_DASHBOARD: Record<string, string> = {
+  admin: '/admin',
+  teacher: '/teacher',
+  student: '/student',
+}
+
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  let dashboardHref = '/student'
+  if (user) {
+    const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+    dashboardHref = ROLE_DASHBOARD[profile?.role ?? 'student'] ?? '/student'
+  }
 
   return (
     <div
@@ -53,7 +65,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
                   <UserCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">Profil</span>
                 </Link>
-                <Link href="/student">
+                <Link href={dashboardHref}>
                   <button className="text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-blue-900/30">
                     Panel
                   </button>

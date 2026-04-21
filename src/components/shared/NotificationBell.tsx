@@ -14,6 +14,7 @@ import {
   type Notification,
 } from '@/lib/supabase/notifications'
 
+
 const TYPE_ICONS: Record<string, string> = {
   new_enrollment:       '🎓',
   new_submission:       '📥',
@@ -59,7 +60,7 @@ export default function NotificationBell({ userId, initialUnread = 0, variant = 
 
   // Realtime subscription
   useEffect(() => {
-    const channel = subscribeToNotifications(userId, (newNotif) => { // eslint-disable-line react-hooks/exhaustive-deps
+    const unsubscribe = subscribeToNotifications(userId, (newNotif) => { // eslint-disable-line react-hooks/exhaustive-deps
       setUnread(prev => prev + 1)
       setNotifications(prev => [newNotif, ...prev])
 
@@ -85,7 +86,7 @@ export default function NotificationBell({ userId, initialUnread = 0, variant = 
       })
     })
 
-    return () => { channel.unsubscribe() }
+    return unsubscribe
   }, [userId])
 
   // Tashqariga bosilganda yopish

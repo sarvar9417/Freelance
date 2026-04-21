@@ -8,7 +8,6 @@ import {
   Play, FileText, ClipboardList, ArrowLeft, ArrowRight,
   CheckCircle2, Upload, Loader2, Star, RotateCcw, Clock, X, Zap,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 interface Lesson {
@@ -117,20 +116,18 @@ export default function LessonClient({
     if (files.length === 0) { setError('Fayl yuklang'); return }
     setError('')
     startTransition(async () => {
-      const supabase = createClient()
-      const fileUrls: string[] = []
-
-      for (const file of files) {
-        const path = `submissions/${userId}/${task!.id}/${Date.now()}_${file.name}`
-        const { data: uploaded, error: uploadErr } = await supabase.storage
-          .from('task-files')
-          .upload(path, file)
-        if (uploadErr) { setError(uploadErr.message); return }
-        const { data: { publicUrl } } = supabase.storage.from('task-files').getPublicUrl(uploaded.path)
-        fileUrls.push(publicUrl)
-      }
-
       try {
+        // 1. Fayllarni server API orqali yuklash
+        const formData = new FormData()
+        formData.append('taskId', task!.id)
+        files.forEach(f => formData.append('files', f))
+
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+        const uploadData = await uploadRes.json()
+        if (!uploadRes.ok) { setError(uploadData.error ?? 'Fayl yuklashda xatolik'); return }
+        const fileUrls: string[] = uploadData.urls
+
+        // 2. Topshirish
         const res = await fetch('/api/submissions/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

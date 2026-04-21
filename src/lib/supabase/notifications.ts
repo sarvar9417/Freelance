@@ -54,10 +54,11 @@ export async function getUnreadCount(userId: string): Promise<number> {
 export function subscribeToNotifications(
   userId: string,
   onInsert: (notification: Notification) => void,
-): RealtimeChannel {
+): () => void {
   const supabase = createClient()
-  return supabase
-    .channel(`notifications:${userId}`)
+  const channelId = `notifications:${userId}:${Math.random().toString(36).slice(2, 8)}`
+  const channel = supabase
+    .channel(channelId)
     .on(
       'postgres_changes',
       {
@@ -69,6 +70,8 @@ export function subscribeToNotifications(
       (payload) => onInsert(payload.new as Notification),
     )
     .subscribe()
+
+  return () => { supabase.removeChannel(channel) }
 }
 
 export function formatNotificationTime(dateStr: string): string {

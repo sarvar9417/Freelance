@@ -37,21 +37,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // Root sahifada autentifikatsiya bo'lgan foydalanuvchini dashboardga yo'naltirish
-  if (user && pathname === '/') {
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile) return supabaseResponse
-
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = ROLE_REDIRECTS[profile.role] ?? '/student'
-    return NextResponse.redirect(redirectUrl)
-  }
-
   // Rol asosida ruxsat tekshirish
   if (user) {
     const { data: profile } = await supabase

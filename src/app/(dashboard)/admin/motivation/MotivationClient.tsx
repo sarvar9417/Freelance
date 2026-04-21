@@ -6,7 +6,7 @@ import {
   Sparkles, Quote, BookHeart, Plus, Trash2, Check,
   Loader2, Info,
 } from 'lucide-react'
-import { addDailyQuote, deleteQuote, approveStory } from '../actions'
+import { addDailyQuote, deleteQuote, approveStory, deleteStory } from '../actions'
 
 interface Quote {
   id: string
@@ -116,7 +116,16 @@ export default function MotivationClient({ quotes: initialQuotes, stories: initi
     startTransition(async () => {
       const result = await approveStory(id)
       if (result.error) setActionError(result.error)
-      else setStories(prev => prev.map(s => s.id === id ? { ...s, is_approved: true } : s))
+      else setStories(prev => prev.map(s => s.id === id ? { ...s, approved: true } : s))
+    })
+  }
+
+  const handleDeleteStory = (id: string) => {
+    setActionError('')
+    startTransition(async () => {
+      const result = await deleteStory(id)
+      if (result.error) setActionError(result.error)
+      else setStories(prev => prev.filter(s => s.id !== id))
     })
   }
 
@@ -288,6 +297,13 @@ export default function MotivationClient({ quotes: initialQuotes, stories: initi
                         Tasdiqlash
                       </button>
                     )}
+                    <button
+                      onClick={() => handleDeleteStory(story.id)}
+                      disabled={isPending}
+                      className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
                 <p className="text-white/50 text-sm line-clamp-3 leading-relaxed">{story.content}</p>

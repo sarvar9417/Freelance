@@ -211,16 +211,23 @@ DO $$ DECLARE r record; BEGIN
   END LOOP;
 END $$;
 
+-- Yordamchi funksiya: admin tekshiruvi (RLS ichida samarali)
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
+  SELECT EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'admin')
+$$;
+
 -- Users
 CREATE POLICY "users_select"     ON users FOR SELECT USING (true);
-CREATE POLICY "users_update_own" ON users FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "users_insert_own" ON users FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "users_update_own" ON users FOR UPDATE USING (auth.uid() = id OR is_admin());
+CREATE POLICY "users_delete_admin" ON users FOR DELETE USING (is_admin());
 
 -- Courses
-CREATE POLICY "courses_select_published" ON courses FOR SELECT USING (is_published = true OR teacher_id = auth.uid());
+CREATE POLICY "courses_select_published" ON courses FOR SELECT USING (is_published = true OR teacher_id = auth.uid() OR is_admin());
 CREATE POLICY "courses_insert_teacher"   ON courses FOR INSERT WITH CHECK (auth.uid() = teacher_id);
-CREATE POLICY "courses_update_teacher"   ON courses FOR UPDATE USING (auth.uid() = teacher_id);
-CREATE POLICY "courses_delete_teacher"   ON courses FOR DELETE USING (auth.uid() = teacher_id);
+CREATE POLICY "courses_update_teacher"   ON courses FOR UPDATE USING (auth.uid() = teacher_id OR is_admin());
+CREATE POLICY "courses_delete_teacher"   ON courses FOR DELETE USING (auth.uid() = teacher_id OR is_admin());
 
 -- Lessons
 CREATE POLICY "lessons_select" ON lessons FOR SELECT USING (

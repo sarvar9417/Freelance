@@ -45,9 +45,17 @@ export default async function StudentsPage() {
 
   const { data: enrollments } = await supabase
     .from('enrollments')
-    .select('id, course_id, progress, enrolled_at, last_accessed, users!student_id(id, full_name, email, avatar_url)')
+    .select('id, course_id, student_id, progress, enrolled_at, last_accessed')
     .in('course_id', courseIds)
     .order('enrolled_at', { ascending: false })
+
+  const uniqueStudentIds = Array.from(new Set((enrollments ?? []).map(e => e.student_id).filter(Boolean)))
+
+  const { data: usersData } = uniqueStudentIds.length > 0
+    ? await supabase.from('users').select('id, full_name, email, avatar_url').in('id', uniqueStudentIds)
+    : { data: [] as { id: string; full_name: string; email: string; avatar_url: string | null }[] }
+
+  const usersMap = Object.fromEntries((usersData ?? []).map(u => [u.id, u]))
 
   const { data: taskRows } = await supabase
     .from('tasks')
@@ -57,7 +65,6 @@ export default async function StudentsPage() {
   const taskIds = (taskRows ?? []).map(t => t.id)
 
   let submissionStats: Record<string, { total: number; graded: number; pending: number; avgScore: number }> = {}
-  const uniqueStudentIds = Array.from(new Set((enrollments ?? []).map((e: any) => e.users?.id).filter(Boolean)))
 
   if (taskIds.length > 0 && uniqueStudentIds.length > 0) {
     const { data: subs } = await supabase
@@ -86,14 +93,15 @@ export default async function StudentsPage() {
     enrolledAt: string; lastAccessed: string | null
   }> = {}
 
-  for (const e of (enrollments ?? []) as any[]) {
-    const sid = e.users?.id
+  for (const e of enrollments ?? []) {
+    const sid = e.student_id
     if (!sid) continue
+    const userData = usersMap[sid]
     if (!studentMap[sid]) {
       studentMap[sid] = {
         userId: sid,
-        fullName: e.users.full_name ?? "O'quvchi",
-        email: e.users.email ?? '',
+        fullName: userData?.full_name ?? "O'quvchi",
+        email: userData?.email ?? '',
         courses: [],
         totalProgress: 0,
         enrollmentCount: 0,

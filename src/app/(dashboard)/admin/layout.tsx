@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'Admin Panel | Freelancer School',
@@ -45,6 +46,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {children}
         </div>
       </main>
+
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: 'rgba(10,14,28,0.96)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff',
+            backdropFilter: 'blur(20px)',
+          },
+        }}
+      />
     </div>
   )
 }

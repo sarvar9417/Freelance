@@ -1,5 +1,4 @@
 import { createClient } from './client'
-import type { RealtimeChannel } from '@supabase/supabase-js'
 
 export type ForumPost = {
   id: string
@@ -278,7 +277,7 @@ export async function getUserLike(
 export function subscribeToComments(
   postId: string,
   onInsert: (comment: ForumComment) => void
-): RealtimeChannel {
+): () => void {
   const supabase = createClient()
   const channel = supabase
     .channel(`comments:${postId}`)
@@ -288,17 +287,17 @@ export function subscribeToComments(
       (payload) => onInsert(payload.new as ForumComment)
     )
     .subscribe()
-  return channel
+  return () => { supabase.removeChannel(channel) }
 }
 
 /** Real-time: postlar ro'yxatini yangilash */
 export function subscribeToPosts(
   onInsert: (post: ForumPost) => void,
   onUpdate: (post: ForumPost) => void
-): RealtimeChannel {
+): () => void {
   const supabase = createClient()
   const channel = supabase
-    .channel('forum_posts_changes')
+    .channel(`forum_posts_changes:${Math.random().toString(36).slice(2, 8)}`)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'forum_posts' },
@@ -310,7 +309,53 @@ export function subscribeToPosts(
       (payload) => onUpdate(payload.new as ForumPost)
     )
     .subscribe()
-  return channel
+  return () => { supabase.removeChannel(channel) }
+}
+
+/** Izoh like toggle */
+export async function toggleCommentLike(commentId: string, userId: string): Promise<void> {
+  const supabase = createClient()
+
+  const { data: existing } = await supabase
+    .from('forum_likes')
+    .select('id')
+    .eq('comment_id', commentId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (existing) {
+    await supabase.from('forum_likes').delete().eq('id', existing.id)
+    const { data: comment } = await supabase
+      .from('forum_comments').select('likes').eq('id', commentId).single()
+    if (comment) {
+      await supabase.from('forum_comments')
+        .update({ likes: Math.max(0, (comment.likes ?? 0) - 1) })
+        .eq('id', commentId)
+    }
+  } else {
+    await supabase.from('forum_likes').insert({ comment_id: commentId, user_id: userId, type: 'like' })
+    const { data: comment } = await supabase
+      .from('forum_comments').select('likes').eq('id', commentId).single()
+    if (comment) {
+      await supabase.from('forum_comments')
+        .update({ likes: (comment.likes ?? 0) + 1 })
+        .eq('id', commentId)
+    }
+  }
+}
+
+/** Foydalanuvchi like bosgan izohlar (bitta so'rov) */
+export async function getUserCommentLikes(userId: string, commentIds: string[]): Promise<Set<string>> {
+  if (!commentIds.length) return new Set()
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('forum_likes')
+    .select('comment_id')
+    .eq('user_id', userId)
+    .in('comment_id', commentIds)
+  const result = new Set<string>()
+  data?.forEach(item => { if (item.comment_id) result.add(item.comment_id) })
+  return result
 }
 
 /** Foydalanuvchining bir nechta post uchun like holati (bitta so'rov) */

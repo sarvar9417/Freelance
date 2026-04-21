@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { addXP, XP_REWARDS } from '@/lib/xp'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { addXP, updateStreak, XP_REWARDS } from '@/lib/xp'
 
 export async function POST(req: Request) {
   try {
@@ -41,15 +42,48 @@ export async function POST(req: Request) {
 
     if (subError) return NextResponse.json({ error: subError.message }, { status: 400 })
 
-    // XP qo'shish (+100)
-    const { newXp, newLevel, levelUp } = await addXP(supabase, user.id, XP_REWARDS.TASK_SUBMIT)
+    // XP + streak
+    let xpResult = await addXP(supabase, user.id, XP_REWARDS.TASK_SUBMIT)
+    let xpGained = XP_REWARDS.TASK_SUBMIT
+
+    const { isNew: streakUpdated } = await updateStreak(supabase, user.id)
+    if (streakUpdated) {
+      xpGained += XP_REWARDS.DAILY_STREAK
+      xpResult = await addXP(supabase, user.id, XP_REWARDS.DAILY_STREAK)
+    }
+
+    // O'qituvchiga bildirishnoma
+    const { data: task } = await supabase
+      .from('tasks')
+      .select('title, courses(teacher_id)')
+      .eq('id', taskId)
+      .single()
+
+    const teacherId = (task?.courses as unknown as { teacher_id: string } | null)?.teacher_id
+    if (teacherId) {
+      const admin = createAdminClient()
+      const { data: studentProfile } = await admin
+        .from('users')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+
+      await admin.from('notifications').insert({
+        user_id: teacherId,
+        type: 'new_submission',
+        title: 'Yangi topshiriq keldi! 📥',
+        message: `${studentProfile?.full_name ?? 'O\'quvchi'} "${task?.title ?? 'Topshiriq'}"ni topshirdi`,
+        link: '/teacher/tasks/review',
+        data: { taskId, studentId: user.id },
+      }).then(() => {})
+    }
 
     return NextResponse.json({
       success: true,
-      xpGained: XP_REWARDS.TASK_SUBMIT,
-      newXp,
-      newLevel,
-      levelUp,
+      xpGained,
+      newXp: xpResult.newXp,
+      newLevel: xpResult.newLevel,
+      levelUp: xpResult.levelUp,
     })
   } catch {
     return NextResponse.json({ error: 'Server xatosi' }, { status: 500 })

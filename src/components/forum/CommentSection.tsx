@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Send, Loader2, MessageSquare, ThumbsUp,
-  Wifi, WifiOff, Sparkles,
+  Send, Loader2, MessageSquare,
+  Wifi, WifiOff, Sparkles, Heart,
 } from 'lucide-react'
 import {
   fetchComments, createComment, subscribeToComments,
+  toggleCommentLike, getUserCommentLikes,
   formatTimeAgo, type ForumComment,
 } from '@/lib/supabase/realtime'
 
@@ -26,43 +27,101 @@ interface Props {
 }
 
 export default function CommentSection({ postId, currentUser }: Props) {
-  const [comments, setComments] = useState<ForumComment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const [text, setText] = useState('')
+  const [comments, setComments]   = useState<ForumComment[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [sending, setSending]     = useState(false)
+  const [text, setText]           = useState('')
   const [connected, setConnected] = useState(false)
-  const [newCount, setNewCount] = useState(0)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [newCount, setNewCount]   = useState(0)
+
+  // commentId → { count, liked }
+  const [commentLikes, setCommentLikes] = useState<Record<string, { count: number; liked: boolean }>>({})
+  const votingRef = useRef<Set<string>>(new Set())
+
+  const bottomRef    = useRef<HTMLDivElement>(null)
+  const textareaRef  = useRef<HTMLTextAreaElement>(null)
   const myCommentIds = useRef<Set<string>>(new Set())
 
   /* ── Load comments ── */
   useEffect(() => {
     let mounted = true
     fetchComments(postId)
-      .then(data => { if (mounted) { setComments(data); setLoading(false) } })
+      .then(async (data) => {
+        if (!mounted) return
+        setComments(data)
+        setLoading(false)
+
+        // Foydalanuvchi like holati
+        if (currentUser && data.length > 0) {
+          const ids = data.map(c => c.id)
+          const likedSet = await getUserCommentLikes(currentUser.id, ids)
+          const map: Record<string, { count: number; liked: boolean }> = {}
+          data.forEach(c => { map[c.id] = { count: c.likes, liked: likedSet.has(c.id) } })
+          setCommentLikes(map)
+        } else {
+          const map: Record<string, { count: number; liked: boolean }> = {}
+          data.forEach(c => { map[c.id] = { count: c.likes, liked: false } })
+          setCommentLikes(map)
+        }
+      })
       .catch(() => { if (mounted) setLoading(false) })
     return () => { mounted = false }
-  }, [postId])
+  }, [postId, currentUser])
 
   /* ── Real-time subscription ── */
   useEffect(() => {
-    const channel = subscribeToComments(postId, (newComment) => {
+    const unsubscribe = subscribeToComments(postId, (newComment) => {
       setComments(prev => {
         if (prev.some(c => c.id === newComment.id)) return prev
         const isMine = myCommentIds.current.has(newComment.id)
         if (!isMine) setNewCount(n => n + 1)
         return [...prev, newComment]
       })
+      setCommentLikes(prev => ({
+        ...prev,
+        [newComment.id]: { count: newComment.likes, liked: false },
+      }))
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     })
 
     const timer = setTimeout(() => setConnected(true), 800)
-    return () => {
-      clearTimeout(timer)
-      channel.unsubscribe()
-    }
+    return () => { clearTimeout(timer); unsubscribe() }
   }, [postId])
+
+  /* ── Comment like toggle ── */
+  const handleCommentLike = useCallback(async (commentId: string) => {
+    if (!currentUser || votingRef.current.has(commentId)) return
+    votingRef.current.add(commentId)
+
+    setCommentLikes(prev => {
+      const cur = prev[commentId] ?? { count: 0, liked: false }
+      return {
+        ...prev,
+        [commentId]: {
+          count: cur.liked ? Math.max(0, cur.count - 1) : cur.count + 1,
+          liked: !cur.liked,
+        },
+      }
+    })
+
+    try {
+      await toggleCommentLike(commentId, currentUser.id)
+    } catch {
+      // revert
+      setCommentLikes(prev => {
+        const cur = prev[commentId] ?? { count: 0, liked: false }
+        return {
+          ...prev,
+          [commentId]: {
+            count: cur.liked ? Math.max(0, cur.count - 1) : cur.count + 1,
+            liked: !cur.liked,
+          },
+        }
+      })
+    } finally {
+      votingRef.current.delete(commentId)
+    }
+  }, [currentUser])
 
   /* ── Auto-resize textarea ── */
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -71,7 +130,7 @@ export default function CommentSection({ postId, currentUser }: Props) {
     if (ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px' }
   }
 
-  /* ── Submit ── */
+  /* ── Submit comment ── */
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault()
     if (!text.trim() || !currentUser || sending) return
@@ -86,11 +145,12 @@ export default function CommentSection({ postId, currentUser }: Props) {
       })
       myCommentIds.current.add(comment.id)
       setComments(prev => prev.some(c => c.id === comment.id) ? prev : [...prev, comment])
+      setCommentLikes(prev => ({ ...prev, [comment.id]: { count: 0, liked: false } }))
       setText('')
       if (textareaRef.current) textareaRef.current.style.height = 'auto'
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     } catch {
-      // silently fail — user sees no change
+      // silently fail
     } finally {
       setSending(false)
     }
@@ -127,7 +187,6 @@ export default function CommentSection({ postId, currentUser }: Props) {
           <span className="text-white/30 font-normal text-sm">({comments.length})</span>
         </h2>
 
-        {/* Connection status */}
         <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-all ${
           connected
             ? 'text-emerald-400 bg-emerald-400/10'
@@ -167,10 +226,11 @@ export default function CommentSection({ postId, currentUser }: Props) {
         <div className="space-y-4">
           <AnimatePresence initial={false}>
             {comments.map((comment, i) => {
-              const isNew  = i >= comments.length - newCount
-              const isMine = comment.author_id === currentUser?.id
+              const isNew    = i >= comments.length - newCount
+              const isMine   = comment.author_id === currentUser?.id
               const colorIdx = comment.author_name.charCodeAt(0) % AVATAR_COLORS.length
               const initials = comment.author_name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+              const likeState = commentLikes[comment.id] ?? { count: comment.likes, liked: false }
 
               return (
                 <motion.div
@@ -200,9 +260,7 @@ export default function CommentSection({ postId, currentUser }: Props) {
 
                     <div
                       className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                        isMine
-                          ? 'rounded-tr-sm text-white'
-                          : 'rounded-tl-sm text-white/80'
+                        isMine ? 'rounded-tr-sm text-white' : 'rounded-tl-sm text-white/80'
                       }`}
                       style={{
                         background: isMine
@@ -216,10 +274,21 @@ export default function CommentSection({ postId, currentUser }: Props) {
                       {comment.content}
                     </div>
 
-                    {/* Like comment */}
-                    <button className="flex items-center gap-1 text-white/20 hover:text-emerald-400 transition-colors text-xs px-1">
-                      <ThumbsUp className="h-3 w-3" />
-                      {comment.likes > 0 && <span>{comment.likes}</span>}
+                    {/* Like button */}
+                    <button
+                      onClick={() => handleCommentLike(comment.id)}
+                      disabled={!currentUser}
+                      className={`flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-lg transition-all ${
+                        likeState.liked
+                          ? 'text-rose-400 bg-rose-400/10'
+                          : 'text-white/25 hover:text-rose-400 hover:bg-rose-400/8 disabled:cursor-not-allowed disabled:hover:text-white/25 disabled:hover:bg-transparent'
+                      }`}
+                    >
+                      {likeState.liked
+                        ? <Heart className="h-3 w-3 fill-rose-400" />
+                        : <Heart className="h-3 w-3" />
+                      }
+                      {likeState.count > 0 && <span>{likeState.count}</span>}
                     </button>
                   </div>
                 </motion.div>

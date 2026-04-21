@@ -19,11 +19,20 @@ export default async function CourseStudentsPage({ params }: { params: { id: str
 
   const { data: enrollments } = await supabase
     .from('enrollments')
-    .select('id, progress, enrolled_at, last_accessed, users!student_id(id, full_name, email, avatar_url)')
+    .select('id, student_id, progress, enrolled_at, last_accessed')
     .eq('course_id', params.id)
     .order('enrolled_at', { ascending: false })
 
-  const studentIds = (enrollments ?? []).map((e: any) => e.users?.id).filter(Boolean)
+  const studentIds = (enrollments ?? []).map(e => e.student_id).filter(Boolean)
+
+  const { data: usersData } = studentIds.length > 0
+    ? await supabase
+        .from('users')
+        .select('id, full_name, email, avatar_url')
+        .in('id', studentIds)
+    : { data: [] as { id: string; full_name: string; email: string; avatar_url: string | null }[] }
+
+  const usersMap = Object.fromEntries((usersData ?? []).map(u => [u.id, u]))
 
   const { data: taskRows } = await supabase
     .from('tasks')
@@ -53,16 +62,19 @@ export default async function CourseStudentsPage({ params }: { params: { id: str
     }
   }
 
-  const students = (enrollments ?? []).map((e: any) => ({
-    enrollmentId: e.id,
-    progress: e.progress ?? 0,
-    enrolledAt: e.enrolled_at,
-    lastAccessed: e.last_accessed,
-    userId: e.users?.id ?? '',
-    fullName: e.users?.full_name ?? "O'quvchi",
-    email: e.users?.email ?? '',
-    ...submissionMap[e.users?.id ?? ''] ?? { total: 0, graded: 0, avgScore: 0 },
-  }))
+  const students = (enrollments ?? []).map(e => {
+    const userData = usersMap[e.student_id]
+    return {
+      enrollmentId: e.id,
+      progress: e.progress ?? 0,
+      enrolledAt: e.enrolled_at,
+      lastAccessed: e.last_accessed,
+      userId: e.student_id,
+      fullName: userData?.full_name ?? "O'quvchi",
+      email: userData?.email ?? '',
+      ...submissionMap[e.student_id] ?? { total: 0, graded: 0, avgScore: 0 },
+    }
+  })
 
   const avgProgress = students.length
     ? Math.round(students.reduce((a, s) => a + s.progress, 0) / students.length)
