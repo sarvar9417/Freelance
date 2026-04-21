@@ -136,8 +136,8 @@ export default function ReviewQueueClient({
                       </span>
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
-                      <span className="text-white/30 text-xs">
-                        {new Date(s.submitted_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' })}
+                      <span className="text-white/30 text-xs" suppressHydrationWarning>
+                        {new Date(s.submitted_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
                       </span>
                     </td>
                     <td className="px-4 py-3.5 text-right">
