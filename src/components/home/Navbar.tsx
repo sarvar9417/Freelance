@@ -65,7 +65,7 @@ export default function Navbar() {
           </Link>
           <Link href="/register">
             <button className="flex items-center gap-1.5 text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-5 py-2 rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/40 hover:shadow-blue-800/50 hover:scale-105">
-              Boshlash
+              Ro‘yxatdan o‘tish
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </Link>
