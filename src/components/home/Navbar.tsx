@@ -108,7 +108,7 @@ export default function Navbar() {
                 </Link>
                 <Link href="/register" className="flex-1">
                   <button className="w-full text-sm font-semibold bg-blue-600 text-white rounded-xl py-2.5 hover:bg-blue-500 transition-colors">
-                    Boshlash
+                    Ro‘yxatdan o‘tish
                   </button>
                 </Link>
               </div>
