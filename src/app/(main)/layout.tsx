@@ -48,13 +48,13 @@ export default async function MainLayout({ children }: { children: React.ReactNo
               Kurslar
             </Link>
             <Link href="/forum" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
-              Forum
+              Onlayn forum
             </Link>
             <Link href="/motivation" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
-              Motivatsiya
+              Motivatsiyaini oshirish
             </Link>
             <Link href="/platforms" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
-              Platformalar
+              Frilanserlik platformalari
             </Link>
           </nav>
 
