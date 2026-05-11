@@ -7,10 +7,10 @@ import { GraduationCap, Menu, X, ArrowRight } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '/courses',     label: 'Kurslar',      external: false },
-  { href: '/forum',       label: 'Forum',         external: false },
-  { href: '/motivation',  label: 'Motivatsiya',   external: false },
-  { href: '/platforms',   label: 'Platformalar',  external: false },
-  { href: '#leaderboard', label: 'Leaderboard',   external: false },
+  { href: '/forum',       label: 'Onlayn forum',         external: false },
+  { href: '/motivation',  label: 'Motivatsiyani oshirish',   external: false },
+  { href: '/platforms',   label: 'Frilanserlik platformalari',  external: false },
+  { href: '#leaderboard', label: 'Topshiriqlar',   external: false },
 ]
 
 export default function Navbar() {
