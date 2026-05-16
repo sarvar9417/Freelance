@@ -26,7 +26,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const isDark = theme === 'dark' || theme === undefined || theme === null
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)

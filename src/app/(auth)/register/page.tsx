@@ -47,7 +47,7 @@ const ROLE_OPTIONS: RoleOption[] = [
 export default function RegisterPage() {
   const router = useRouter()
   const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const isDark = theme === 'dark' || theme === undefined || theme === null
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)

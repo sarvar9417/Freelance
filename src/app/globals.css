@@ -487,50 +487,41 @@
   flex-direction: column;
 }
 
-[data-theme="dark"] .auth-layout {
+.dark .auth-layout {
   background: linear-gradient(to bottom right, #0f172a, #1e293b, #0f172a);
 }
 
-[data-theme="light"] .auth-layout {
+.auth-layout {
   background: linear-gradient(to bottom right, #f9fafb, #ffffff, #f3f4f6);
 }
 
 .auth-logo {
   padding: 0.5rem;
   border-radius: 0.5rem;
-}
-
-[data-theme="dark"] .auth-logo {
-  background-color: #2563eb;
-}
-
-[data-theme="light"] .auth-logo {
   background: linear-gradient(to bottom right, #3b82f6, #2563eb);
+}
+
+.dark .auth-logo {
+  background-color: #2563eb;
 }
 
 .auth-title {
   font-size: 1.25rem;
   font-weight: 700;
-}
-
-[data-theme="dark"] .auth-title {
-  color: #ffffff;
-}
-
-[data-theme="light"] .auth-title {
   color: #111827;
+}
+
+.dark .auth-title {
+  color: #ffffff;
 }
 
 .auth-footer {
   padding: 1rem;
   text-align: center;
   font-size: 0.875rem;
-}
-
-[data-theme="dark"] .auth-footer {
-  color: #64748b;
-}
-
-[data-theme="light"] .auth-footer {
   color: #9ca3af;
+}
+
+.dark .auth-footer {
+  color: #64748b;
 }
