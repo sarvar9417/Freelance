@@ -24,9 +24,10 @@ const AVATAR_COLORS = [
 interface Props {
   postId: string
   currentUser: { id: string; name: string; avatar: string } | null
+  isDark?: boolean
 }
 
-export default function CommentSection({ postId, currentUser }: Props) {
+export default function CommentSection({ postId, currentUser, isDark = true }: Props) {
   const [comments, setComments]   = useState<ForumComment[]>([])
   const [loading, setLoading]     = useState(true)
   const [sending, setSending]     = useState(false)
@@ -172,7 +173,7 @@ export default function CommentSection({ postId, currentUser }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 text-white/30 animate-spin" />
+        <Loader2 className={`h-6 w-6 animate-spin ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
       </div>
     )
   }
@@ -181,16 +182,20 @@ export default function CommentSection({ postId, currentUser }: Props) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-white font-semibold flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-blue-400" />
+        <h2 className={`font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <MessageSquare className={`h-4 w-4 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
           Izohlar
-          <span className="text-white/30 font-normal text-sm">({comments.length})</span>
+          <span className={`font-normal text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>({comments.length})</span>
         </h2>
 
         <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-all ${
           connected
-            ? 'text-emerald-400 bg-emerald-400/10'
-            : 'text-white/30 bg-white/5'
+            ? isDark
+              ? 'text-emerald-400 bg-emerald-400/10'
+              : 'text-emerald-600 bg-emerald-50'
+            : isDark
+              ? 'text-white/30 bg-white/5'
+              : 'text-gray-400 bg-gray-100'
         }`}>
           {connected
             ? <><Wifi className="h-3 w-3" /> Jonli</>
@@ -205,11 +210,13 @@ export default function CommentSection({ postId, currentUser }: Props) {
           <motion.button
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             onClick={scrollToNew}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}
+            style={isDark ? { background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' } : { background: '#eff6ff', border: '1px solid #bfdbfe' }}
           >
-            <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-blue-300">{newCount} ta yangi izoh — ko&apos;rish</span>
+            <Sparkles className={`h-3.5 w-3.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+            <span className={isDark ? 'text-blue-300' : 'text-blue-600'}>{newCount} ta yangi izoh — ko&apos;rish</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -217,10 +224,10 @@ export default function CommentSection({ postId, currentUser }: Props) {
       {/* Comments list */}
       {comments.length === 0 ? (
         <div className="text-center py-12 rounded-2xl"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' }}>
-          <MessageSquare className="h-8 w-8 text-white/15 mx-auto mb-3" />
-          <p className="text-white/30 text-sm">Hali izoh yo&apos;q</p>
-          <p className="text-white/20 text-xs mt-1">Birinchi izoh yozing!</p>
+          style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' } : { background: '#f9fafb', border: '2px dashed #e5e7eb' }}>
+          <MessageSquare className={`h-8 w-8 mx-auto mb-3 ${isDark ? 'text-white/15' : 'text-gray-300'}`} />
+          <p className={`text-sm ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Hali izoh yo&apos;q</p>
+          <p className={`text-xs mt-1 ${isDark ? 'text-white/20' : 'text-gray-400'}`}>Birinchi izoh yozing!</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -248,28 +255,34 @@ export default function CommentSection({ postId, currentUser }: Props) {
                   {/* Bubble */}
                   <div className={`flex-1 max-w-[85%] ${isMine ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                     <div className={`flex items-center gap-2 ${isMine ? 'flex-row-reverse' : ''}`}>
-                      <span className="text-white/70 text-xs font-semibold">{comment.author_name}</span>
+                      <span className={`text-xs font-semibold ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{comment.author_name}</span>
                       {isMine && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full text-blue-300 bg-blue-400/10">Sen</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                          isDark ? 'text-blue-300 bg-blue-400/10' : 'text-blue-600 bg-blue-50'
+                        }`}>Sen</span>
                       )}
                       {isNew && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full text-emerald-300 bg-emerald-400/10 animate-pulse">Yangi</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full animate-pulse ${
+                          isDark ? 'text-emerald-300 bg-emerald-400/10' : 'text-emerald-600 bg-emerald-50'
+                        }`}>Yangi</span>
                       )}
-                      <span className="text-white/20 text-[10px]">{formatTimeAgo(comment.created_at)}</span>
+                      <span className={`text-[10px] ${isDark ? 'text-white/20' : 'text-gray-400'}`}>{formatTimeAgo(comment.created_at)}</span>
                     </div>
 
                     <div
                       className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                        isMine ? 'rounded-tr-sm text-white' : 'rounded-tl-sm text-white/80'
+                        isMine
+                          ? isDark ? 'rounded-tr-sm text-white' : 'rounded-tr-sm text-gray-900'
+                          : isDark ? 'rounded-tl-sm text-white/80' : 'rounded-tl-sm text-gray-700'
                       }`}
-                      style={{
-                        background: isMine
-                          ? 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(99,102,241,0.2))'
-                          : 'rgba(255,255,255,0.06)',
-                        border: isMine
-                          ? '1px solid rgba(59,130,246,0.3)'
-                          : '1px solid rgba(255,255,255,0.08)',
-                      }}
+                      style={isMine
+                        ? isDark
+                          ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(99,102,241,0.2))', border: '1px solid rgba(59,130,246,0.3)' }
+                          : { background: 'linear-gradient(135deg, #eff6ff, #e0e7ff)', border: '1px solid #bfdbfe' }
+                        : isDark
+                          ? { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }
+                          : { background: '#f9fafb', border: '1px solid #e5e7eb' }
+                      }
                     >
                       {comment.content}
                     </div>
@@ -280,12 +293,16 @@ export default function CommentSection({ postId, currentUser }: Props) {
                       disabled={!currentUser}
                       className={`flex items-center gap-1.5 text-[11px] font-medium px-2 py-1 rounded-lg transition-all ${
                         likeState.liked
-                          ? 'text-rose-400 bg-rose-400/10'
-                          : 'text-white/25 hover:text-rose-400 hover:bg-rose-400/8 disabled:cursor-not-allowed disabled:hover:text-white/25 disabled:hover:bg-transparent'
+                          ? isDark
+                            ? 'text-rose-400 bg-rose-400/10'
+                            : 'text-rose-600 bg-rose-50'
+                          : isDark
+                            ? 'text-white/25 hover:text-rose-400 hover:bg-rose-400/8 disabled:cursor-not-allowed disabled:hover:text-white/25 disabled:hover:bg-transparent'
+                            : 'text-gray-400 hover:text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:hover:text-gray-400 disabled:hover:bg-transparent'
                       }`}
                     >
                       {likeState.liked
-                        ? <Heart className="h-3 w-3 fill-rose-400" />
+                        ? <Heart className={`h-3 w-3 ${isDark ? 'fill-rose-400' : 'fill-rose-500'}`} />
                         : <Heart className="h-3 w-3" />
                       }
                       {likeState.count > 0 && <span>{likeState.count}</span>}
@@ -302,7 +319,7 @@ export default function CommentSection({ postId, currentUser }: Props) {
       {/* Write comment */}
       {currentUser ? (
         <form onSubmit={handleSubmit} className="rounded-2xl p-4 space-y-3"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)' }}>
+          style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}>
           <div className="flex items-start gap-3">
             <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${AVATAR_COLORS[currentUser.name.charCodeAt(0) % AVATAR_COLORS.length]} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5`}>
               {currentUser.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)}
@@ -314,14 +331,20 @@ export default function CommentSection({ postId, currentUser }: Props) {
               onKeyDown={handleKeyDown}
               placeholder="Izoh yozing... (Ctrl+Enter — yuborish)"
               rows={1}
-              className="flex-1 bg-transparent text-white text-sm placeholder:text-white/20 outline-none resize-none min-h-[36px] max-h-40 leading-relaxed"
+              className={`flex-1 bg-transparent text-sm outline-none resize-none min-h-[36px] max-h-40 leading-relaxed ${
+                isDark ? 'text-white placeholder:text-white/20' : 'text-gray-900 placeholder:text-gray-400'
+              }`}
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-white/20 text-xs hidden sm:block">Ctrl+Enter — tez yuborish</span>
+            <span className={`text-xs hidden sm:block ${isDark ? 'text-white/20' : 'text-gray-400'}`}>Ctrl+Enter — tez yuborish</span>
             <button type="submit" disabled={!text.trim() || sending}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-900/30 ml-auto">
+              className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all ml-auto ${
+                isDark
+                  ? 'text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-900/30'
+                  : 'text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed'
+              }`}>
               {sending
                 ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Yuborilmoqda</>
                 : <><Send className="h-3.5 w-3.5" /> Yuborish</>
@@ -331,10 +354,12 @@ export default function CommentSection({ postId, currentUser }: Props) {
         </form>
       ) : (
         <div className="text-center py-6 rounded-2xl"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-          <p className="text-white/40 text-sm">
+          style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.08)' } : { background: '#f9fafb', border: '1px dashed #e5e7eb' }}>
+          <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
             Izoh yozish uchun{' '}
-            <a href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+            <a href="/login" className={`font-medium transition-colors ${
+              isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+            }`}>
               kirish
             </a>{' '}
             kerak

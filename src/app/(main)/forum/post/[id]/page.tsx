@@ -1,7 +1,11 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock, Tag, MessageSquare } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { useTheme } from 'next-themes'
+import { ArrowLeft, Clock, Tag, MessageSquare, Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import CommentSection from '@/components/forum/CommentSection'
 import PostLikeBar from '@/components/forum/PostLikeBar'
 import { formatTimeAgo } from '@/lib/supabase/realtime'
@@ -22,54 +26,71 @@ const AVATAR_COLORS = [
   'from-amber-600 to-amber-800',
 ]
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export default function PostDetailPage({ params }: { params: { id: string } }) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark' || theme === undefined || theme === null
   const supabase = createClient()
-  const { data } = await supabase.from('forum_posts').select('title').eq('id', params.id).single()
-  return { title: data?.title ? `${data.title} | Forum` : 'Post | Forum' }
-}
+  const [post, setPost] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<{ id: string; name: string; avatar: string } | null>(null)
 
-export default async function PostDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+  useEffect(() => {
+    async function fetchData() {
+      const [{ data: postData }, { data: { user } }] = await Promise.all([
+        supabase.from('forum_posts').select('*').eq('id', params.id).single(),
+        supabase.auth.getUser(),
+      ])
 
-  /* ── Post va foydalanuvchi ma'lumotlari ── */
-  const [{ data: post }, { data: { user } }] = await Promise.all([
-    supabase.from('forum_posts').select('*').eq('id', params.id).single(),
-    supabase.auth.getUser(),
-  ])
+      if (!postData) {
+        setLoading(false)
+        return
+      }
+
+      setPost(postData)
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('full_name')
+          .eq('id', user.id)
+          .single()
+
+        setCurrentUser({
+          id: user.id,
+          name: profile?.full_name ?? user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? 'Foydalanuvchi',
+          avatar: user.user_metadata?.avatar_url ?? '',
+        })
+      }
+
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [params.id, supabase])
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 flex items-center justify-center min-h-[50vh]">
+        <Loader2 className={`h-8 w-8 animate-spin ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
+      </div>
+    )
+  }
 
   if (!post) notFound()
-
-  /* ── Foydalanuvchi profili ── */
-  let currentUser: { id: string; name: string; avatar: string } | null = null
-  if (user) {
-    const { data: profile } = await supabase
-      .from('users')
-      .select('full_name')
-      .eq('id', user.id)
-      .single()
-
-    currentUser = {
-      id: user.id,
-      name:
-        profile?.full_name ??
-        user.user_metadata?.full_name ??
-        user.email?.split('@')[0] ??
-        'Foydalanuvchi',
-      avatar: user.user_metadata?.avatar_url ?? '',
-    }
-  }
 
   const catStyle = CATEGORY_STYLES[post.category] ?? CATEGORY_STYLES['Savol']
   const colorIdx = post.author_name.charCodeAt(0) % AVATAR_COLORS.length
   const initials = post.author_name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div className={`max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6 ${isDark ? '' : 'bg-gray-50/50 min-h-screen'}`}>
 
       {/* ── Ortga ── */}
       <Link
         href="/forum"
-        className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm transition-colors"
+        className={`inline-flex items-center gap-2 text-sm transition-colors ${
+          isDark ? 'text-white/40 hover:text-white/70' : 'text-gray-500 hover:text-gray-700'
+        }`}
       >
         <ArrowLeft className="h-4 w-4" />
         Forumga qaytish
@@ -78,7 +99,7 @@ export default async function PostDetailPage({ params }: { params: { id: string 
       {/* ── Post kontenti ── */}
       <article
         className="rounded-2xl p-6 sm:p-8"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'white', border: '1px solid #e5e7eb' }}
       >
         {/* Meta */}
         <div className="flex items-center gap-2 flex-wrap mb-4">
@@ -86,26 +107,32 @@ export default async function PostDetailPage({ params }: { params: { id: string 
             <Tag className="h-3 w-3" />
             {post.category}
           </span>
-          <span className="flex items-center gap-1.5 text-white/25 text-xs ml-auto">
+          <span className={`flex items-center gap-1.5 text-xs ml-auto ${
+            isDark ? 'text-white/25' : 'text-gray-400'
+          }`}>
             <Clock className="h-3 w-3" />
             {formatTimeAgo(post.created_at)}
           </span>
         </div>
 
         {/* Sarlavha */}
-        <h1 className="text-xl sm:text-2xl font-bold text-white leading-snug mb-5">
+        <h1 className={`text-xl sm:text-2xl font-bold leading-snug mb-5 ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}>
           {post.title}
         </h1>
 
         {/* Kontent */}
-        <div className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap mb-6">
+        <div className={`text-sm leading-relaxed whitespace-pre-wrap mb-6 ${
+          isDark ? 'text-white/70' : 'text-gray-600'
+        }`}>
           {post.content}
         </div>
 
         {/* Muallif */}
         <div
           className="flex items-center gap-3 pt-5"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+          style={isDark ? { borderTop: '1px solid rgba(255,255,255,0.06)' } : { borderTop: '1px solid #f3f4f6' }}
         >
           <div
             className={`h-9 w-9 rounded-xl bg-gradient-to-br ${AVATAR_COLORS[colorIdx]} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-lg`}
@@ -113,22 +140,29 @@ export default async function PostDetailPage({ params }: { params: { id: string 
             {initials}
           </div>
           <div>
-            <p className="text-white/80 text-sm font-semibold">{post.author_name}</p>
-            <p className="text-white/25 text-xs">Post muallifi</p>
+            <p className={`text-sm font-semibold ${
+              isDark ? 'text-white/80' : 'text-gray-900'
+            }`}>{post.author_name}</p>
+            <p className={`text-xs ${
+              isDark ? 'text-white/25' : 'text-gray-400'
+            }`}>Post muallifi</p>
           </div>
-          <div className="ml-auto flex items-center gap-1.5 text-white/30 text-xs">
+          <div className={`ml-auto flex items-center gap-1.5 text-xs ${
+            isDark ? 'text-white/30' : 'text-gray-400'
+          }`}>
             <MessageSquare className="h-3.5 w-3.5" />
             {post.comment_count} izoh
           </div>
         </div>
 
         {/* Like/Dislike tugmalari */}
-        <div className="pt-4 mt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="pt-4 mt-4" style={isDark ? { borderTop: '1px solid rgba(255,255,255,0.06)' } : { borderTop: '1px solid #f3f4f6' }}>
           <PostLikeBar
             postId={post.id}
             initialLikes={post.likes}
             initialDislikes={post.dislikes}
-            userId={user?.id ?? null}
+            userId={currentUser?.id ?? null}
+            isDark={isDark}
           />
         </div>
       </article>
@@ -136,9 +170,9 @@ export default async function PostDetailPage({ params }: { params: { id: string 
       {/* ── Izohlar (Real-time) ── */}
       <div
         className="rounded-2xl p-6"
-        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+        style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
       >
-        <CommentSection postId={post.id} currentUser={currentUser} />
+        <CommentSection postId={post.id} currentUser={currentUser} isDark={isDark} />
       </div>
     </div>
   )

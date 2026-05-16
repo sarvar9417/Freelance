@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTheme } from 'next-themes'
 import {
   Search, Plus, MessageSquare, TrendingUp,
   Loader2, Wifi, Users, FileText, X,
@@ -25,6 +26,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export default function ForumPage() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark' || theme === undefined || theme === null
   const [posts, setPosts]           = useState<ForumPost[]>([])
   const [topPosts, setTopPosts]     = useState<ForumPost[]>([])
   const [loading, setLoading]       = useState(true)
@@ -100,13 +103,15 @@ export default function ForumPage() {
   const totalComments = posts.reduce((sum, p) => sum + p.comment_count, 0)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 ${isDark ? '' : 'bg-gray-50/50 min-h-screen'}`}>
 
       {/* ── Sarlavha ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Forum</h1>
-          <p className="text-white/40 text-sm mt-1">
+          <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            Forum
+          </h1>
+          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
             Freelancerlik haqida savol bering, tajriba ulashing
           </p>
         </div>
@@ -114,7 +119,11 @@ export default function ForumPage() {
           <Link href="/forum/post/new">
             <motion.button
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/30 flex-shrink-0"
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors flex-shrink-0 ${
+                isDark
+                  ? 'text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-900/30'
+                  : 'text-white bg-blue-600 hover:bg-blue-700 shadow-md'
+              }`}
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Post yaratish</span>
@@ -123,7 +132,11 @@ export default function ForumPage() {
           </Link>
         ) : (
           <Link href="/login">
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white/70 border border-white/10 hover:border-white/20 hover:text-white transition-all flex-shrink-0">
+            <button className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex-shrink-0 ${
+              isDark
+                ? 'text-white/70 border border-white/10 hover:border-white/20 hover:text-white'
+                : 'text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-gray-900'
+            }`}>
               Kirish
             </button>
           </Link>
@@ -133,21 +146,28 @@ export default function ForumPage() {
       {/* ── Qidiruv + Kategoriyalar ── */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+          <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none ${
+            isDark ? 'text-white/30' : 'text-gray-400'
+          }`} />
           <input
             type="text"
             value={searchInput}
             onChange={e => handleSearchInput(e.target.value)}
             placeholder="Postlarni qidirish..."
-            className="w-full pl-10 pr-10 py-2.5 rounded-xl text-sm text-white placeholder:text-white/25 outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+            className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-blue-500/50 transition-all ${
+              isDark
+                ? 'text-white placeholder:text-white/25 bg-white/5 border border-white/8'
+                : 'text-gray-900 placeholder:text-gray-400 bg-white border border-gray-200'
+            }`}
           />
           <AnimatePresence>
             {searchInput && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                  isDark ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'
+                }`}
               >
                 <X className="h-3.5 w-3.5" />
               </motion.button>
@@ -163,10 +183,14 @@ export default function ForumPage() {
               onClick={() => setCategory(cat)}
               className={`flex-shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all duration-200 ${
                 category === cat
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30'
-                  : `border text-white/50 hover:text-white/80 hover:bg-white/6 ${CATEGORY_COLORS[cat] ?? ''}`
+                  ? isDark
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30'
+                    : 'bg-blue-600 text-white shadow-md'
+                  : isDark
+                    ? `border text-white/50 hover:text-white/80 hover:bg-white/6 ${CATEGORY_COLORS[cat] ?? ''}`
+                    : `border text-gray-500 hover:text-gray-900 hover:bg-gray-100 ${CATEGORY_COLORS[cat]?.replace('400', '600') ?? ''}`
               }`}
-              style={category !== cat ? { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' } : {}}
+              style={category !== cat ? (isDark ? { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' } : { background: 'transparent', borderColor: '#e5e7eb' }) : {}}
             >
               {cat}
             </button>
@@ -179,8 +203,10 @@ export default function ForumPage() {
         {newPostCount > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-emerald-300"
-            style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium ${
+              isDark ? 'text-emerald-300' : 'text-emerald-600'
+            }`}
+            style={isDark ? { background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' } : { background: '#ecfdf5', border: '1px solid #a7f3d0' }}
           >
             <Wifi className="h-3.5 w-3.5 animate-pulse" />
             {newPostCount} ta yangi post real-time qo&apos;shildi
@@ -195,17 +221,17 @@ export default function ForumPage() {
         <div className="lg:col-span-2">
           {loading ? (
             <div className="flex items-center justify-center py-24">
-              <Loader2 className="h-6 w-6 text-white/30 animate-spin" />
+              <Loader2 className={`h-6 w-6 animate-spin ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
             </div>
           ) : posts.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="text-center py-20 rounded-2xl"
-              style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' }}
+              style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' } : { background: '#f9fafb', border: '2px dashed #e5e7eb' }}
             >
-              <MessageSquare className="h-10 w-10 text-white/12 mx-auto mb-3" />
-              <p className="text-white/40 text-sm">Post topilmadi</p>
-              <p className="text-white/20 text-xs mt-1">
+              <MessageSquare className={`h-10 w-10 mx-auto mb-3 ${isDark ? 'text-white/12' : 'text-gray-300'}`} />
+              <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Post topilmadi</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-white/20' : 'text-gray-400'}`}>
                 {search ? 'Boshqa kalit so\'z kiriting' : 'Kategoriya tanlang yoki post yarating'}
               </p>
             </motion.div>
@@ -219,6 +245,7 @@ export default function ForumPage() {
                   currentUserId={userId}
                   userLike={userLikes[post.id] ?? null}
                   onLikeChange={handleLikeChange}
+                  isDark={isDark}
                 />
               ))}
             </div>
@@ -231,23 +258,33 @@ export default function ForumPage() {
           {/* Statistika */}
           <div
             className="rounded-2xl p-4 space-y-3"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <h3 className="text-white/50 text-[11px] font-semibold uppercase tracking-widest">
+            <h3 className={`text-[11px] font-semibold uppercase tracking-widest ${
+              isDark ? 'text-white/50' : 'text-gray-500'
+            }`}>
               Statistika
             </h3>
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-white/40 text-sm">
+                <span className={`flex items-center gap-2 text-sm ${
+                  isDark ? 'text-white/40' : 'text-gray-500'
+                }`}>
                   <FileText className="h-3.5 w-3.5" /> Jami postlar
                 </span>
-                <span className="text-white font-bold text-sm tabular-nums">{posts.length}</span>
+                <span className={`font-bold text-sm tabular-nums ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {posts.length}
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-white/40 text-sm">
+                <span className={`flex items-center gap-2 text-sm ${
+                  isDark ? 'text-white/40' : 'text-gray-500'
+                }`}>
                   <MessageSquare className="h-3.5 w-3.5" /> Jami izohlar
                 </span>
-                <span className="text-white font-bold text-sm tabular-nums">{totalComments}</span>
+                <span className={`font-bold text-sm tabular-nums ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {totalComments}
+                </span>
               </div>
             </div>
           </div>
@@ -255,30 +292,40 @@ export default function ForumPage() {
           {/* Eng ko'p muhokama */}
           <div
             className="rounded-2xl p-4"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <h3 className="text-white/50 text-[11px] font-semibold uppercase tracking-widest mb-3 flex items-center gap-2">
-              <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
+            <h3 className={`text-[11px] font-semibold uppercase tracking-widest mb-3 flex items-center gap-2 ${
+              isDark ? 'text-white/50' : 'text-gray-500'
+            }`}>
+              <TrendingUp className={`h-3.5 w-3.5 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
               Eng ko&apos;p muhokama
             </h3>
             {topPosts.length === 0 ? (
-              <p className="text-white/20 text-xs">Hali post yo&apos;q</p>
+              <p className={`text-xs ${isDark ? 'text-white/20' : 'text-gray-400'}`}>Hali post yo&apos;q</p>
             ) : (
               <div className="space-y-1">
                 {topPosts.map((post, i) => (
                   <Link
                     key={post.id}
                     href={`/forum/post/${post.id}`}
-                    className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-white/5 transition-colors group"
+                    className={`flex items-start gap-2.5 p-2 rounded-xl transition-colors group ${
+                      isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'
+                    }`}
                   >
-                    <span className="text-white/20 text-[11px] font-bold mt-0.5 w-4 flex-shrink-0">
+                    <span className={`text-[11px] font-bold mt-0.5 w-4 flex-shrink-0 ${
+                      isDark ? 'text-white/20' : 'text-gray-400'
+                    }`}>
                       {i + 1}.
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white/60 text-xs leading-snug group-hover:text-white/85 transition-colors line-clamp-2">
+                      <p className={`text-xs leading-snug transition-colors line-clamp-2 ${
+                        isDark ? 'text-white/60 group-hover:text-white/85' : 'text-gray-600 group-hover:text-gray-900'
+                      }`}>
                         {post.title}
                       </p>
-                      <span className="text-white/20 text-[10px] mt-1 flex items-center gap-1">
+                      <span className={`text-[10px] mt-1 flex items-center gap-1 ${
+                        isDark ? 'text-white/20' : 'text-gray-400'
+                      }`}>
                         <MessageSquare className="h-2.5 w-2.5" />
                         {post.comment_count} izoh · {formatTimeAgo(post.created_at)}
                       </span>
@@ -294,14 +341,20 @@ export default function ForumPage() {
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               className="rounded-2xl p-5 text-center"
-              style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}
+              style={isDark ? { background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' } : { background: '#eff6ff', border: '1px solid #bfdbfe' }}
             >
-              <Users className="h-7 w-7 text-blue-400/50 mx-auto mb-2" />
-              <p className="text-white/40 text-xs mb-3 leading-relaxed">
+              <Users className={`h-7 w-7 mx-auto mb-2 ${isDark ? 'text-blue-400/50' : 'text-blue-500'}`} />
+              <p className={`text-xs mb-3 leading-relaxed ${
+                isDark ? 'text-white/40' : 'text-gray-600'
+              }`}>
                 Post yaratish va izoh yozish uchun tizimga kiring
               </p>
               <Link href="/login">
-                <button className="text-xs font-semibold text-blue-300 bg-blue-500/15 hover:bg-blue-500/25 px-5 py-2 rounded-xl transition-all">
+                <button className={`text-xs font-semibold px-5 py-2 rounded-xl transition-all ${
+                  isDark
+                    ? 'text-blue-300 bg-blue-500/15 hover:bg-blue-500/25'
+                    : 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                }`}>
                   Kirish
                 </button>
               </Link>

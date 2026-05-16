@@ -33,10 +33,11 @@ interface Props {
   currentUserId?: string | null
   userLike?: 'like' | 'dislike' | null
   onLikeChange?: (postId: string, likes: number, dislikes: number) => void
+  isDark?: boolean
 }
 
 export default function PostCard({
-  post, index = 0, pinned = false, currentUserId, userLike: initialLike, onLikeChange,
+  post, index = 0, pinned = false, currentUserId, userLike: initialLike, onLikeChange, isDark = true,
 }: Props) {
   const [likes, setLikes] = useState(post.likes)
   const [dislikes, setDislikes] = useState(post.dislikes)
@@ -88,33 +89,45 @@ export default function PostCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.06 }}
-      className="group rounded-2xl transition-all duration-200 hover:translate-y-[-2px]"
-      style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${pinned ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)'}` }}
+      className={`group rounded-2xl transition-all duration-200 hover:translate-y-[-2px] ${
+        isDark ? '' : 'bg-white border border-gray-200'
+      }`}
+      style={isDark ? { background: 'rgba(255,255,255,0.04)', border: `1px solid ${pinned ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)' }` } : {}}
     >
       <Link href={`/forum/post/${post.id}`} className="block p-5">
         {/* Top row */}
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           {pinned && (
-            <span className="flex items-center gap-1 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-400/10">
+            <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+              isDark ? 'text-amber-400 bg-amber-400/10' : 'text-amber-600 bg-amber-50'
+            }`}>
               <Pin className="h-2.5 w-2.5" /> Muhim
             </span>
           )}
           <span className={`flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${catStyle.bg} ${catStyle.text}`}>
             <Tag className="h-2.5 w-2.5" />{post.category}
           </span>
-          <span className="text-white/20 text-xs flex items-center gap-1 ml-auto">
+          <span className={`text-xs flex items-center gap-1 ml-auto ${
+            isDark ? 'text-white/20' : 'text-gray-400'
+          }`}>
             <Clock className="h-3 w-3" />
             {formatTimeAgo(post.created_at)}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="text-white font-semibold text-sm leading-snug mb-2 group-hover:text-blue-300 transition-colors line-clamp-2">
+        <h3 className={`font-semibold text-sm leading-snug mb-2 transition-colors line-clamp-2 ${
+          isDark
+            ? 'text-white group-hover:text-blue-300'
+            : 'text-gray-900 group-hover:text-blue-600'
+        }`}>
           {post.title}
         </h3>
 
         {/* Preview */}
-        <p className="text-white/40 text-xs leading-relaxed line-clamp-2 mb-4">
+        <p className={`text-xs leading-relaxed line-clamp-2 mb-4 ${
+          isDark ? 'text-white/40' : 'text-gray-500'
+        }`}>
           {post.content}
         </p>
 
@@ -123,21 +136,31 @@ export default function PostCard({
           <div className={`h-6 w-6 rounded-full bg-gradient-to-br ${AVATAR_COLORS[colorIdx]} flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0`}>
             {initials}
           </div>
-          <span className="text-white/40 text-xs">{post.author_name}</span>
-          <ChevronRight className="h-3 w-3 text-white/15 ml-auto group-hover:text-white/40 transition-colors" />
+          <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+            {post.author_name}
+          </span>
+          <ChevronRight className={`h-3 w-3 ml-auto transition-colors ${
+            isDark ? 'text-white/15 group-hover:text-white/40' : 'text-gray-300 group-hover:text-gray-500'
+          }`} />
         </div>
       </Link>
 
       {/* Footer actions */}
-      <div className="flex items-center gap-4 px-5 py-3 border-t border-white/5">
+      <div className={`flex items-center gap-4 px-5 py-3 ${
+        isDark ? 'border-t border-white/5' : 'border-t border-gray-100'
+      }`}>
         {/* Like */}
         <button
           onClick={() => handleVote('like')}
           disabled={!currentUserId || voting}
           className={`flex items-center gap-1.5 text-xs font-medium transition-all rounded-lg px-2 py-1 ${
             myLike === 'like'
-              ? 'text-emerald-400 bg-emerald-400/10'
-              : 'text-white/30 hover:text-emerald-400 hover:bg-emerald-400/8 disabled:cursor-not-allowed'
+              ? isDark
+                ? 'text-emerald-400 bg-emerald-400/10'
+                : 'text-emerald-600 bg-emerald-50'
+              : isDark
+                ? 'text-white/30 hover:text-emerald-400 hover:bg-emerald-400/8 disabled:cursor-not-allowed'
+                : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:cursor-not-allowed'
           }`}
         >
           <ThumbsUp className="h-3.5 w-3.5" /> {likes}
@@ -149,18 +172,26 @@ export default function PostCard({
           disabled={!currentUserId || voting}
           className={`flex items-center gap-1.5 text-xs font-medium transition-all rounded-lg px-2 py-1 ${
             myLike === 'dislike'
-              ? 'text-red-400 bg-red-400/10'
-              : 'text-white/30 hover:text-red-400 hover:bg-red-400/8 disabled:cursor-not-allowed'
+              ? isDark
+                ? 'text-red-400 bg-red-400/10'
+                : 'text-red-600 bg-red-50'
+              : isDark
+                ? 'text-white/30 hover:text-red-400 hover:bg-red-400/8 disabled:cursor-not-allowed'
+                : 'text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:cursor-not-allowed'
           }`}
         >
           <ThumbsDown className="h-3.5 w-3.5" /> {dislikes}
         </button>
 
-        <Link href={`/forum/post/${post.id}`} className="flex items-center gap-1.5 text-xs text-white/30 hover:text-blue-400 transition-colors ml-auto">
+        <Link href={`/forum/post/${post.id}`} className={`flex items-center gap-1.5 text-xs transition-colors ml-auto ${
+          isDark ? 'text-white/30 hover:text-blue-400' : 'text-gray-400 hover:text-blue-600'
+        }`}>
           <MessageSquare className="h-3.5 w-3.5" /> {post.comment_count} javob
         </Link>
 
-        <span className="flex items-center gap-1 text-xs text-white/20">
+        <span className={`flex items-center gap-1 text-xs ${
+          isDark ? 'text-white/20' : 'text-gray-400'
+        }`}>
           <Eye className="h-3 w-3" />
           {Math.floor(Math.random() * 200 + 50)}
         </span>

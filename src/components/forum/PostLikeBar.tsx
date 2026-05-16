@@ -9,9 +9,10 @@ interface Props {
   initialLikes: number
   initialDislikes: number
   userId: string | null
+  isDark?: boolean
 }
 
-export default function PostLikeBar({ postId, initialLikes, initialDislikes, userId }: Props) {
+export default function PostLikeBar({ postId, initialLikes, initialDislikes, userId, isDark = true }: Props) {
   const [likes, setLikes]       = useState(initialLikes)
   const [dislikes, setDislikes] = useState(initialDislikes)
   const [myLike, setMyLike]     = useState<'like' | 'dislike' | null>(null)
@@ -63,8 +64,12 @@ export default function PostLikeBar({ postId, initialLikes, initialDislikes, use
         disabled={!userId || voting}
         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
           myLike === 'like'
-            ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30'
-            : 'text-white/40 hover:text-emerald-300 border border-white/8 hover:border-emerald-500/30 hover:bg-emerald-500/8 disabled:cursor-not-allowed'
+            ? isDark
+              ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30'
+              : 'text-emerald-600 bg-emerald-50 border border-emerald-200'
+            : isDark
+              ? 'text-white/40 hover:text-emerald-300 border border-white/8 hover:border-emerald-500/30 hover:bg-emerald-500/8 disabled:cursor-not-allowed'
+              : 'text-gray-400 hover:text-emerald-600 border border-gray-200 hover:border-emerald-200 hover:bg-emerald-50 disabled:cursor-not-allowed'
         }`}
       >
         <ThumbsUp className="h-4 w-4" />
@@ -76,8 +81,12 @@ export default function PostLikeBar({ postId, initialLikes, initialDislikes, use
         disabled={!userId || voting}
         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
           myLike === 'dislike'
-            ? 'text-red-300 bg-red-500/15 border border-red-500/30'
-            : 'text-white/40 hover:text-red-300 border border-white/8 hover:border-red-500/30 hover:bg-red-500/8 disabled:cursor-not-allowed'
+            ? isDark
+              ? 'text-red-300 bg-red-500/15 border border-red-500/30'
+              : 'text-red-600 bg-red-50 border border-red-200'
+            : isDark
+              ? 'text-white/40 hover:text-red-300 border border-white/8 hover:border-red-500/30 hover:bg-red-500/8 disabled:cursor-not-allowed'
+              : 'text-gray-400 hover:text-red-600 border border-gray-200 hover:border-red-200 hover:bg-red-50 disabled:cursor-not-allowed'
         }`}
       >
         <ThumbsDown className="h-4 w-4" />
@@ -85,7 +94,7 @@ export default function PostLikeBar({ postId, initialLikes, initialDislikes, use
       </button>
 
       {!userId && (
-        <span className="text-white/20 text-xs ml-1">
+        <span className={`text-xs ml-1 ${isDark ? 'text-white/20' : 'text-gray-400'}`}>
           (baholash uchun kiring)
         </span>
       )}
