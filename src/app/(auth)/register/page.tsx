@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTheme } from 'next-themes'
 import { Eye, EyeOff, Loader2, GraduationCap, BookOpen } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -45,6 +46,8 @@ const ROLE_OPTIONS: RoleOption[] = [
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -103,12 +106,29 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-sm shadow-2xl">
+    <Card className={`border backdrop-blur-sm shadow-2xl ${
+      isDark
+        ? 'border-slate-700 bg-slate-800/50'
+        : 'border-gray-200 bg-white shadow-lg'
+    }`}>
       <CardHeader className="space-y-1 pb-4">
-        <CardTitle className="text-2xl font-bold text-white text-center">
+        <div className="flex justify-center mb-4">
+          <div className={`p-3 rounded-2xl ${
+            isDark
+              ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-900/40'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20'
+          }`}>
+            <GraduationCap className="h-8 w-8 text-white" />
+          </div>
+        </div>
+        <CardTitle className={`text-2xl font-bold text-center ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}>
           Ro&apos;yxatdan o&apos;tish
         </CardTitle>
-        <CardDescription className="text-center text-slate-400">
+        <CardDescription className={`text-center ${
+          isDark ? 'text-slate-400' : 'text-gray-500'
+        }`}>
           Bepul ta&apos;lim olishni boshlang
         </CardDescription>
       </CardHeader>
@@ -117,31 +137,45 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Server xatosi */}
           {serverError && (
-            <div className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-4 py-3">
+            <div className={`border text-sm rounded-lg px-4 py-3 ${
+              isDark
+                ? 'bg-red-900/40 border-red-700 text-red-300'
+                : 'bg-red-50 border-red-200 text-red-600'
+            }`}>
               {serverError}
             </div>
           )}
 
           {/* Ism Familiya */}
           <div className="space-y-1.5">
-            <Label htmlFor="full_name" className="text-slate-300">
+            <Label htmlFor="full_name" className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>
               Ism va familiya
             </Label>
             <Input
               id="full_name"
               placeholder="Sarvar Raximov"
               {...register('full_name')}
-              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500"
+              className={
+                isDark
+                  ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500'
+              }
             />
             {errors.full_name && (
-              <p className="text-red-400 text-xs mt-1">{errors.full_name.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.full_name.message}
+              </p>
             )}
           </div>
 
           {/* Yosh */}
           <div className="space-y-1.5">
-            <Label htmlFor="age" className="text-slate-300">
-              Yosh <span className="text-slate-500 text-xs">(13—25)</span>
+            <Label htmlFor="age" className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>
+              Yosh <span className={isDark ? 'text-slate-500' : 'text-gray-400'}>(13—25)</span>
             </Label>
             <Input
               id="age"
@@ -150,16 +184,24 @@ export default function RegisterPage() {
               max={25}
               placeholder="18"
               {...register('age', { valueAsNumber: true })}
-              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500"
+              className={
+                isDark
+                  ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500'
+              }
             />
             {errors.age && (
-              <p className="text-red-400 text-xs mt-1">{errors.age.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.age.message}
+              </p>
             )}
           </div>
 
           {/* Email */}
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-slate-300">
+            <Label htmlFor="email" className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>
               Email manzil
             </Label>
             <Input
@@ -167,16 +209,24 @@ export default function RegisterPage() {
               type="email"
               placeholder="sarvar@email.com"
               {...register('email')}
-              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500"
+              className={
+                isDark
+                  ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500'
+              }
             />
             {errors.email && (
-              <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           {/* Parol */}
           <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-slate-300">
+            <Label htmlFor="password" className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>
               Parol
             </Label>
             <div className="relative">
@@ -185,24 +235,36 @@ export default function RegisterPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Kamida 6 ta belgi"
                 {...register('password')}
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 pr-10"
+                className={
+                  isDark
+                    ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 pr-10'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 pr-10'
+                }
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                  isDark
+                    ? 'text-slate-400 hover:text-slate-200'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             {errors.password && (
-              <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.password.message}
+              </p>
             )}
           </div>
 
           {/* Parolni tasdiqlash */}
           <div className="space-y-1.5">
-            <Label htmlFor="confirm_password" className="text-slate-300">
+            <Label htmlFor="confirm_password" className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>
               Parolni tasdiqlang
             </Label>
             <div className="relative">
@@ -211,24 +273,36 @@ export default function RegisterPage() {
                 type={showConfirm ? 'text' : 'password'}
                 placeholder="Parolni qayta kiriting"
                 {...register('confirm_password')}
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 pr-10"
+                className={
+                  isDark
+                    ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 pr-10'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 pr-10'
+                }
               />
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                  isDark
+                    ? 'text-slate-400 hover:text-slate-200'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
               >
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             {errors.confirm_password && (
-              <p className="text-red-400 text-xs mt-1">{errors.confirm_password.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.confirm_password.message}
+              </p>
             )}
           </div>
 
           {/* Rol tanlash */}
           <div className="space-y-2">
-            <Label className="text-slate-300">Rolni tanlang</Label>
+            <Label className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>Rolni tanlang</Label>
             <div className="grid grid-cols-2 gap-3">
               {ROLE_OPTIONS.map((option) => (
                 <button
@@ -237,22 +311,34 @@ export default function RegisterPage() {
                   onClick={() => setValue('role', option.value, { shouldValidate: true })}
                   className={`p-3 rounded-lg border-2 text-left transition-all duration-200 ${
                     selectedRole === option.value
-                      ? 'border-blue-500 bg-blue-900/30 text-white'
-                      : 'border-slate-600 bg-slate-700/30 text-slate-300 hover:border-slate-500'
+                      ? isDark
+                        ? 'border-blue-500 bg-blue-900/30 text-white'
+                        : 'border-blue-500 bg-blue-50 text-gray-900'
+                      : isDark
+                        ? 'border-slate-600 bg-slate-700/30 text-slate-300 hover:border-slate-500'
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <div className={`mb-1.5 ${selectedRole === option.value ? 'text-blue-400' : 'text-slate-400'}`}>
+                  <div className={`mb-1.5 ${
+                    selectedRole === option.value
+                      ? isDark ? 'text-blue-400' : 'text-blue-600'
+                      : isDark ? 'text-slate-400' : 'text-gray-400'
+                  }`}>
                     {option.icon}
                   </div>
                   <div className="font-medium text-sm">{option.label}</div>
-                  <div className="text-xs text-slate-400 mt-0.5 leading-tight">
+                  <div className={`text-xs mt-0.5 leading-tight ${
+                    isDark ? 'text-slate-400' : 'text-gray-500'
+                  }`}>
                     {option.description}
                   </div>
                 </button>
               ))}
             </div>
             {errors.role && (
-              <p className="text-red-400 text-xs mt-1">{errors.role.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.role.message}
+              </p>
             )}
           </div>
 
@@ -275,9 +361,13 @@ export default function RegisterPage() {
       </CardContent>
 
       <CardFooter className="justify-center pb-6 pt-2">
-        <p className="text-slate-400 text-sm">
+        <p className={`text-sm ${
+          isDark ? 'text-slate-400' : 'text-gray-500'
+        }`}>
           Allaqachon hisobingiz bormi?{' '}
-          <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+          <Link href="/login" className={`font-medium ${
+            isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+          }`}>
             Kirish
           </Link>
         </p>

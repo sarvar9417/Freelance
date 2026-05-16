@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    <div className="auth-layout">
       {/* Header */}
       <header className="py-6 px-4">
         <div className="max-w-7xl mx-auto">
           <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="auth-logo">
               <GraduationCap className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">Freelancer School</span>
+            <span className="auth-title">Freelancer School</span>
           </Link>
         </div>
       </header>
@@ -30,7 +30,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-slate-500 text-sm">
+      <footer className="auth-footer">
         <p>© 2024 Freelancer School — Bepul, hamma uchun</p>
       </footer>
     </div>

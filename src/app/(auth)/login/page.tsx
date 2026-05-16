@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { Eye, EyeOff, Loader2, CheckCircle, GraduationCap } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,6 +25,8 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -73,7 +76,6 @@ function LoginForm() {
         return
       }
 
-      // Rol bo'yicha yo'naltirish
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: profile } = await supabase
@@ -82,7 +84,6 @@ function LoginForm() {
           .eq('id', user.id)
           .single()
 
-        // public.users da yozuv yo'q bo'lsa — metadata dan yaratamiz
         if (!profile) {
           await supabase.from('users').upsert({
             id: user.id,
@@ -113,12 +114,29 @@ function LoginForm() {
   }
 
   return (
-    <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-sm shadow-2xl">
+    <Card className={`border backdrop-blur-sm shadow-2xl ${
+      isDark
+        ? 'border-slate-700 bg-slate-800/50'
+        : 'border-gray-200 bg-white shadow-lg'
+    }`}>
       <CardHeader className="space-y-1 pb-4">
-        <CardTitle className="text-2xl font-bold text-white text-center">
+        <div className="flex justify-center mb-4">
+          <div className={`p-3 rounded-2xl ${
+            isDark
+              ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-900/40'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20'
+          }`}>
+            <GraduationCap className="h-8 w-8 text-white" />
+          </div>
+        </div>
+        <CardTitle className={`text-2xl font-bold text-center ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}>
           Xush kelibsiz!
         </CardTitle>
-        <CardDescription className="text-center text-slate-400">
+        <CardDescription className={`text-center ${
+          isDark ? 'text-slate-400' : 'text-gray-500'
+        }`}>
           Hisobingizga kiring
         </CardDescription>
       </CardHeader>
@@ -127,7 +145,11 @@ function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Muvaffaqiyat xabari */}
           {successMessage && (
-            <div className="bg-green-900/40 border border-green-700 text-green-300 text-sm rounded-lg px-4 py-3 flex items-start gap-2">
+            <div className={`border text-sm rounded-lg px-4 py-3 flex items-start gap-2 ${
+              isDark
+                ? 'bg-green-900/40 border-green-700 text-green-300'
+                : 'bg-green-50 border-green-200 text-green-700'
+            }`}>
               <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <span>{successMessage}</span>
             </div>
@@ -135,14 +157,20 @@ function LoginForm() {
 
           {/* Server xatosi */}
           {serverError && (
-            <div className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-4 py-3">
+            <div className={`border text-sm rounded-lg px-4 py-3 ${
+              isDark
+                ? 'bg-red-900/40 border-red-700 text-red-300'
+                : 'bg-red-50 border-red-200 text-red-600'
+            }`}>
               {serverError}
             </div>
           )}
 
           {/* Email */}
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-slate-300">
+            <Label htmlFor="email" className={
+              isDark ? 'text-slate-300' : 'text-gray-700'
+            }>
               Email manzil
             </Label>
             <Input
@@ -151,22 +179,30 @@ function LoginForm() {
               placeholder="sarvar@email.com"
               {...register('email')}
               autoComplete="email"
-              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500"
+              className={
+                isDark
+                  ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500'
+              }
             />
             {errors.email && (
-              <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.email.message}
+              </p>
             )}
           </div>
 
           {/* Parol */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-slate-300">
+              <Label htmlFor="password" className={
+                isDark ? 'text-slate-300' : 'text-gray-700'
+              }>
                 Parol
               </Label>
               <Link
                 href="/forgot-password"
-                className="text-xs text-blue-400 hover:text-blue-300"
+                className={`text-xs ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
               >
                 Parolni unutdingizmi?
               </Link>
@@ -178,18 +214,28 @@ function LoginForm() {
                 placeholder="Parolingizni kiriting"
                 {...register('password')}
                 autoComplete="current-password"
-                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 pr-10"
+                className={
+                  isDark
+                    ? 'bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500 pr-10'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 pr-10'
+                }
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                  isDark
+                    ? 'text-slate-400 hover:text-slate-200'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             {errors.password && (
-              <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-500'}`}>
+                {errors.password.message}
+              </p>
             )}
           </div>
 
@@ -212,9 +258,13 @@ function LoginForm() {
       </CardContent>
 
       <CardFooter className="justify-center pb-6 pt-2">
-        <p className="text-slate-400 text-sm">
+        <p className={`text-sm ${
+          isDark ? 'text-slate-400' : 'text-gray-500'
+        }`}>
           Hisobingiz yo&apos;qmi?{' '}
-          <Link href="/register" className="text-blue-400 hover:text-blue-300 font-medium">
+          <Link href="/register" className={`font-medium ${
+            isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+          }`}>
             Ro&apos;yxatdan o&apos;tish
           </Link>
         </p>
@@ -224,8 +274,15 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   return (
-    <Suspense fallback={<div className="h-96 animate-pulse bg-slate-800/50 rounded-xl" />}>
+    <Suspense fallback={
+      <div className={`h-96 animate-pulse rounded-xl ${
+        isDark ? 'bg-slate-800/50' : 'bg-gray-100'
+      }`} />
+    }>
       <LoginForm />
     </Suspense>
   )
