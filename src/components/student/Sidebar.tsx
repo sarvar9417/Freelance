@@ -51,10 +51,10 @@ function NavItem({
         active
           ? isDark
             ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-900/40'
-            : 'bg-blue-600 text-white shadow-lg shadow-blue-200/50'
+            : 'bg-blue-600 text-white shadow-md shadow-blue-200/50'
           : isDark
             ? 'text-white/50 hover:text-white hover:bg-white/5'
-            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
       {active && (
@@ -107,15 +107,17 @@ function SidebarInner({
     <div className={`flex flex-col h-full select-none ${isDark ? '' : 'bg-white'}`}>
       {/* Logo + notification */}
       <div className={`flex items-center justify-between px-5 py-4 border-b ${
-        isDark ? 'border-white/5' : 'border-slate-200'
+        isDark ? 'border-white/5' : 'border-gray-200'
       }`}>
         <Link href="/" className="flex items-center gap-2.5">
-          <div className={`bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-lg shadow-md ${
-            isDark ? 'shadow-blue-900/40' : 'shadow-blue-200/50'
+          <div className={`p-1.5 rounded-lg ${
+            isDark
+              ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-md shadow-blue-900/40'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-md shadow-blue-500/20'
           }`}>
             <GraduationCap className="h-4 w-4 text-white" />
           </div>
-          <span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>FreelancerSchool</span>
+          <span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>FreelancerSchool</span>
         </Link>
         <div className="flex items-center gap-1">
           <button
@@ -123,7 +125,7 @@ function SidebarInner({
             className={`p-1.5 rounded-lg transition-all ${
               isDark
                 ? 'text-white/40 hover:text-white hover:bg-white/10'
-                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
             }`}
             aria-label="Toggle theme"
           >
@@ -132,7 +134,7 @@ function SidebarInner({
           <NotificationBell userId={userId} initialUnread={unreadNotifications} variant="student" />
           {onClose && (
             <button onClick={onClose} className={`lg:hidden ml-1 ${
-              isDark ? 'text-white/30 hover:text-white' : 'text-slate-400 hover:text-slate-600'
+              isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-600'
             }`}>
               <X className="h-4 w-4" />
             </button>
@@ -143,31 +145,33 @@ function SidebarInner({
       {/* User card */}
       <div className={`mx-3 mt-4 rounded-2xl p-4 ${
         isDark
-          ? 'bg-[rgba(59,130,246,0.07)] border border-[rgba(59,130,246,0.15)]'
+          ? 'bg-blue-500/5 border border-blue-500/10'
           : 'bg-blue-50 border border-blue-100'
       }`}>
         <div className="flex items-center gap-3 mb-3">
-          <div className={`bg-gradient-to-br from-blue-500 to-blue-700 h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${
-            isDark ? 'shadow-lg shadow-blue-900/40' : 'shadow'
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white ${
+            isDark
+              ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow'
           }`}>
             {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-sm font-semibold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{fullName}</p>
-            <p className={`text-xs ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Level {level} · O&apos;quvchi</p>
+            <p className={`text-sm font-semibold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{fullName}</p>
+            <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Level {level} · O&apos;quvchi</p>
           </div>
         </div>
 
         {/* XP bar */}
         <div className="mb-2">
           <div className="flex justify-between mb-1">
-            <span className={`text-xs flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
+            <span className={`text-xs flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
               <Zap className="h-3 w-3 text-amber-500" />
               {xp.toLocaleString()} XP
             </span>
-            <span className={`text-xs ${isDark ? 'text-white/30' : 'text-slate-400'}`}>{xpToNext.toLocaleString()}</span>
+            <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{xpToNext.toLocaleString()}</span>
           </div>
-          <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-200'}`}>
+          <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
             <motion.div
               className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full"
               initial={{ width: 0 }}
@@ -197,13 +201,13 @@ function SidebarInner({
       </nav>
 
       {/* Sign out */}
-      <div className={`p-3 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+      <div className={`p-3 border-t ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
         <button
           onClick={handleSignOut}
           className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
             isDark
               ? 'text-white/40 hover:text-red-400 hover:bg-red-500/10'
-              : 'text-slate-500 hover:text-red-600 hover:bg-red-50'
+              : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
           }`}
         >
           <LogOut className="h-4 w-4" />
@@ -232,7 +236,7 @@ export default function Sidebar(props: Props) {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}
       >
-        <Menu className={`h-4 w-4 ${isDark ? 'text-white' : 'text-slate-700'}`} />
+        <Menu className={`h-4 w-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
       </button>
 
       {/* Desktop */}
@@ -241,7 +245,7 @@ export default function Sidebar(props: Props) {
         style={{
           background: isDark ? 'rgba(7,10,20,0.7)' : '#ffffff',
           backdropFilter: 'blur(24px)',
-          borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
+          borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#e5e7eb'
         }}
       >
         <SidebarInner {...props} />
@@ -268,8 +272,7 @@ export default function Sidebar(props: Props) {
               className="lg:hidden fixed left-0 top-0 bottom-0 w-72 z-50 flex flex-col border-r"
               style={{
                 background: isDark ? '#090d18' : '#ffffff',
-                backdropFilter: 'blur(24px)',
-                borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'
               }}
             >
               <SidebarInner {...props} onClose={() => setOpen(false)} />

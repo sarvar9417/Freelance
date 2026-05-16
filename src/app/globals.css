@@ -6,78 +6,122 @@
   html { scroll-behavior: smooth; }
 
   /* ============================================
-     DARK MODE (DEFAULT) - Deep space theme
+     DEFAULT LIGHT MODE - Professional Clean
      ============================================ */
+  :root {
+    /* Primary Colors - Clean White Theme */
+    --color-white: #ffffff;
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+    --color-gray-950: #0b0f19;
+
+    /* Accent Colors */
+    --color-blue-50: #eff6ff;
+    --color-blue-100: #dbeafe;
+    --color-blue-200: #bfdbfe;
+    --color-blue-300: #93c5fd;
+    --color-blue-400: #60a5fa;
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+    --color-blue-700: #1d4ed8;
+    --color-blue-800: #1e40af;
+    --color-blue-900: #1e3a8a;
+
+    --color-emerald-50: #ecfdf5;
+    --color-emerald-100: #d1fae5;
+    --color-emerald-500: #10b981;
+    --color-emerald-600: #059669;
+    --color-emerald-700: #047857;
+
+    --color-purple-50: #f5f3ff;
+    --color-purple-100: #ede9fe;
+    --color-purple-500: #8b5cf6;
+    --color-purple-600: #7c3aed;
+    --color-purple-700: #6d28d9;
+
+    --color-amber-50: #fffbeb;
+    --color-amber-100: #fef3c7;
+    --color-amber-500: #f59e0b;
+    --color-amber-600: #d97706;
+
+    --color-red-50: #fef2f2;
+    --color-red-100: #fee2e2;
+    --color-red-500: #ef4444;
+    --color-red-600: #dc2626;
+
+    /* Semantic Colors */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f9fafb;
+    --color-bg-tertiary: #f3f4f6;
+    --color-bg-elevated: #ffffff;
+
+    --color-text-primary: #111827;
+    --color-text-secondary: #4b5563;
+    --color-text-tertiary: #6b7280;
+    --color-text-muted: #9ca3af;
+
+    --color-border-default: #e5e7eb;
+    --color-border-subtle: #f3f4f6;
+    --color-border-strong: #d1d5db;
+
+    /* Shadows - Layered Depth */
+    --shadow-xs: 0 0 0 1px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    /* Focus Ring */
+    --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.4);
+    --focus-ring-subtle: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  }
+
+  /* ============================================
+     DARK MODE - Deep Space Theme
+     ============================================ */
+  .dark {
+    --color-bg-primary: #0b0f19;
+    --color-bg-secondary: #111827;
+    --color-bg-tertiary: #1f2937;
+    --color-bg-elevated: rgba(17, 24, 39, 0.8);
+
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #d1d5db;
+    --color-text-tertiary: #9ca3af;
+    --color-text-muted: #6b7280;
+
+    --color-border-default: rgba(255, 255, 255, 0.1);
+    --color-border-subtle: rgba(255, 255, 255, 0.05);
+    --color-border-strong: rgba(255, 255, 255, 0.2);
+
+    --shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  }
+
   body {
-    @apply bg-[#0B0F19] text-white;
+    @apply bg-white text-gray-900;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* ============================================
-     LIGHT MODE - Pro platform style
-     Like Linear, Vercel, Stripe, Notion
-     ============================================ */
-  .light {
-    /* Color system - clean, accessible */
-    --color-bg-primary: #ffffff;
-    --color-bg-secondary: #fafbfc;
-    --color-bg-tertiary: #f3f4f6;
-    --color-bg-elevated: #ffffff;
-    --color-text-primary: #0f172a;
-    --color-text-secondary: #475569;
-    --color-text-tertiary: #94a3b8;
-    --color-text-muted: #9ca3af;
-    --color-border-subtle: #e5e7eb;
-    --color-border-default: #d1d5db;
-    --color-border-strong: #9ca3af;
-
-    /* Accent colors */
-    --color-accent-blue: #2563eb;
-    --color-accent-blue-hover: #1d4ed8;
-    --color-accent-blue-subtle: #dbeafe;
-    --color-accent-emerald: #059669;
-    --color-accent-emerald-subtle: #d1fae5;
-    --color-accent-purple: #7c3aed;
-    --color-accent-purple-subtle: #ede9fe;
-    --color-accent-amber: #d97706;
-    --color-accent-amber-subtle: #fef3c7;
-    --color-accent-red: #dc2626;
-    --color-accent-red-subtle: #fee2e2;
-
-    /* Shadows - layered depth */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-    /* Interactive states */
-    --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.3);
-    --focus-ring-blue: 0 0 0 3px rgba(37, 99, 235, 0.3);
-  }
-
-  .light body {
-    @apply bg-[#fafbfc] text-slate-900;
-    background: linear-gradient(to bottom, #fafbfc 0%, #f5f5f4 100%);
-    min-height: 100vh;
-  }
-
   * { box-sizing: border-box; }
-
-  /* ============================================
-     BASE TYPOGRAPHY
-     ============================================ */
-  .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
-    @apply text-slate-900 font-semibold;
-  }
-
-  .light p {
-    @apply text-slate-600;
-  }
-
-  .light a {
-    @apply text-blue-600 hover:text-blue-700;
-  }
 }
 
 /* ============================================
@@ -100,10 +144,6 @@
   0%, 100% { opacity: 0.4; transform: scale(1); }
   50%       { opacity: 0.7; transform: scale(1.08); }
 }
-@keyframes barGrow {
-  from { transform: scaleY(0); }
-  to   { transform: scaleY(1); }
-}
 
 .animate-float       { animation: float  3s ease-in-out infinite; }
 .animate-float2      { animation: float2 4.5s ease-in-out infinite; }
@@ -120,339 +160,320 @@
 }
 
 /* ============================================
-   GLASS EFFECTS - Pro level
+   COMPONENT STYLES - LIGHT MODE DEFAULT
    ============================================ */
 
-/* Dark mode glass */
+/* Glass Effect */
 .glass {
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-/* Light mode - subtle, clean glass */
-.light .glass {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .glass {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Cards */
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
   box-shadow: var(--shadow-sm);
 }
 
-/* Glass dark - Dark mode */
-.glass-dark {
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.06);
-}
-
-/* Glass dark - Light mode */
-.light .glass-dark {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #e5e7eb;
+.card-elevated {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-default);
+  border-radius: 16px;
   box-shadow: var(--shadow-md);
 }
 
-/* ============================================
-   CARDS - Light mode professional
-   ============================================ */
-.light .card {
-  @apply bg-white rounded-xl border border-slate-200;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: none;
+  outline: none;
 }
 
-.light .card-hover {
-  @apply bg-white rounded-xl border border-slate-200;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  transition: all 0.2s ease;
+.btn:focus-visible {
+  box-shadow: var(--focus-ring);
 }
 
-.light .card-hover:hover {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
   transform: translateY(-1px);
 }
 
-/* ============================================
-   TEXT COLORS - Light mode
-   (Using CSS variables for theme-aware colors)
-   ============================================ */
-.light [class*="text-white"] {
-  color: var(--color-text-primary, #0f172a);
+.btn-secondary {
+  background: var(--color-white);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-border-default);
 }
 
-/* ============================================
-   BORDERS - Light mode
-   ============================================ */
-.light .border-white\/10 { border-color: #e5e7eb; }
-.light .border-white\/5 { border-color: #f3f4f6; }
-.light .border-white { border-color: #e5e7eb; }
-
-/* ============================================
-   BACKGROUND COLORS - Light mode
-   ============================================ */
-.light .bg-white\/5 { background-color: #f9fafb; }
-.light .bg-white\/10 { background-color: #f3f4f6; }
-.light .bg-white\/20 { background-color: #e5e7eb; }
-
-/* Hover backgrounds */
-.light .hover\:bg-white\/5:hover { background-color: #f3f4f6; }
-.light .hover\:bg-white\/10:hover { background-color: #e5e7eb; }
-.light .hover\:bg-white\/20:hover { background-color: #d1d5db; }
-
-/* ============================================
-   BUTTONS - Pro styling
-   ============================================ */
-.light .btn-primary {
-  @apply bg-blue-600 text-white font-medium px-4 py-2 rounded-lg;
-  @apply hover:bg-blue-700 active:bg-blue-800;
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
-  box-shadow: 0 1px 2px 0 rgb(37 99 235 / 0.3);
+.btn-secondary:hover {
+  background: var(--color-gray-50);
+  border-color: var(--color-gray-300);
 }
 
-.light .btn-secondary {
-  @apply bg-white text-slate-700 font-medium px-4 py-2 rounded-lg;
-  @apply border border-slate-300 hover:bg-slate-50 active:bg-slate-100;
-  @apply focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+.btn-ghost {
+  background: transparent;
+  color: var(--color-gray-600);
 }
 
-.light .btn-ghost {
-  @apply bg-transparent text-slate-600 font-medium px-4 py-2 rounded-lg;
-  @apply hover:bg-slate-100 active:bg-slate-200;
-  @apply focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+.btn-ghost:hover {
+  background: var(--color-gray-100);
 }
 
-/* ============================================
-   INPUTS - Professional styling
-   ============================================ */
-.light input,
-.light textarea,
-.light select {
-  @apply bg-white text-slate-900 border border-slate-300 rounded-lg;
-  @apply placeholder:text-slate-400;
-  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
-  box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.05);
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  color: var(--color-gray-900);
+  transition: all 0.2s;
 }
 
-.light input:focus,
-.light textarea:focus,
-.light select:focus {
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+.input::placeholder {
+  color: var(--color-gray-400);
 }
 
-/* ============================================
-   NAVIGATION - Sidebar styling
-   ============================================ */
-.light .nav-item {
-  @apply text-slate-600 hover:text-slate-900 hover:bg-slate-100;
+.input:focus {
+  outline: none;
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-.light .nav-item-active {
-  @apply bg-blue-50 text-blue-700;
-  border: 1px solid #dbeafe;
+/* Navigation */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-decoration: none;
 }
 
-/* ============================================
-   TABLES - Pro styling
-   ============================================ */
-.light table {
-  @apply w-full text-sm;
+.nav-item:hover {
+  color: var(--color-gray-900);
+  background: var(--color-gray-100);
 }
 
-.light thead {
-  @apply bg-slate-50 text-slate-700;
+.nav-item-active {
+  color: var(--color-blue-600);
+  background: var(--color-blue-50);
 }
 
-.light th {
-  @apply px-4 py-3 text-left font-semibold text-slate-700;
-  @apply border-b border-slate-200;
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 9999px;
 }
 
-.light td {
-  @apply px-4 py-3 text-slate-600;
-  @apply border-b border-slate-100;
+.badge-blue {
+  background: var(--color-blue-50);
+  color: var(--color-blue-700);
+  border: 1px solid var(--color-blue-100);
 }
 
-.light tr:hover td {
-  @apply bg-slate-50;
+.badge-green {
+  background: var(--color-emerald-50);
+  color: var(--color-emerald-700);
+  border: 1px solid var(--color-emerald-100);
 }
 
-/* ============================================
-   BADGES & TAGS
-   ============================================ */
-.light .badge {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+.badge-purple {
+  background: var(--color-purple-50);
+  color: var(--color-purple-700);
+  border: 1px solid var(--color-purple-100);
 }
 
-.light .badge-blue {
-  @apply bg-blue-50 text-blue-700 border border-blue-200;
+.badge-amber {
+  background: var(--color-amber-50);
+  color: var(--color-amber-700);
+  border: 1px solid var(--color-amber-100);
 }
 
-.light .badge-green {
-  @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
+.badge-red {
+  background: var(--color-red-50);
+  color: var(--color-red-700);
+  border: 1px solid var(--color-red-100);
 }
 
-.light .badge-purple {
-  @apply bg-purple-50 text-purple-700 border border-purple-200;
+/* Avatar */
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-gray-100);
+  color: var(--color-gray-600);
+  border: 1px solid var(--color-border-default);
 }
 
-.light .badge-amber {
-  @apply bg-amber-50 text-amber-700 border border-amber-200;
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 12px;
 }
 
-.light .badge-red {
-  @apply bg-red-50 text-red-700 border border-red-200;
+.avatar-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  font-size: 18px;
 }
 
-/* ============================================
-   SCROLLBAR - Pro styling
-   ============================================ */
-.light ::-webkit-scrollbar {
+/* Progress Bar */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--color-gray-200);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-blue-500), var(--color-blue-400));
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+
+/* Tables */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-gray-500);
+  background: var(--color-gray-50);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--color-gray-700);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.table tr:hover td {
+  background: var(--color-gray-50);
+}
+
+/* Dividers */
+.divider {
+  height: 1px;
+  background: var(--color-border-default);
+}
+
+.divider-vertical {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border-default);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.light ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
   border-radius: 3px;
 }
 
-.light ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
 }
 
-.light ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+/* Focus */
+*:focus-visible {
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: 2px;
 }
 
-/* Firefox */
-.light {
-  scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
+/* Selection */
+::selection {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--color-gray-900);
 }
 
-/* ============================================
-   FOCUS STATES - Accessibility
-   ============================================ */
-.light :focus-visible {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+/* Transitions */
+.transition-base {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ============================================
-   SELECTION - User preference
-   ============================================ */
-.light ::selection {
-  background-color: rgba(37, 99, 235, 0.2);
-  color: #1e293b;
+.transition-fast {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ============================================
-   DIVIDERS
-   ============================================ */
-.light .divider {
-  border-top: 1px solid #e2e8f0;
-}
-
-.light .divider-vertical {
-  border-left: 1px solid #e2e8f0;
-}
-
-/* ============================================
-   STATUS COLORS
-   ============================================ */
-.light .status-success { color: #059669; }
-.light .status-warning { color: #d97706; }
-.light .status-error { color: #dc2626; }
-.light .status-info { color: #2563eb; }
-
-/* ============================================
-   AVATARS - Light mode
-   ============================================ */
-.light .avatar {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-}
-
-.light .avatar-gradient {
-  background: linear-gradient(to bottom right, #3b82f6, #2563eb);
-  color: white;
-  border: none;
-}
-
-/* ============================================
-   PROGRESS BARS
-   ============================================ */
-.light .progress-track {
-  background-color: #f1f5f9;
-  border-radius: 9999px;
-}
-
-.light .progress-fill {
-  background-color: #2563eb;
-  border-radius: 9999px;
-}
-
-/* ============================================
-   ANIMATIONS - Subtle, professional
-   ============================================ */
-.light .animate-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.light .slide-in {
-  animation: slideUp 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ============================================
-   BACKDROP BLUR SUPPORT
-   ============================================ */
-@supports (backdrop-filter: blur(12px)) {
-  .light .backdrop-blur {
-    backdrop-filter: blur(12px);
-  }
-}
-
-.bar-origin { transform-origin: bottom; }
-
-/* ============================================
-   UTILITY CLASSES - Pro level
-   ============================================ */
-.light .shadow-card {
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-}
-
-.light .shadow-elevated {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-.light .shadow-modal {
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-}
-
-/* ============================================
-   TRANSITIONS - Smooth
-   ============================================ */
-.light .transition-theme {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+.transition-slow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

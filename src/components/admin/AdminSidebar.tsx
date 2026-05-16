@@ -41,10 +41,10 @@ function NavItem({
         active
           ? isDark
             ? 'bg-purple-600/90 text-white shadow-lg shadow-purple-900/40'
-            : 'bg-purple-600 text-white shadow-lg shadow-purple-200/50'
+            : 'bg-purple-600 text-white shadow-md shadow-purple-200/50'
           : isDark
             ? 'text-white/50 hover:text-white hover:bg-white/5'
-            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
       }`}
     >
       {active && (
@@ -86,16 +86,18 @@ function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => vo
     <div className={`flex flex-col h-full select-none ${isDark ? '' : 'bg-white'}`}>
       {/* Logo */}
       <div className={`flex items-center justify-between px-5 py-4 border-b ${
-        isDark ? 'border-white/5' : 'border-slate-200'
+        isDark ? 'border-white/5' : 'border-gray-200'
       }`}>
         <Link href="/admin" className="flex items-center gap-2.5">
-          <div className={`bg-gradient-to-br from-purple-500 to-purple-700 p-1.5 rounded-lg shadow-md ${
-            isDark ? 'shadow-purple-900/40' : ''
+          <div className={`p-1.5 rounded-lg ${
+            isDark
+              ? 'bg-gradient-to-br from-purple-500 to-purple-700 shadow-md shadow-purple-900/40'
+              : 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-md shadow-purple-500/20'
           }`}>
             <Shield className="h-4 w-4 text-white" />
           </div>
           <div>
-            <span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>FreelancerSchool</span>
+            <span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>FreelancerSchool</span>
             <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
               isDark ? 'bg-purple-900/60 text-purple-300' : 'bg-purple-100 text-purple-700'
             }`}>
@@ -109,7 +111,7 @@ function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => vo
             className={`p-1.5 rounded-lg transition-all ${
               isDark
                 ? 'text-white/40 hover:text-white hover:bg-white/10'
-                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
             }`}
             aria-label="Toggle theme"
           >
@@ -117,7 +119,7 @@ function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => vo
           </button>
           {onClose && (
             <button onClick={onClose} className={`lg:hidden ${
-              isDark ? 'text-white/30 hover:text-white' : 'text-slate-400 hover:text-slate-600'
+              isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-600'
             }`}>
               <X className="h-4 w-4" />
             </button>
@@ -128,18 +130,20 @@ function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => vo
       {/* Admin profil */}
       <div className={`mx-3 mt-4 rounded-2xl p-4 ${
         isDark
-          ? 'bg-[rgba(139,92,246,0.07)] border border-[rgba(139,92,246,0.15)]'
+          ? 'bg-purple-500/5 border border-purple-500/10'
           : 'bg-purple-50 border border-purple-100'
       }`}>
         <div className="flex items-center gap-3">
-          <div className={`bg-gradient-to-br from-purple-500 to-purple-700 h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0 ${
-            isDark ? 'shadow-lg shadow-purple-900/40' : 'shadow'
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white ${
+            isDark
+              ? 'bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg'
+              : 'bg-gradient-to-br from-purple-500 to-purple-600 shadow'
           }`}>
             {initials}
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-sm font-semibold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{fullName}</p>
-            <p className={`text-xs truncate ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{email}</p>
+            <p className={`text-sm font-semibold truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>{fullName}</p>
+            <p className={`text-xs truncate ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{email}</p>
           </div>
         </div>
       </div>
@@ -152,13 +156,13 @@ function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => vo
       </nav>
 
       {/* Chiqish */}
-      <div className={`p-3 border-t ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+      <div className={`p-3 border-t ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
         <button
           onClick={handleSignOut}
           className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
             isDark
               ? 'text-white/40 hover:text-red-400 hover:bg-red-500/10'
-              : 'text-slate-500 hover:text-red-600 hover:bg-red-50'
+              : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
           }`}
         >
           <LogOut className="h-4 w-4" />
@@ -187,7 +191,7 @@ export default function AdminSidebar(props: Props) {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}
       >
-        <Menu className={`h-4 w-4 ${isDark ? 'text-white' : 'text-slate-700'}`} />
+        <Menu className={`h-4 w-4 ${isDark ? 'text-white' : 'text-gray-700'}`} />
       </button>
 
       {/* Desktop sidebar */}
@@ -196,7 +200,7 @@ export default function AdminSidebar(props: Props) {
         style={{
           background: isDark ? 'rgba(7,10,20,0.7)' : '#ffffff',
           backdropFilter: 'blur(24px)',
-          borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
+          borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#e5e7eb'
         }}
       >
         <SidebarInner {...props} />
@@ -224,7 +228,7 @@ export default function AdminSidebar(props: Props) {
               style={{
                 background: isDark ? '#090d18' : '#ffffff',
                 backdropFilter: 'blur(24px)',
-                borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb'
               }}
             >
               <SidebarInner {...props} onClose={() => setOpen(false)} />
