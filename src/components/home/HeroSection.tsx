@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useTheme } from 'next-themes'
 import { ArrowRight, BadgeCheck, Users, Star, Zap, TrendingUp, Bell } from 'lucide-react'
 
 const BADGES = [
-  { icon: BadgeCheck, label: 'Sertifikat beriladi', color: 'text-emerald-400' },
-  { icon: Users,      label: "12,000+ o'quvchi",   color: 'text-blue-400' },
-  { icon: Star,       label: '4.9 reyting',         color: 'text-amber-400' },
+  { icon: BadgeCheck, label: 'Sertifikat beriladi', color: 'text-emerald-500' },
+  { icon: Users,      label: "12,000+ o'quvchi",   color: 'text-blue-500' },
+  { icon: Star,       label: '4.9 reyting',         color: 'text-amber-500' },
 ]
 
 const COURSES_MOCK = [
@@ -17,40 +18,43 @@ const COURSES_MOCK = [
 ]
 
 function DashboardMockup() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   return (
     <div className="relative w-full max-w-lg mx-auto">
       {/* Glow */}
-      <div className="absolute inset-0 bg-blue-600/20 blur-3xl rounded-full scale-110" />
+      <div className={`absolute inset-0 ${isDark ? 'bg-blue-600/20' : 'bg-blue-500/10'} blur-3xl rounded-full scale-110`} />
 
       {/* Main card */}
       <motion.div
         initial={{ opacity: 0, y: 30, rotateY: -8 }}
         animate={{ opacity: 1, y: 0, rotateY: 0 }}
         transition={{ duration: 0.9, ease: 'easeOut', delay: 0.3 }}
-        className="relative glass rounded-3xl p-6 shadow-2xl shadow-black/40 animate-float"
+        className={`relative ${isDark ? 'glass' : 'bg-white'} rounded-3xl p-6 shadow-2xl ${isDark ? 'shadow-black/40' : 'shadow-slate-200/50'} animate-float`}
         style={{ perspective: '1000px' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <p className="text-white/50 text-xs mb-0.5">Xush kelibsiz 👋</p>
-            <p className="text-white font-semibold text-sm">Dilshod Nazarov</p>
+            <p className={`text-xs mb-0.5 ${isDark ? 'text-white/50' : 'text-slate-500'}`}>Xush kelibsiz 👋</p>
+            <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>Dilshod Nazarov</p>
           </div>
-          <div className="bg-blue-500/20 border border-blue-400/30 rounded-xl px-3 py-1.5">
-            <p className="text-blue-300 text-xs font-semibold">Top Rated ⭐</p>
+          <div className={`${isDark ? 'bg-blue-500/20 border-blue-400/30' : 'bg-blue-50 border-blue-200'} rounded-xl px-3 py-1.5`}>
+            <p className={`text-xs font-semibold ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>Top Rated ⭐</p>
           </div>
         </div>
 
         {/* Progress bars */}
-        <p className="text-white/40 text-xs mb-3 font-medium uppercase tracking-wider">Kurslar jarayoni</p>
+        <p className={`text-xs mb-3 font-medium uppercase tracking-wider ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Kurslar jarayoni</p>
         <div className="space-y-3 mb-5">
           {COURSES_MOCK.map(({ name, pct, color }, i) => (
             <div key={name}>
               <div className="flex justify-between mb-1">
-                <span className="text-white/70 text-xs">{name}</span>
-                <span className="text-white/50 text-xs">{pct}%</span>
+                <span className={`text-xs ${isDark ? 'text-white/70' : 'text-slate-700'}`}>{name}</span>
+                <span className={`text-xs ${isDark ? 'text-white/50' : 'text-slate-500'}`}>{pct}%</span>
               </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-slate-100'}`}>
                 <motion.div
                   className={`h-full bg-gradient-to-r ${color} rounded-full`}
                   initial={{ width: 0 }}
@@ -64,13 +68,13 @@ function DashboardMockup() {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="glass-dark rounded-2xl p-3 text-center">
-            <p className="text-amber-400 font-bold text-lg">$2,400</p>
-            <p className="text-white/40 text-xs mt-0.5">Bu oyda</p>
+          <div className={`${isDark ? 'glass-dark' : 'bg-slate-50 border border-slate-100'} rounded-2xl p-3 text-center`}>
+            <p className="text-amber-500 font-bold text-lg">$2,400</p>
+            <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Bu oyda</p>
           </div>
-          <div className="glass-dark rounded-2xl p-3 text-center">
-            <p className="text-emerald-400 font-bold text-lg">47 ta</p>
-            <p className="text-white/40 text-xs mt-0.5">Buyurtmalar</p>
+          <div className={`${isDark ? 'glass-dark' : 'bg-slate-50 border border-slate-100'} rounded-2xl p-3 text-center`}>
+            <p className="text-emerald-500 font-bold text-lg">47 ta</p>
+            <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>Buyurtmalar</p>
           </div>
         </div>
       </motion.div>
@@ -80,15 +84,15 @@ function DashboardMockup() {
         initial={{ opacity: 0, x: 30, scale: 0.8 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         transition={{ duration: 0.7, delay: 0.9 }}
-        className="absolute -top-5 -right-4 glass rounded-2xl px-4 py-3 shadow-xl shadow-black/30 animate-float2"
+        className={`absolute -top-5 -right-4 ${isDark ? 'glass' : 'bg-white'} rounded-2xl px-4 py-3 shadow-xl ${isDark ? 'shadow-black/30' : 'shadow-slate-200/50'} animate-float2`}
       >
         <div className="flex items-center gap-2.5">
           <div className="bg-emerald-500/20 rounded-full p-1.5">
-            <Bell className="h-3.5 w-3.5 text-emerald-400" />
+            <Bell className="h-3.5 w-3.5 text-emerald-500" />
           </div>
           <div>
-            <p className="text-white text-xs font-semibold">Yangi buyurtma!</p>
-            <p className="text-white/50 text-xs">$150 · Logo dizayn</p>
+            <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Yangi buyurtma!</p>
+            <p className={`text-xs ${isDark ? 'text-white/50' : 'text-slate-500'}`}>$150 · Logo dizayn</p>
           </div>
         </div>
       </motion.div>
@@ -98,15 +102,15 @@ function DashboardMockup() {
         initial={{ opacity: 0, x: -30, scale: 0.8 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
         transition={{ duration: 0.7, delay: 1.1 }}
-        className="absolute -bottom-5 -left-4 glass rounded-2xl px-4 py-3 shadow-xl shadow-black/30 animate-float-delay"
+        className={`absolute -bottom-5 -left-4 ${isDark ? 'glass' : 'bg-white'} rounded-2xl px-4 py-3 shadow-xl ${isDark ? 'shadow-black/30' : 'shadow-slate-200/50'} animate-float-delay`}
       >
         <div className="flex items-center gap-2.5">
           <div className="bg-blue-500/20 rounded-full p-1.5">
-            <TrendingUp className="h-3.5 w-3.5 text-blue-400" />
+            <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
           </div>
           <div>
-            <p className="text-white text-xs font-semibold">+38% daromad</p>
-            <p className="text-white/50 text-xs">O&apos;tgan oydan</p>
+            <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>+38% daromad</p>
+            <p className={`text-xs ${isDark ? 'text-white/50' : 'text-slate-500'}`}>O&apos;tgan oydan</p>
           </div>
         </div>
       </motion.div>
@@ -115,25 +119,40 @@ function DashboardMockup() {
 }
 
 export default function HeroSection() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center pt-20 pb-16 overflow-hidden"
+      className={`relative min-h-screen flex items-center pt-20 pb-16 overflow-hidden ${
+        isDark ? '' : 'bg-slate-50'
+      }`}
     >
       {/* BG orbs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/5 w-[500px] h-[500px] bg-blue-700/15 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/5 w-96 h-96 bg-purple-700/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-2/3 left-1/2 w-64 h-64 bg-emerald-700/8 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
-        {/* Grid */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
+        {isDark ? (
+          <>
+            <div className="absolute top-1/4 left-1/5 w-[500px] h-[500px] bg-blue-700/15 rounded-full blur-3xl animate-pulse-slow" />
+            <div className="absolute bottom-1/4 right-1/5 w-96 h-96 bg-purple-700/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-2/3 left-1/2 w-64 h-64 bg-emerald-700/8 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
+            {/* Grid - dark mode */}
+            <div
+              className="absolute inset-0 opacity-[0.025]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)',
+                backgroundSize: '60px 60px',
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <div className="absolute top-1/4 left-1/5 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-3xl animate-pulse-slow" />
+            <div className="absolute bottom-1/4 right-1/5 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-2/3 left-1/2 w-64 h-64 bg-emerald-600/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
+          </>
+        )}
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
@@ -150,10 +169,10 @@ export default function HeroSection() {
               {BADGES.map(({ icon: Icon, label, color }) => (
                 <div
                   key={label}
-                  className="flex items-center gap-1.5 glass rounded-full px-3 py-1.5"
+                  className={`flex items-center gap-1.5 ${isDark ? 'glass' : 'bg-white border border-slate-200'} rounded-full px-3 py-1.5`}
                 >
                   <Icon className={`h-3.5 w-3.5 ${color}`} />
-                  <span className="text-white/80 text-xs font-medium">{label}</span>
+                  <span className={`text-xs font-medium ${isDark ? 'text-white/80' : 'text-slate-700'}`}>{label}</span>
                 </div>
               ))}
             </motion.div>
@@ -165,11 +184,11 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-5"
             >
-              <span className="text-white">O&apos;zbekistonda</span>{' '}
+              <span className={isDark ? 'text-white' : 'text-slate-900'}>O&apos;zbekistonda</span>{' '}
               <span className="gradient-text">Freelancer</span>{' '}
-              <span className="text-white">bo&apos;ling va</span>{' '}
+              <span className={isDark ? 'text-white' : 'text-slate-900'}>bo&apos;ling va</span>{' '}
               <br className="hidden sm:block" />
-              <span className="text-white">dunyoda pul </span>
+              <span className={isDark ? 'text-white' : 'text-slate-900'}>dunyoda pul </span>
               <span className="gradient-text">toping</span>
             </motion.h1>
 
@@ -178,10 +197,12 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg text-white/60 leading-relaxed mb-8 max-w-lg"
+              className={`text-lg leading-relaxed mb-8 max-w-lg ${
+                isDark ? 'text-white/60' : 'text-slate-600'
+              }`}
             >
               Upwork, Fiverr platformalarida muvaffaqiyatga erishish uchun{' '}
-              <span className="text-white font-semibold">BEPUL ko&apos;nikmalar</span>.
+              <span className={isDark ? 'text-white font-semibold' : 'text-slate-900 font-semibold'}>BEPUL ko&apos;nikmalar</span>.
               Noldan professional darajagacha — hamma narsa shu yerda.
             </motion.p>
 
@@ -199,7 +220,11 @@ export default function HeroSection() {
                 </button>
               </Link>
               <Link href="/courses">
-                <button className="flex items-center justify-center gap-2 glass hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-200 text-base w-full sm:w-auto">
+                <button className={`flex items-center justify-center gap-2 font-semibold px-8 py-4 rounded-2xl transition-all duration-200 text-base w-full sm:w-auto ${
+                  isDark
+                    ? 'glass hover:bg-white/10 text-white'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                }`}>
                   Kurslarni ko&apos;rish
                   <ArrowRight className="h-4 w-4" />
                 </button>
@@ -214,7 +239,7 @@ export default function HeroSection() {
               className="flex flex-wrap gap-x-6 gap-y-2 mt-8"
             >
               {["Ro'yxatdan o'tish bepul", "Kredit karta kerak emas", "Sertifikat beriladi"].map(t => (
-                <span key={t} className="flex items-center gap-1.5 text-sm text-white/40">
+                <span key={t} className={`flex items-center gap-1.5 text-sm ${isDark ? 'text-white/40' : 'text-slate-500'}`}>
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
                   {t}
                 </span>
@@ -230,7 +255,9 @@ export default function HeroSection() {
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0B0F19] to-transparent" />
+      <div className={`absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t ${
+        isDark ? 'from-[#0B0F19] to-transparent' : 'from-slate-50 to-transparent'
+      }`} />
     </section>
   )
 }
