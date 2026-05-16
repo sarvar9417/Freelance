@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTheme } from 'next-themes'
 import { Star } from 'lucide-react'
 
 const REVIEWS = [
@@ -59,110 +60,93 @@ const REVIEWS = [
     initials: 'IH',
     color: 'bg-amber-600',
   },
-  {
-    name: "Zulfiya Yo'ldosheva",
-    role: 'Virtual Assistent',
-    city: "Farg'ona",
-    income: '$920/oy',
-    platform: 'Upwork',
-    stars: 5,
-    text: "Freelancerlik nima ekanini bilmay boshladim. Hozir virtual assistent sifatida AQSHlik mijozlar bilan ishlayapman. Shu platforma tufayli.",
-    initials: 'ZY',
-    color: 'bg-cyan-600',
-  },
 ]
 
-function Stars({ n }: { n: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: n }).map((_, i) => (
-        <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-      ))}
-    </div>
-  )
-}
-
 export default function Testimonials() {
-  return (
-    <section id="testimonials" className="relative py-20">
-      {/* BG */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-950/10 to-transparent pointer-events-none" />
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+  return (
+    <section className={`relative py-20 ${isDark ? '' : 'bg-white'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14"
+          className="text-center mb-12"
         >
-          <p className="text-white/40 text-sm font-medium uppercase tracking-widest mb-2">Fikrlar</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-            12,000+ o&apos;quvchi{' '}
-            <span className="gradient-text">ishonadi</span>
-          </h2>
-          <p className="text-white/50 max-w-xl mx-auto">
-            Haqiqiy natijalar, haqiqiy odamlar. Ular sizning oldingizdagi yo&apos;ldan o&apos;tishgan.
+          <p className={`text-sm font-medium uppercase tracking-widest mb-2 ${
+            isDark ? 'text-white/40' : 'text-gray-500'
+          }`}>
+            Fikrlar
           </p>
+          <h2 className={`text-3xl sm:text-4xl font-bold ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
+            O&apos;quvchilarimiz{' '}
+            <span className="gradient-text">nima deydi?</span>
+          </h2>
         </motion.div>
 
-        {/* Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {REVIEWS.map(({ name, role, city, income, platform, stars, text, initials, color }, i) => (
             <motion.div
               key={name}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              className="glass rounded-3xl p-6 flex flex-col gap-4 group"
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className={`rounded-3xl p-6 ${
+                isDark
+                  ? 'glass hover:bg-white/5'
+                  : 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
+              }`}
             >
-              {/* Stars */}
-              <Stars n={stars} />
-
-              {/* Text */}
-              <p className="text-white/65 text-sm leading-relaxed flex-1">
-                &ldquo;{text}&rdquo;
-              </p>
-
-              {/* Divider */}
-              <div className="h-px bg-white/5" />
-
-              {/* Author */}
-              <div className="flex items-center gap-3">
-                <div className={`${color} h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0`}>
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`${color} h-10 w-10 rounded-xl flex items-center justify-center text-white font-bold text-sm`}>
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold text-sm truncate">{name}</p>
-                  <p className="text-white/40 text-xs">{role} · {city}</p>
+                  <p className={`font-semibold text-sm truncate ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>{name}</p>
+                  <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+                    {role} · {city}
+                  </p>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-emerald-400 text-sm font-bold">{income}</p>
-                  <p className="text-white/30 text-xs">{platform}</p>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: stars }).map((_, i) => (
+                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Text */}
+              <p className={`text-sm leading-relaxed mb-4 ${
+                isDark ? 'text-white/70' : 'text-gray-600'
+              }`}>
+                {text}
+              </p>
+
+              {/* Footer */}
+              <div className={`flex items-center justify-between pt-3 border-t ${
+                isDark ? 'border-white/5' : 'border-gray-100'
+              }`}>
+                <div className={`text-xs font-semibold ${
+                  isDark ? 'text-emerald-400' : 'text-emerald-600'
+                }`}>
+                  {income}
+                </div>
+                <div className={`text-xs px-2 py-0.5 rounded-full ${
+                  isDark ? 'bg-white/5 text-white/60' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {platform}
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
-
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mt-14"
-        >
-          <p className="text-white/40 text-sm mb-5">
-            Siz ham ularning qatoriga qo&apos;shiling
-          </p>
-          <a href="/register">
-            <button className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold px-10 py-4 rounded-2xl transition-all duration-200 shadow-xl shadow-blue-900/40 hover:scale-105">
-              Bepul ro&apos;yxatdan o&apos;tish →
-            </button>
-          </a>
-        </motion.div>
       </div>
     </section>
   )

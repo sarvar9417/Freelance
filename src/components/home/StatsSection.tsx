@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { useTheme } from 'next-themes'
 import { Users, BookOpen, Briefcase, DollarSign } from 'lucide-react'
 
 interface Stat {
@@ -12,7 +13,8 @@ interface Stat {
   label: string
   sub: string
   color: string
-  glow: string
+  glowLight: string
+  glowDark: string
 }
 
 const STATS: Stat[] = [
@@ -23,8 +25,9 @@ const STATS: Stat[] = [
     suffix: '+',
     label: "Faol o'quvchilar",
     sub: "247 ta o'quvchi hozir o'qiyapti",
-    color: 'text-blue-400',
-    glow: 'bg-blue-500/10',
+    color: 'text-blue-600',
+    glowLight: 'bg-blue-50',
+    glowDark: 'bg-blue-500/10',
   },
   {
     icon: BookOpen,
@@ -33,8 +36,9 @@ const STATS: Stat[] = [
     suffix: '+',
     label: 'Mutaxassis kurslar',
     sub: "4 ta yangi kurs qo'shildi",
-    color: 'text-purple-400',
-    glow: 'bg-purple-500/10',
+    color: 'text-purple-600',
+    glowLight: 'bg-purple-50',
+    glowDark: 'bg-purple-500/10',
   },
   {
     icon: Briefcase,
@@ -43,8 +47,9 @@ const STATS: Stat[] = [
     suffix: '%',
     label: 'Ish topish darajasi',
     sub: '6 oy ichida birinchi buyurtma',
-    color: 'text-emerald-400',
-    glow: 'bg-emerald-500/10',
+    color: 'text-emerald-600',
+    glowLight: 'bg-emerald-50',
+    glowDark: 'bg-emerald-500/10',
   },
   {
     icon: DollarSign,
@@ -53,8 +58,9 @@ const STATS: Stat[] = [
     suffix: 'M+',
     label: "O'quvchilar daromadi",
     sub: "O'tgan yildan 3x ko'paydi",
-    color: 'text-amber-400',
-    glow: 'bg-amber-500/10',
+    color: 'text-amber-600',
+    glowLight: 'bg-amber-50',
+    glowDark: 'bg-amber-500/10',
   },
 ]
 
@@ -90,8 +96,11 @@ function Counter({ value, prefix, suffix }: { value: number; prefix: string; suf
 }
 
 export default function StatsSection() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   return (
-    <section className="relative py-20">
+    <section className={`relative py-20 ${isDark ? '' : 'bg-gray-50/30'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -100,17 +109,21 @@ export default function StatsSection() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <p className="text-white/40 text-sm font-medium uppercase tracking-widest mb-2">
+          <p className={`text-sm font-medium uppercase tracking-widest mb-2 ${
+            isDark ? 'text-white/40' : 'text-gray-500'
+          }`}>
             Raqamlarda
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">
+          <h2 className={`text-3xl sm:text-4xl font-bold ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
             Nima uchun bizni{' '}
             <span className="gradient-text">tanlashadi?</span>
           </h2>
         </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {STATS.map(({ icon: Icon, prefix, value, suffix, label, sub, color, glow }, i) => (
+          {STATS.map(({ icon: Icon, prefix, value, suffix, label, sub, color, glowLight, glowDark }, i) => (
             <motion.div
               key={label}
               initial={{ opacity: 0, y: 30 }}
@@ -118,9 +131,15 @@ export default function StatsSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              className="glass rounded-3xl p-6 group cursor-default"
+              className={`rounded-3xl p-6 group cursor-default ${
+                isDark
+                  ? 'glass hover:bg-white/5'
+                  : 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
+              }`}
             >
-              <div className={`inline-flex p-3 rounded-2xl ${glow} mb-4`}>
+              <div className={`inline-flex p-3 rounded-2xl mb-4 ${
+                isDark ? glowDark : glowLight
+              }`}>
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
 
@@ -128,11 +147,15 @@ export default function StatsSection() {
                 <Counter value={value} prefix={prefix} suffix={suffix} />
               </div>
 
-              <p className="text-white font-semibold text-sm mb-2">{label}</p>
+              <p className={`font-semibold text-sm mb-2 ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}>{label}</p>
 
-              <div className="flex items-center gap-1.5 pt-3 border-t border-white/5">
+              <div className={`flex items-center gap-1.5 pt-3 border-t ${
+                isDark ? 'border-white/5' : 'border-gray-100'
+              }`}>
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse inline-block flex-shrink-0" />
-                <p className="text-white/40 text-xs">{sub}</p>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{sub}</p>
               </div>
             </motion.div>
           ))}
