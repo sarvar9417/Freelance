@@ -10,12 +10,20 @@ import {
 import type { ForumPost } from '@/lib/supabase/realtime'
 import { formatTimeAgo, togglePostLike } from '@/lib/supabase/realtime'
 
-const CATEGORY_STYLES: Record<string, { text: string; bg: string }> = {
+const CATEGORY_STYLES_DARK: Record<string, { text: string; bg: string }> = {
   'Savol':    { text: 'text-blue-300',   bg: 'bg-blue-500/12 border border-blue-500/25'    },
   'Muhokama': { text: 'text-purple-300', bg: 'bg-purple-500/12 border border-purple-500/25' },
   'Yangilik': { text: 'text-emerald-300',bg: 'bg-emerald-500/12 border border-emerald-500/25'},
   'Tavsiya':  { text: 'text-amber-300',  bg: 'bg-amber-500/12 border border-amber-500/25'   },
   'Yordam':   { text: 'text-rose-300',   bg: 'bg-rose-500/12 border border-rose-500/25'     },
+}
+
+const CATEGORY_STYLES_LIGHT: Record<string, { text: string; bg: string }> = {
+  'Savol':    { text: 'text-blue-600',   bg: 'bg-blue-50 border border-blue-200'    },
+  'Muhokama': { text: 'text-purple-600', bg: 'bg-purple-50 border border-purple-200' },
+  'Yangilik': { text: 'text-emerald-600',bg: 'bg-emerald-50 border border-emerald-200'},
+  'Tavsiya':  { text: 'text-amber-600',  bg: 'bg-amber-50 border border-amber-200'   },
+  'Yordam':   { text: 'text-rose-600',   bg: 'bg-rose-50 border border-rose-200'     },
 }
 
 const AVATAR_COLORS = [
@@ -46,7 +54,9 @@ export default function PostCard({
 
   const colorIdx = post.author_name.charCodeAt(0) % AVATAR_COLORS.length
   const initials = post.author_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-  const catStyle = CATEGORY_STYLES[post.category] ?? CATEGORY_STYLES['Savol']
+  const catStyle = isDark
+    ? (CATEGORY_STYLES_DARK[post.category] ?? CATEGORY_STYLES_DARK['Savol'])
+    : (CATEGORY_STYLES_LIGHT[post.category] ?? CATEGORY_STYLES_LIGHT['Savol'])
 
   const handleVote = async (type: 'like' | 'dislike') => {
     if (!currentUserId || voting) return
