@@ -2,6 +2,7 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { useTheme } from 'next-themes'
 import { Zap, TrendingUp } from 'lucide-react'
 
 const WEEK_DATA = [
@@ -21,50 +22,54 @@ const TODAY_IDX = 5 // Shanba
 export default function XPChart() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
 
   return (
-    <section className="relative py-20">
+    <section className={`relative py-20 ${isDark ? '' : 'bg-white'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="glass rounded-3xl p-8"
+            className={`rounded-3xl p-8 ${
+              isDark ? 'glass' : 'bg-white border border-gray-200 shadow-lg'
+            }`}
           >
             {/* Header */}
             <div className="flex items-start justify-between mb-8">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Zap className="h-4 w-4 text-amber-400" />
-                  <p className="text-white/50 text-sm font-medium">Haftalik faollik</p>
+                  <Zap className={`h-4 w-4 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
+                  <p className={`text-sm font-medium ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Haftalik faollik</p>
                 </div>
-                <h3 className="text-white text-xl font-bold">Sizning XP tarixi</h3>
+                <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Sizning XP tarixi</h3>
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-1.5 justify-end mb-1">
-                  <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-400 text-sm font-semibold">+24%</span>
+                  <TrendingUp className={`h-3.5 w-3.5 ${isDark ? 'text-emerald-400' : 'text-emerald-500'}`} />
+                  <span className={`text-sm font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>+24%</span>
                 </div>
-                <p className="text-white/50 text-xs">o&apos;tgan haftadan</p>
+                <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>o&apos;tgan haftadan</p>
               </div>
             </div>
 
             {/* Total XP */}
             <div className="flex items-center gap-6 mb-8">
               <div>
-                <p className="text-3xl font-extrabold text-white">{TOTAL_XP.toLocaleString()}</p>
-                <p className="text-white/40 text-xs mt-0.5">Jami XP bu hafta</p>
+                <p className={`text-3xl font-extrabold ${isDark ? 'text-white' : 'text-gray-900'}`}>{TOTAL_XP.toLocaleString()}</p>
+                <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Jami XP bu hafta</p>
               </div>
-              <div className="h-10 w-px bg-white/10" />
+              <div className={`h-10 w-px ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
               <div>
-                <p className="text-xl font-bold text-amber-400">🏆 Kumush</p>
-                <p className="text-white/40 text-xs mt-0.5">Joriy daraja</p>
+                <p className={`text-xl font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>🏆 Kumush</p>
+                <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Joriy daraja</p>
               </div>
-              <div className="h-10 w-px bg-white/10" />
+              <div className={`h-10 w-px ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
               <div>
-                <p className="text-xl font-bold text-blue-400">🔥 14</p>
-                <p className="text-white/40 text-xs mt-0.5">Kun streak</p>
+                <p className={`text-xl font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>🔥 14</p>
+                <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Kun streak</p>
               </div>
             </div>
 
@@ -81,7 +86,11 @@ export default function XPChart() {
                       initial={{ opacity: 0 }}
                       animate={inView ? { opacity: 1 } : {}}
                       transition={{ delay: 0.3 + i * 0.1 }}
-                      className={`text-xs font-semibold ${isToday ? 'text-amber-400' : 'text-white/30'}`}
+                      className={`text-xs font-semibold ${
+                        isToday
+                          ? isDark ? 'text-amber-400' : 'text-amber-600'
+                          : isDark ? 'text-white/30' : 'text-gray-400'
+                      }`}
                     >
                       {label}
                     </motion.span>
@@ -90,14 +99,18 @@ export default function XPChart() {
                     <div className="w-full flex-1 flex items-end">
                       <div className="w-full relative" style={{ height: '100%' }}>
                         {/* Background track */}
-                        <div className="absolute inset-0 bg-white/5 rounded-xl" />
+                        <div className={`absolute inset-0 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-100'}`} />
 
                         {/* Filled bar */}
                         <motion.div
                           className={`absolute bottom-0 left-0 right-0 rounded-xl ${
                             isToday
-                              ? 'bg-gradient-to-t from-amber-500 to-amber-400 shadow-lg shadow-amber-900/40'
-                              : 'bg-gradient-to-t from-blue-600 to-blue-400'
+                              ? isDark
+                                ? 'bg-gradient-to-t from-amber-500 to-amber-400 shadow-lg shadow-amber-900/40'
+                                : 'bg-gradient-to-t from-amber-500 to-amber-400 shadow-md shadow-amber-200/50'
+                              : isDark
+                                ? 'bg-gradient-to-t from-blue-600 to-blue-400'
+                                : 'bg-gradient-to-t from-blue-500 to-blue-400'
                           }`}
                           initial={{ height: '0%' }}
                           animate={inView ? { height: `${pct}%` } : { height: '0%' }}
@@ -107,7 +120,11 @@ export default function XPChart() {
                     </div>
 
                     {/* Day label */}
-                    <span className={`text-xs font-medium ${isToday ? 'text-white' : 'text-white/40'}`}>
+                    <span className={`text-xs font-medium ${
+                      isToday
+                        ? isDark ? 'text-white' : 'text-gray-900'
+                        : isDark ? 'text-white/40' : 'text-gray-500'
+                    }`}>
                       {day}
                     </span>
                   </div>
@@ -116,17 +133,19 @@ export default function XPChart() {
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-5 mt-6 pt-5 border-t border-white/5">
+            <div className={`flex items-center gap-5 mt-6 pt-5 ${
+              isDark ? 'border-white/5' : 'border-gray-100'
+            }`}>
               <div className="flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-blue-400" />
-                <span className="text-white/40 text-xs">Oddiy kun</span>
+                <div className={`h-2.5 w-2.5 rounded-full ${isDark ? 'bg-blue-400' : 'bg-blue-500'}`} />
+                <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Oddiy kun</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                <span className="text-white/40 text-xs">Bugun</span>
+                <div className={`h-2.5 w-2.5 rounded-full ${isDark ? 'bg-amber-400' : 'bg-amber-500'}`} />
+                <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Bugun</span>
               </div>
               <div className="ml-auto">
-                <span className="text-white/30 text-xs">1 XP = 1 daqiqa o&apos;qish</span>
+                <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>1 XP = 1 daqiqa o&apos;qish</span>
               </div>
             </div>
           </motion.div>
