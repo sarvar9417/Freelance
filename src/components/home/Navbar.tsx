@@ -36,18 +36,24 @@ export default function Navbar() {
         scrolled
           ? isDark
             ? 'glass-dark shadow-2xl shadow-black/30'
-            : 'bg-white/80 shadow-lg border-b border-slate-200'
+            : 'bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm'
           : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-lg shadow-lg shadow-blue-900/40 group-hover:scale-105 transition-transform">
+          <div className={`p-1.5 rounded-lg transition-transform group-hover:scale-105 ${
+            isDark
+              ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-900/40'
+              : 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-md shadow-blue-200/50'
+          }`}>
             <GraduationCap className="h-5 w-5 text-white" />
           </div>
-          <span className={`font-bold text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-            Freelancer<span className="text-blue-500">School</span>
+          <span className={`font-bold text-lg tracking-tight ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}>
+            Freelancer<span className="text-blue-600">School</span>
           </span>
         </Link>
 
@@ -75,9 +81,10 @@ export default function Navbar() {
             className={`p-2 rounded-lg transition-all ${
               isDark
                 ? 'text-white/70 hover:text-white hover:bg-white/10'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
             }`}
             aria-label="Toggle theme"
+            title={isDark ? "Light mode" : "Dark mode"}
           >
             {isDark ? (
               <Sun className="h-5 w-5" />
@@ -95,7 +102,7 @@ export default function Navbar() {
             </button>
           </Link>
           <Link href="/register">
-            <button className="flex items-center gap-1.5 text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-5 py-2 rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/40 hover:shadow-blue-800/50 hover:scale-105">
+            <button className="flex items-center gap-1.5 text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-5 py-2 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.02]">
               Ro'yxatdan o'tish
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
@@ -105,10 +112,10 @@ export default function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setOpen(!open)}
-          className={`md:hidden p-2 ${
+          className={`md:hidden p-2 rounded-lg ${
             isDark
               ? 'text-white/70 hover:text-white'
-              : 'text-slate-600 hover:text-slate-900'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
