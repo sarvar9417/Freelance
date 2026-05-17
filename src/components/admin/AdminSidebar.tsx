@@ -9,7 +9,7 @@ import {
   Sparkles, Settings, LogOut, Shield, Menu, X, ChevronRight, Sun, Moon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const NAV = [
   { href: '/admin',            label: 'Dashboard',       icon: LayoutDashboard, exact: true },
@@ -65,8 +65,7 @@ function NavItem({
 
 function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => void }) {
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark, setTheme } = useMountedTheme()
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -175,8 +174,7 @@ function SidebarInner({ fullName, email, onClose }: Props & { onClose?: () => vo
 
 export default function AdminSidebar(props: Props) {
   const [open, setOpen] = useState(false)
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <>
