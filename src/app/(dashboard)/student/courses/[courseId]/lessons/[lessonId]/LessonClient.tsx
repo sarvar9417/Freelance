@@ -9,6 +9,7 @@ import {
   CheckCircle2, Upload, Loader2, Star, RotateCcw, Clock, X, Zap,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 interface Lesson {
   id: string; title: string; order_num: number; video_url: string | null; content: string | null
@@ -41,19 +42,19 @@ function getEmbedUrl(url: string): string | null {
 }
 
 export default function LessonClient({
-  lesson, task, submission, userId, courseId,
+  lesson, task, submission, courseId,
   prevLesson, nextLesson, totalLessons, currentIndex,
 }: {
   lesson: Lesson
   task: Task | null
   submission: Submission | null
-  userId: string
   courseId: string
   prevLesson: { id: string; title: string } | null
   nextLesson: { id: string; title: string } | null
   totalLessons: number
   currentIndex: number
 }) {
+  const { isDark } = useMountedTheme()
   const router = useRouter()
   const [tab, setTab] = useState<Tab>(lesson.video_url ? 'video' : lesson.content ? 'content' : 'task')
   const [isPending, startTransition] = useTransition()
@@ -62,7 +63,6 @@ export default function LessonClient({
   const [success, setSuccess] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Darsni tugatish
   const handleComplete = () => {
     startTransition(async () => {
       try {
@@ -74,7 +74,6 @@ export default function LessonClient({
         const data = await res.json()
 
         if (res.ok) {
-          // XP toast
           toast.success(`+${data.xpGained} XP qo'shildi! ⚡`, {
             description: data.courseCompleted
               ? 'Kurs 100% tugatildi! +500 bonus XP 🏆'
@@ -111,13 +110,11 @@ export default function LessonClient({
     })
   }
 
-  // Topshiriq topshirish
   const handleSubmit = () => {
     if (files.length === 0) { setError('Fayl yuklang'); return }
     setError('')
     startTransition(async () => {
       try {
-        // 1. Fayllarni server API orqali yuklash
         const formData = new FormData()
         formData.append('taskId', task!.id)
         files.forEach(f => formData.append('files', f))
@@ -127,7 +124,6 @@ export default function LessonClient({
         if (!uploadRes.ok) { setError(uploadData.error ?? 'Fayl yuklashda xatolik'); return }
         const fileUrls: string[] = uploadData.urls
 
-        // 2. Topshirish
         const res = await fetch('/api/submissions/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -135,10 +131,7 @@ export default function LessonClient({
         })
         const data = await res.json()
 
-        if (!res.ok) {
-          setError(data.error ?? 'Xatolik yuz berdi')
-          return
-        }
+        if (!res.ok) { setError(data.error ?? 'Xatolik yuz berdi'); return }
 
         setSuccess('Topshiriq muvaffaqiyatli yuborildi!')
         setFiles([])
@@ -149,15 +142,6 @@ export default function LessonClient({
           style: { ...TOAST_STYLE, border: '1px solid rgba(245,158,11,0.3)' },
         })
 
-        if (data.levelUp) {
-          setTimeout(() => {
-            toast.success(`Level ${data.newLevel} ga ko'tarildingiz! 🚀`, {
-              duration: 5000,
-              style: { ...TOAST_STYLE, border: '1px solid rgba(139,92,246,0.4)' },
-            })
-          }, 1000)
-        }
-
         router.refresh()
       } catch {
         setError('Server xatosi. Qayta urinib ko\'ring.')
@@ -167,9 +151,9 @@ export default function LessonClient({
 
   const embedUrl = lesson.video_url ? getEmbedUrl(lesson.video_url) : null
   const STATUS_MAP = {
-    pending:  { label: 'Tekshirilmoqda', color: 'text-amber-400',   bg: 'bg-amber-500/10 border-amber-500/20',   icon: Clock },
-    graded:   { label: 'Baholandi',       color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
-    revision: { label: 'Qayta topshiring', color: 'text-red-400',   bg: 'bg-red-500/10 border-red-500/20',       icon: RotateCcw },
+    pending:  { label: 'Tekshirilmoqda', color: isDark ? 'text-amber-400' : 'text-amber-600',   bg: isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200', icon: Clock },
+    graded:   { label: 'Baholandi',       color: isDark ? 'text-emerald-400' : 'text-emerald-600', bg: isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-200', icon: CheckCircle2 },
+    revision: { label: 'Qayta topshiring', color: isDark ? 'text-red-400' : 'text-red-600',   bg: isDark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-200',       icon: RotateCcw },
   }
 
   const tabs: { key: Tab; label: string; icon: React.ElementType; show: boolean }[] = [
@@ -180,19 +164,17 @@ export default function LessonClient({
 
   return (
     <div className="space-y-4">
-      {/* Dars sarlavhasi */}
-      <div className="rounded-2xl p-5"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className={`rounded-2xl p-5 ${isDark ? '' : 'bg-white border border-gray-200'}`}
+        style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : {}}>
         <div className="flex items-center gap-3 mb-1">
-          <div className="h-7 w-7 rounded-lg bg-blue-500/15 border border-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">
+          <div className={`h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold ${isDark ? 'bg-blue-500/15 border border-blue-500/20 text-blue-400' : 'bg-blue-100 border border-blue-200 text-blue-600'}`}>
             {lesson.order_num}
           </div>
-          <h1 className="text-white text-lg font-bold">{lesson.title}</h1>
+          <h1 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{lesson.title}</h1>
         </div>
-        <p className="text-white/30 text-xs pl-10">Dars {currentIndex + 1} / {totalLessons}</p>
+        <p className={`text-xs pl-10 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Dars {currentIndex + 1} / {totalLessons}</p>
       </div>
 
-      {/* Tablar */}
       {tabs.filter(t => t.show).length > 1 && (
         <div className="flex gap-2">
           {tabs.filter(t => t.show).map(t => {
@@ -200,9 +182,11 @@ export default function LessonClient({
             return (
               <button key={t.key} onClick={() => setTab(t.key)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  tab === t.key ? 'bg-blue-600/80 text-white' : 'text-white/40 hover:text-white'
+                  tab === t.key 
+                    ? isDark ? 'bg-blue-600/80 text-white' : 'bg-blue-600 text-white'
+                    : isDark ? 'text-white/40 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 }`}
-                style={tab !== t.key ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' } : {}}>
+                style={tab !== t.key ? (isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }) : {}}>
                 <Icon className="h-3.5 w-3.5" /> {t.label}
               </button>
             )
@@ -210,12 +194,11 @@ export default function LessonClient({
         </div>
       )}
 
-      {/* Kontent */}
       <AnimatePresence mode="wait">
         {tab === 'video' && embedUrl && (
           <motion.div key="video" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="rounded-2xl overflow-hidden aspect-video"
-            style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            className={`rounded-2xl overflow-hidden aspect-video ${isDark ? '' : 'bg-gray-900'}`}
+            style={isDark ? { background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.07)' } : {}}>
             <iframe src={embedUrl} className="w-full h-full" allowFullScreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
           </motion.div>
@@ -223,38 +206,38 @@ export default function LessonClient({
 
         {tab === 'content' && lesson.content && (
           <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="rounded-2xl p-6"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">{lesson.content}</p>
+            className={`rounded-2xl p-6 ${isDark ? '' : 'bg-white border border-gray-200'}`}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : {}}>
+            <p className={`text-sm leading-relaxed whitespace-pre-wrap ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{lesson.content}</p>
           </motion.div>
         )}
 
         {tab === 'task' && task && (
           <motion.div key="task" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="rounded-2xl p-5 space-y-4"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            className={`rounded-2xl p-5 space-y-4 ${isDark ? '' : 'bg-white border border-gray-200'}`}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : {}}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <ClipboardList className="h-4 w-4 text-amber-400" /> {task.title}
+                <h3 className={`font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  <ClipboardList className={`h-4 w-4 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} /> {task.title}
                 </h3>
                 {task.deadline && (
-                  <p className="text-white/40 text-xs mt-1 flex items-center gap-1">
+                  <p className={`text-xs mt-1 flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
                     <Clock className="h-3 w-3" />
                     Deadline: {new Date(task.deadline).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                <span className="text-amber-400 text-sm font-bold">{task.max_score}</span>
-                <Zap className="h-3.5 w-3.5 text-amber-300 ml-1" />
-                <span className="text-amber-300 text-xs">+100 XP</span>
+                <Star className={`h-4 w-4 ${isDark ? 'text-amber-400 fill-amber-400' : 'text-amber-500 fill-amber-500'}`} />
+                <span className={`text-sm font-bold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{task.max_score}</span>
+                <Zap className={`h-3.5 w-3.5 ml-1 ${isDark ? 'text-amber-300' : 'text-amber-400'}`} />
+                <span className={`text-xs ${isDark ? 'text-amber-300' : 'text-amber-500'}`}>+100 XP</span>
               </div>
             </div>
 
             {task.description && (
-              <p className="text-white/60 text-sm leading-relaxed">{task.description}</p>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{task.description}</p>
             )}
 
             {submission ? (
@@ -267,16 +250,16 @@ export default function LessonClient({
                       <StatusIcon className={`h-4 w-4 ${st.color}`} />
                       <span className={st.color}>{st.label}</span>
                       {submission.score !== null && (
-                        <span className="ml-auto text-white/60">{submission.score}/{task.max_score}</span>
+                        <span className={`ml-auto ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{submission.score}/{task.max_score}</span>
                       )}
                     </div>
                   )
                 })()}
                 {submission.feedback && (
-                  <div className="p-3 rounded-xl"
-                    style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <p className="text-white/40 text-xs mb-1">O&apos;qituvchi izohi:</p>
-                    <p className="text-white/70 text-sm">{submission.feedback}</p>
+                  <div className={`p-3 rounded-xl ${isDark ? '' : 'bg-gray-50 border border-gray-200'}`}
+                    style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' } : {}}>
+                    <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>O&apos;qituvchi izohi:</p>
+                    <p className={`text-sm ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{submission.feedback}</p>
                   </div>
                 )}
               </div>
@@ -284,12 +267,14 @@ export default function LessonClient({
               <div className="space-y-3">
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors hover:border-blue-500/50"
-                  style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-                  <Upload className="h-6 w-6 text-white/30 mx-auto mb-2" />
-                  <p className="text-white/50 text-sm">Faylni shu yerga tashlang yoki bosing</p>
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+                    isDark ? 'hover:border-blue-500/50' : 'hover:border-blue-400'
+                  } ${isDark ? '' : 'border-gray-300'}`}
+                  style={isDark ? { borderColor: 'rgba(255,255,255,0.1)' } : {}}>
+                  <Upload className={`h-6 w-6 mx-auto mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
+                  <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Faylni shu yerga tashlang yoki bosing</p>
                   {task.allowed_formats && task.allowed_formats.length > 0 && (
-                    <p className="text-white/25 text-xs mt-1">
+                    <p className={`text-xs mt-1 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
                       Ruxsat etilgan: {task.allowed_formats.map(f => `.${f}`).join(', ')}
                     </p>
                   )}
@@ -300,11 +285,11 @@ export default function LessonClient({
                 {files.length > 0 && (
                   <div className="space-y-1">
                     {files.map((f, i) => (
-                      <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg"
-                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                        <span className="text-white/60 text-xs truncate">{f.name}</span>
+                      <div key={i} className={`flex items-center justify-between px-3 py-2 rounded-lg ${isDark ? '' : 'bg-gray-50 border border-gray-200'}`}
+                        style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : {}}>
+                        <span className={`text-xs truncate ${isDark ? 'text-white/60' : 'text-gray-700'}`}>{f.name}</span>
                         <button onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
-                          className="text-white/30 hover:text-red-400 ml-2 flex-shrink-0">
+                          className={`ml-2 flex-shrink-0 transition-colors ${isDark ? 'text-white/30 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}>
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -312,12 +297,12 @@ export default function LessonClient({
                   </div>
                 )}
 
-                {error && <p className="text-red-400 text-xs">{error}</p>}
-                {success && <p className="text-emerald-400 text-xs">{success}</p>}
+                {error && <p className={`text-xs ${isDark ? 'text-red-400' : 'text-red-600'}`}>{error}</p>}
+                {success && <p className={`text-xs ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{success}</p>}
 
                 <button onClick={handleSubmit} disabled={isPending || files.length === 0}
-                  className="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.8), rgba(217,119,6,0.8))' }}>
+                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${isDark ? 'text-white' : 'text-white'}`}
+                  style={isDark ? { background: 'linear-gradient(135deg, rgba(245,158,11,0.8), rgba(217,119,6,0.8))' } : { background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
                   {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                   Topshirish
                 </button>
@@ -327,28 +312,31 @@ export default function LessonClient({
         )}
       </AnimatePresence>
 
-      {/* Navigatsiya */}
       <div className="flex items-center justify-between gap-3 pt-2">
         {prevLesson ? (
           <Link href={`/student/courses/${courseId}/lessons/${prevLesson.id}`}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm text-white/50 hover:text-white transition-all"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${
+              isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+            }`}
+            style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}>
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:block truncate max-w-[120px]">{prevLesson.title}</span>
           </Link>
         ) : <div />}
 
         <button onClick={handleComplete} disabled={isPending}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-all disabled:opacity-60"
-          style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.8))' }}>
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-60 ${isDark ? 'text-white' : 'text-white'}`}
+          style={isDark ? { background: 'linear-gradient(135deg, rgba(16,185,129,0.8), rgba(5,150,105,0.8))' } : { background: 'linear-gradient(135deg, #10b981, #059669)' }}>
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
           {nextLesson ? 'Bajarildi va keyingisi' : 'Darsni tugatish'}
         </button>
 
         {nextLesson ? (
           <Link href={`/student/courses/${courseId}/lessons/${nextLesson.id}`}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm text-white/50 hover:text-white transition-all"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${
+              isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+            }`}
+            style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}>
             <span className="hidden sm:block truncate max-w-[120px]">{nextLesson.title}</span>
             <ArrowRight className="h-4 w-4" />
           </Link>

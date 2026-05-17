@@ -1,28 +1,25 @@
+'use client'
+
 import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 import TaskEditClient from './TaskEditClient'
 
-export default async function EditTaskPage({
-  params,
-}: {
-  params: { id: string; taskId: string }
-}) {
+export default async function EditTaskPage({ params }: { params: { id: string; taskId: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: course } = await supabase
     .from('courses')
-    .select('id, title, emoji')
+    .select('id, title, emoji, teacher_id')
     .eq('id', params.id)
-    .eq('teacher_id', user.id)
     .single()
 
-  if (!course) notFound()
+  if (!course || course.teacher_id !== user.id) notFound()
 
   const { data: task } = await supabase
     .from('tasks')
-    .select('id, title, description, deadline, max_score, allowed_formats, lesson_id, task_file_urls')
+    .select('*')
     .eq('id', params.taskId)
     .eq('course_id', params.id)
     .single()
@@ -41,15 +38,7 @@ export default async function EditTaskPage({
       taskId={params.taskId}
       courseTitle={`${course.emoji} ${course.title}`}
       lessons={lessons ?? []}
-      initial={{
-        title: task.title ?? '',
-        lesson_id: task.lesson_id ?? '',
-        description: task.description ?? '',
-        deadline: task.deadline ?? '',
-        max_score: task.max_score ?? 100,
-        allowed_formats: (task.allowed_formats as string[]) ?? [],
-        task_file_urls: (task.task_file_urls as string[]) ?? [],
-      }}
+      initial={task}
     />
   )
 }

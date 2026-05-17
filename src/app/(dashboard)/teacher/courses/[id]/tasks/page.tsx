@@ -1,69 +1,78 @@
-import { redirect, notFound } from 'next/navigation'
+'use client'
+
+import { redirect } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useMountedTheme } from '@/hooks/useTheme'
+import { ClipboardCheck, Plus, FileText } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import TasksClient from './TasksClient'
-import { ArrowLeft, Plus } from 'lucide-react'
 
-export default async function TasksPage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+export default function TeacherCourseTasksPage({ params }: { params: { id: string } }) {
+  const { isDark } = useMountedTheme()
+  const [tasks, setTasks] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const { data: course } = await supabase
-    .from('courses')
-    .select('id, title, emoji')
-    .eq('id', params.id)
-    .eq('teacher_id', user.id)
-    .single()
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { redirect('/login'); return }
 
-  if (!course) notFound()
+      const { data: tasksData } = await supabase
+        .from('tasks')
+        .select('id, title, description, max_score, deadline, is_published')
+        .eq('course_id', params.id)
+        .order('created_at', { ascending: false })
 
-  const { data: tasks } = await supabase
-    .from('tasks')
-    .select('id, title, description, deadline, max_score, allowed_formats, created_at, lesson_id')
-    .eq('course_id', params.id)
-    .order('created_at', { ascending: true })
+      setTasks(tasksData ?? [])
+      setLoading(false)
+    }
+    loadData()
+  }, [params.id])
 
-  const taskIds = (tasks ?? []).map(t => t.id)
-  const { data: subRows } = taskIds.length > 0
-    ? await supabase
-        .from('submissions')
-        .select('task_id, status')
-        .in('task_id', taskIds)
-    : { data: [] }
-
-  const submissionMap = Object.fromEntries(
-    taskIds.map(id => [
-      id,
-      {
-        total:   (subRows ?? []).filter(s => s.task_id === id).length,
-        pending: (subRows ?? []).filter(s => s.task_id === id && s.status === 'pending').length,
-      },
-    ])
-  )
-
-  const enriched = (tasks ?? []).map(t => ({ ...t, ...(submissionMap[t.id] ?? { total: 0, pending: 0 }) }))
+  if (loading) return <div className="max-w-5xl mx-auto animate-pulse"><div className="h-8 w-48 bg-white/10 rounded mb-4" /></div>
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/teacher/courses" className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div>
-            <p className="text-white/40 text-xs">{course.emoji} {course.title}</p>
-            <h1 className="text-xl font-bold text-white">Topshiriqlar boshqaruvi</h1>
-          </div>
+        <div>
+          <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Topshiriqlar</h1>
+          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tasks.length} ta topshiriq</p>
         </div>
-        <Link href={`/teacher/courses/${params.id}/tasks/new`}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white shadow-lg"
-          style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.8), rgba(217,119,6,0.8))' }}>
+        <Link href={`/teacher/courses/${params.id}/tasks/new`} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium ${
+          isDark ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'
+        }`}>
           <Plus className="h-4 w-4" /> Yangi topshiriq
         </Link>
       </div>
 
-      <TasksClient courseId={params.id} tasks={enriched} />
+      {tasks.length === 0 ? (
+        <div className={`text-center py-16 rounded-2xl ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+          <ClipboardCheck className={`h-12 w-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+          <p className={isDark ? 'text-white/40' : 'text-gray-500'}>Hali topshiriq yaratilmagan</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {tasks.map(task => (
+            <div key={task.id} className={`flex items-center gap-4 p-4 rounded-xl ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
+              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-amber-500/20' : 'bg-amber-100'}`}>
+                <FileText className={`h-5 w-5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+              </div>
+              <div className="flex-1">
+                <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{task.title}</h3>
+                <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{task.max_score} ball • {task.deadline ? new Date(task.deadline).toLocaleDateString('uz-UZ') : 'Deadline yo\'q'}</p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                task.is_published 
+                  ? isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'
+                  : isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'
+              }`}>
+                {task.is_published ? 'Faol' : 'Nofaol'}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
