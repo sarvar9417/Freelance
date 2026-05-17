@@ -26,13 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uz" suppressHydrationWarning className="dark">
+    <html lang="uz" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           {children}
           <Toaster position="top-right" />
         </ThemeProvider>
