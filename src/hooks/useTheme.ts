@@ -4,19 +4,22 @@ import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 
 export function useMountedTheme() {
-  const { theme, setTheme } = useTheme()
+  const { theme, resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    // Force dark mode on mount
-    if (theme !== 'dark') {
-      setTheme('dark')
-    }
-  }, [theme, setTheme])
+  }, [])
 
-  // Always dark for now - prevents flash
-  const isDark = true
+  // SSR paytida default dark, mounted bo'lgandan so'ng resolvedTheme ishlat
+  const isDark = mounted 
+    ? (resolvedTheme === 'dark')
+    : true
 
-  return { isDark, mounted, theme: 'dark', setTheme }
+  return { 
+    isDark, 
+    mounted, 
+    theme: resolvedTheme || 'dark', 
+    setTheme 
+  }
 }
