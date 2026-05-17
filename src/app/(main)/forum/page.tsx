@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useTheme } from 'next-themes'
 import {
   Search, Plus, MessageSquare, TrendingUp,
   Loader2, Wifi, Users, FileText, X,
 } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 import {
   fetchPosts, fetchTopPosts, subscribeToPosts,
   getUserPostLikes, formatTimeAgo, type ForumPost,
@@ -26,8 +26,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export default function ForumPage() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark' || theme === undefined || theme === null
+  const { isDark } = useMountedTheme()
   const [posts, setPosts]           = useState<ForumPost[]>([])
   const [topPosts, setTopPosts]     = useState<ForumPost[]>([])
   const [loading, setLoading]       = useState(true)

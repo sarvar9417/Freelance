@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { GraduationCap, Heart, Tv, Share2, Send, Globe } from 'lucide-react'
 
 const LINKS = {
@@ -34,8 +34,7 @@ const SOCIALS = [
 ]
 
 export default function Footer() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <footer className={`relative border-t pt-16 pb-8 ${

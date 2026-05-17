@@ -17,6 +17,7 @@ CREATE POLICY "Faqat o'z maqsadlari" ON user_goals
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useMountedTheme } from '@/hooks/useTheme'
 import {
   Target, Trophy, Play, CheckCircle2, Plus,
   Loader2, Calendar, Flame, Award, Send, Trash2,
@@ -115,6 +116,8 @@ const AVATAR_GRADIENTS = [
 ]
 
 export default function MotivationPage() {
+  const { isDark } = useMountedTheme()
+
   const [goals, setGoals]         = useState<Goal[]>([])
   const [newGoal, setNewGoal]     = useState('')
   const [deadline, setDeadline]   = useState('')
@@ -180,20 +183,20 @@ export default function MotivationPage() {
       <div className="text-center space-y-3">
         <motion.div
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 text-amber-400 text-sm font-semibold px-4 py-2 rounded-full"
-          style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}
+          className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full ${isDark ? 'text-amber-400' : 'text-amber-600'}`}
+          style={isDark ? { background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' } : { background: '#fef3c7', border: '1px solid #fcd34d' }}
         >
           <Flame className="h-4 w-4" /> Motivatsiya markazi
         </motion.div>
         <motion.h1
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-4xl font-bold text-white"
+          className={`text-3xl sm:text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
         >
           Muvaffaqiyat — odatdan boshlanadi
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-          className="text-white/40 max-w-xl mx-auto text-sm leading-relaxed"
+          className={`max-w-xl mx-auto text-sm leading-relaxed ${isDark ? 'text-white/40' : 'text-gray-500'}`}
         >
           Har kuni ilhom oling, maqsad belgilang va eng yaxshi o&apos;quvchilar bilan raqobatlashing.
         </motion.p>
@@ -211,14 +214,14 @@ export default function MotivationPage() {
             <Award className="h-4 w-4 text-white" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-lg">Haftaning eng yaxshi o&apos;quvchisi</h2>
-            <p className="text-white/35 text-sm">XP — tajriba ballari asosida</p>
+            <h2 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Haftaning eng yaxshi o&apos;quvchisi</h2>
+            <p className={`text-sm ${isDark ? 'text-white/35' : 'text-gray-500'}`}>XP — tajriba ballari asosida</p>
           </div>
         </div>
 
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+          style={isDark ? { border: '1px solid rgba(255,255,255,0.07)' } : { border: '1px solid #e5e7eb' }}
         >
           {TOP_STUDENTS.map((s, i) => {
             const initials = s.name.split(' ').map(w => w[0]).join('').toUpperCase()
@@ -230,10 +233,8 @@ export default function MotivationPage() {
                 key={s.rank}
                 initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.3 }}
-                className={`flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/3 ${
-                  i < TOP_STUDENTS.length - 1 ? 'border-b border-white/5' : ''
-                } ${isTop3 ? '' : ''}`}
-                style={i === 0 ? { background: 'rgba(245,158,11,0.06)' } : {}}
+                className={`flex items-center gap-4 px-5 py-4 transition-colors ${isDark ? (i < TOP_STUDENTS.length - 1 ? 'border-b border-white/5' : '') : (i < TOP_STUDENTS.length - 1 ? 'border-b border-gray-100' : '')} ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'} ${isTop3 ? '' : ''}`}
+                style={i === 0 ? (isDark ? { background: 'rgba(245,158,11,0.06)' } : { background: '#fefce8' }) : {}}
               >
                 <span className="text-xl w-7 text-center flex-shrink-0">{s.badge}</span>
 
@@ -242,16 +243,16 @@ export default function MotivationPage() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-white/85 text-sm font-semibold truncate">{s.name}</p>
-                  <p className="text-white/30 text-[10px]">{s.achievement}</p>
+                  <p className={`text-sm font-semibold truncate ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{s.name}</p>
+                  <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{s.achievement}</p>
                 </div>
 
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="flex items-center gap-1 text-amber-400/70 text-xs">
+                  <div className={`flex items-center gap-1 text-xs ${isDark ? 'text-amber-400/70' : 'text-amber-600'}`}>
                     <Flame className="h-3 w-3" />
                     <span>{s.streak} kun</span>
                   </div>
-                  <div className={`font-bold text-sm tabular-nums ${isTop3 ? 'text-amber-400' : 'text-white/50'}`}>
+                  <div className={`font-bold text-sm tabular-nums ${isTop3 ? (isDark ? 'text-amber-400' : 'text-amber-600') : (isDark ? 'text-white/50' : 'text-gray-400')}`}>
                     {s.xp.toLocaleString()} XP
                   </div>
                 </div>
@@ -269,8 +270,8 @@ export default function MotivationPage() {
               <Play className="h-4 w-4 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-bold text-lg">Motivatsion video darslar</h2>
-              <p className="text-white/35 text-sm">Freelancing haqida eng yaxshi videolar</p>
+              <h2 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Motivatsion video darslar</h2>
+              <p className={`text-sm ${isDark ? 'text-white/35' : 'text-gray-500'}`}>Freelancing haqida eng yaxshi videolar</p>
             </div>
           </div>
         </div>
@@ -281,8 +282,8 @@ export default function MotivationPage() {
               key={v.id}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.07, duration: 0.35 }}
-              className="rounded-2xl overflow-hidden group cursor-pointer hover:translate-y-[-2px] transition-transform"
-              style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+              className={`rounded-2xl overflow-hidden group cursor-pointer hover:translate-y-[-2px] transition-transform ${isDark ? '' : 'bg-white'}`}
+              style={isDark ? { border: '1px solid rgba(255,255,255,0.07)' } : { border: '1px solid #e5e7eb' }}
               onClick={() => setPlayingId(playingId === v.id ? null : v.id)}
             >
               {/* Thumbnail */}
@@ -308,13 +309,13 @@ export default function MotivationPage() {
               </div>
 
               {/* Meta */}
-              <div className="p-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                <h3 className="text-white/85 text-sm font-semibold leading-snug mb-2 group-hover:text-white transition-colors">
+              <div className={`p-4 ${isDark ? '' : 'bg-gray-50'}`}>
+                <h3 className={`text-sm font-semibold leading-snug mb-2 transition-colors ${isDark ? 'text-white/85 group-hover:text-white' : 'text-gray-800 group-hover:text-gray-900'}`}>
                   {v.title}
                 </h3>
                 <div className="flex items-center justify-between">
-                  <span className="text-white/30 text-[10px]">{v.channel}</span>
-                  <span className="text-white/25 text-[10px]">{v.views} ko&apos;rish</span>
+                  <span className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{v.channel}</span>
+                  <span className={`text-[10px] ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{v.views} ko&apos;rish</span>
                 </div>
               </div>
 
@@ -325,9 +326,9 @@ export default function MotivationPage() {
                     initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     className="px-4 pb-4 overflow-hidden"
-                    style={{ background: 'rgba(255,255,255,0.03)' }}
+                    style={isDark ? { background: 'rgba(255,255,255,0.03)' } : { background: '#f9fafb' }}
                   >
-                    <p className="text-white/40 text-xs text-center py-2 border border-white/8 rounded-xl">
+                    <p className={`text-xs text-center py-2 rounded-xl ${isDark ? 'text-white/40 border border-white/8' : 'text-gray-500 border border-gray-200'}`}>
                       🎬 Video tez orada qo&apos;shiladi
                     </p>
                   </motion.div>
@@ -350,8 +351,8 @@ export default function MotivationPage() {
             <Target className="h-4 w-4 text-white" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-lg">Maqsad belgilash</h2>
-            <p className="text-white/35 text-sm">
+            <h2 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Maqsad belgilash</h2>
+            <p className={`text-sm ${isDark ? 'text-white/35' : 'text-gray-500'}`}>
               {userId
                 ? goals.length > 0
                   ? `${completedCount}/${goals.length} ta maqsad bajarildi`
@@ -365,7 +366,7 @@ export default function MotivationPage() {
         {userId ? (
           <div
             className="rounded-2xl p-6 space-y-5"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
             {/* Forma */}
             <form onSubmit={addGoal} className="space-y-3">
@@ -375,8 +376,8 @@ export default function MotivationPage() {
                   value={newGoal}
                   onChange={e => setNewGoal(e.target.value)}
                   placeholder="Maqsadingizni yozing... (masalan: Fiverr da 5 ⭐ olish)"
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-blue-500/40"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  className={`flex-1 px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-blue-500/40 ${isDark ? 'text-white placeholder:text-white/20' : 'text-gray-900 placeholder:text-gray-400'}`}
+                  style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}
                 />
                 <button
                   type="submit"
@@ -387,16 +388,16 @@ export default function MotivationPage() {
                 </button>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-white/25" />
+                <Calendar className={`h-3.5 w-3.5 ${isDark ? 'text-white/25' : 'text-gray-400'}`} />
                 <input
                   type="date"
                   value={deadline}
                   onChange={e => setDeadline(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="px-3 py-1.5 rounded-lg text-xs text-white/60 outline-none"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  className={`px-3 py-1.5 rounded-lg text-xs outline-none ${isDark ? 'text-white/60' : 'text-gray-700'}`}
+                  style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}
                 />
-                <span className="text-white/25 text-xs">Muddati (ixtiyoriy)</span>
+                <span className={`text-xs ${isDark ? 'text-white/25' : 'text-gray-400'}`}>Muddati (ixtiyoriy)</span>
               </div>
             </form>
 
@@ -411,17 +412,17 @@ export default function MotivationPage() {
                       className={`flex items-center gap-3 p-3.5 rounded-xl group transition-all ${
                         goal.completed ? 'opacity-50' : ''
                       }`}
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                      style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}
                     >
                       <button onClick={() => toggleGoal(goal)} className="flex-shrink-0">
-                        <CheckCircle2 className={`h-5 w-5 transition-colors ${goal.completed ? 'text-emerald-400 fill-emerald-400/20' : 'text-white/20 hover:text-emerald-400/60'}`} />
+                        <CheckCircle2 className={`h-5 w-5 transition-colors ${goal.completed ? 'text-emerald-500' : (isDark ? 'text-white/20 hover:text-emerald-400/60' : 'text-gray-300 hover:text-emerald-500')}`} />
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm ${goal.completed ? 'line-through text-white/30' : 'text-white/80'}`}>
+                        <p className={`text-sm ${goal.completed ? `line-through ${isDark ? 'text-white/30' : 'text-gray-400'}` : (isDark ? 'text-white/80' : 'text-gray-700')}`}>
                           {goal.goal}
                         </p>
                         {goal.deadline && (
-                          <p className="text-[10px] text-white/25 mt-0.5 flex items-center gap-1">
+                          <p className={`text-[10px] mt-0.5 flex items-center gap-1 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
                             <Calendar className="h-2.5 w-2.5" />
                             {new Date(goal.deadline).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
@@ -429,7 +430,7 @@ export default function MotivationPage() {
                       </div>
                       <button
                         onClick={() => deleteGoal(goal.id)}
-                        className="text-white/15 hover:text-rose-400 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                        className={`transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0 ${isDark ? 'text-white/15 hover:text-rose-400' : 'text-gray-300 hover:text-red-500'}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -440,11 +441,11 @@ export default function MotivationPage() {
                 {/* Progress */}
                 {goals.length > 0 && (
                   <div className="pt-2">
-                    <div className="flex items-center justify-between text-xs text-white/30 mb-1.5">
+                    <div className={`flex items-center justify-between text-xs mb-1.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
                       <span>Umumiy progress</span>
                       <span>{completedCount}/{goals.length}</span>
                     </div>
-                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={isDark ? { background: 'rgba(255,255,255,0.07)' } : { background: '#e5e7eb' }}>
                       <motion.div
                         className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500"
                         initial={{ width: 0 }}
@@ -458,20 +459,20 @@ export default function MotivationPage() {
             )}
 
             {goalsFetched && goals.length === 0 && (
-              <div className="text-center py-8 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' }}>
-                <Target className="h-8 w-8 text-white/12 mx-auto mb-2" />
-                <p className="text-white/30 text-sm">Hali maqsad yo&apos;q</p>
-                <p className="text-white/15 text-xs mt-1">Yuqoridagi formadan birinchi maqsadingizni qo&apos;shing</p>
+              <div className="text-center py-8 rounded-xl" style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.07)' } : { background: '#f9fafb', border: '2px dashed #e5e7eb' }}>
+                <Target className={`h-8 w-8 mx-auto mb-2 ${isDark ? 'text-white/12' : 'text-gray-300'}`} />
+                <p className={`text-sm ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Hali maqsad yo&apos;q</p>
+                <p className={`text-xs mt-1 ${isDark ? 'text-white/15' : 'text-gray-400'}`}>Yuqoridagi formadan birinchi maqsadingizni qo&apos;shing</p>
               </div>
             )}
           </div>
         ) : (
           <div
             className="rounded-2xl p-8 text-center"
-            style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}
+            style={isDark ? { background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' } : { background: '#eff6ff', border: '1px solid #dbeafe' }}
           >
-            <Target className="h-10 w-10 text-blue-400/40 mx-auto mb-3" />
-            <p className="text-white/50 text-sm mb-4">Maqsad belgilash uchun tizimga kiring</p>
+            <Target className={`h-10 w-10 mx-auto mb-3 ${isDark ? 'text-blue-400/40' : 'text-blue-400/60'}`} />
+            <p className={`text-sm mb-4 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>Maqsad belgilash uchun tizimga kiring</p>
             <a href="/login">
               <button className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/30">
                 Kirish
@@ -485,14 +486,14 @@ export default function MotivationPage() {
       <motion.section
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
         className="rounded-2xl p-8 text-center relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.1))', border: '1px solid rgba(99,102,241,0.25)' }}
+        style={isDark ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(168,85,247,0.1))', border: '1px solid rgba(99,102,241,0.25)' } : { background: 'linear-gradient(135deg, #eff6ff, #f3e8ff)', border: '1px solid #e0e7ff' }}
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-600/8 rounded-full blur-3xl pointer-events-none" />
+        <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none ${isDark ? 'bg-blue-600/8' : 'bg-blue-200/30'}`} />
+        <div className={`absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl pointer-events-none ${isDark ? 'bg-purple-600/8' : 'bg-purple-200/30'}`} />
         <div className="relative z-10">
-          <Trophy className="h-10 w-10 text-amber-400 mx-auto mb-3" />
-          <h2 className="text-white font-bold text-xl mb-2">Haftalik chaqiruv</h2>
-          <p className="text-white/50 text-sm max-w-md mx-auto mb-6">
+          <Trophy className={`h-10 w-10 mx-auto mb-3 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
+          <h2 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Haftalik chaqiruv</h2>
+          <p className={`text-sm max-w-md mx-auto mb-6 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
             Bu haftani Fiverr / Upwork da kamida 1 ta taklif yuborib yakunlang.
             Kirishning 80%i — harakat qilishda.
           </p>

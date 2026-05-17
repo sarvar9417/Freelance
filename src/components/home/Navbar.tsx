@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GraduationCap, Menu, X, ArrowRight, Sun, Moon } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const NAV_LINKS = [
   { href: '/courses',     label: 'Kurslar',      external: false },
@@ -17,15 +17,13 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const { isDark, setTheme } = useMountedTheme()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  const isDark = theme === 'dark'
 
   return (
     <motion.header

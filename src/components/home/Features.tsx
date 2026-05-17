@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Play, ClipboardList, MessageSquare, Sparkles, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -62,8 +62,7 @@ const POPULAR_COURSES = [
 ]
 
 export default function Features() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <section id="features" className={`relative py-20 ${isDark ? '' : 'bg-gray-50/50'}`}>

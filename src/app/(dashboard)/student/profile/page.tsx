@@ -1,103 +1,94 @@
+'use client'
+
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { BookOpen, Star, Zap, Flame, CheckCircle2, ClipboardCheck } from 'lucide-react'
-import ProfileClient from './ProfileClient'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useMountedTheme } from '@/hooks/useTheme'
+import { User, Mail, Calendar, Award, Zap, Flame } from 'lucide-react'
 
-export default async function StudentProfilePage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+export default function ProfilePage() {
+  const { isDark } = useMountedTheme()
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  const [
-    { data: profile },
-    { data: xpRow },
-    { data: streakRow },
-    { data: enrollments },
-  ] = await Promise.all([
-    supabase.from('users').select('id, full_name, email, bio, age, created_at').eq('id', user.id).single(),
-    supabase.from('user_xp').select('total_xp, current_level').eq('user_id', user.id).single(),
-    supabase.from('user_streaks').select('current_streak').eq('user_id', user.id).single(),
-    supabase.from('enrollments').select('course_id, progress').eq('student_id', user.id),
-  ])
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { redirect('/login'); return }
 
-  const courseIds = (enrollments ?? []).map(e => e.course_id)
-  const taskIds: string[] = []
-  if (courseIds.length > 0) {
-    const { data: tasks } = await supabase.from('tasks').select('id').in('course_id', courseIds)
-    taskIds.push(...(tasks ?? []).map(t => t.id))
-  }
-  const { data: submissions } = taskIds.length > 0
-    ? await supabase.from('submissions').select('status, score').eq('student_id', user.id).in('task_id', taskIds)
-    : { data: [] }
+      const [{ data: profileData }, { data: xpData }, { data: streakData }, { data: enrollments }] = await Promise.all([
+        supabase.from('users').select('full_name, created_at').eq('id', user.id).single(),
+        supabase.from('user_xp').select('total_xp, current_level').eq('user_id', user.id).single(),
+        supabase.from('user_streaks').select('current_streak').eq('user_id', user.id).single(),
+        supabase.from('enrollments').select('course_id').eq('student_id', user.id),
+      ])
 
-  const completedCourses = (enrollments ?? []).filter(e => e.progress >= 100).length
-  const gradedSubs = (submissions ?? []).filter(s => s.status === 'graded' && s.score !== null)
-  const avgScore = gradedSubs.length
-    ? Math.round(gradedSubs.reduce((a, s) => a + (s.score ?? 0), 0) / gradedSubs.length)
-    : 0
+      setProfile({
+        name: profileData?.full_name || user.user_metadata?.full_name || 'O\'quvchi',
+        email: user.email,
+        joined: profileData?.created_at ? new Date(profileData.created_at).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long' }) : '—',
+        xp: xpData?.total_xp || 0,
+        level: xpData?.current_level || 1,
+        streak: streakData?.current_streak || 0,
+        courses: enrollments?.length || 0,
+      })
+      setLoading(false)
+    }
+    loadData()
+  }, [])
 
-  const stats = [
-    { label: "O'qigan kurslar", value: (enrollments ?? []).length, icon: BookOpen, color: 'text-blue-400' },
-    { label: 'Tugatgan', value: completedCourses, icon: CheckCircle2, color: 'text-emerald-400' },
-    { label: 'Topshiriqlar', value: (submissions ?? []).length, icon: ClipboardCheck, color: 'text-purple-400' },
-    { label: "O'rt. baho", value: avgScore ? `${avgScore}` : '—', icon: Star, color: 'text-amber-400' },
-  ]
+  if (loading) return <div className="max-w-2xl mx-auto animate-pulse"><div className="h-8 w-48 bg-white/10 rounded mb-2" /></div>
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-white">Mening profilim</h1>
+      <div>
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Profil</h1>
+        <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Shaxsiy ma'lumotlar</p>
+      </div>
 
-      {/* Avatar + info */}
-      <div className="rounded-2xl p-6"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-        <div className="flex items-start gap-5">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500/60 to-purple-600/60 flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
-            {(profile?.full_name ?? 'U').split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)}
+      <div className={`rounded-2xl p-6 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
+        <div className="flex items-center gap-4 mb-6">
+          <div className={`h-16 w-16 rounded-full flex items-center justify-center text-2xl font-bold text-white ${
+            isDark ? 'bg-gradient-to-br from-blue-500 to-purple-500' : 'bg-gradient-to-br from-blue-400 to-purple-500'
+          }`}>
+            {profile?.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase() || 'U'}
           </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-white text-lg font-bold">{profile?.full_name ?? "O'quvchi"}</h2>
-            <p className="text-white/40 text-sm">{profile?.email}</p>
-            {profile?.bio && <p className="text-white/50 text-sm mt-2 leading-relaxed">{profile.bio}</p>}
-            <div className="flex flex-wrap items-center gap-3 mt-3">
-              <div className="flex items-center gap-1.5 text-amber-400 text-sm">
-                <Zap className="h-4 w-4" />
-                <span className="font-semibold">{(xpRow?.total_xp ?? 0).toLocaleString()} XP</span>
-                <span className="text-white/30 text-xs">· Level {xpRow?.current_level ?? 1}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-orange-400 text-sm">
-                <Flame className="h-4 w-4" />
-                <span className="font-semibold">{streakRow?.current_streak ?? 0}</span>
-                <span className="text-white/30 text-xs">kun streak</span>
-              </div>
-            </div>
+          <div>
+            <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{profile?.name}</h2>
+            <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Level {profile?.level || 1}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Mail className={`h-5 w-5 ${isDark ? 'text-white/40' : 'text-gray-400'}`} />
+            <span className={isDark ? 'text-white/80' : 'text-gray-700'}>{profile?.email}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar className={`h-5 w-5 ${isDark ? 'text-white/40' : 'text-gray-400'}`} />
+            <span className={isDark ? 'text-white/80' : 'text-gray-700'}>Qo'shilgan: {profile?.joined}</span>
           </div>
         </div>
       </div>
 
-      {/* Statistika */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {stats.map(s => {
-          const Icon = s.icon
-          return (
-            <div key={s.label} className="rounded-2xl p-4 text-center"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <Icon className={`h-5 w-5 ${s.color} mx-auto mb-1`} />
-              <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-white/30 text-xs mt-0.5">{s.label}</p>
-            </div>
-          )
-        })}
+      <div className="grid grid-cols-3 gap-4">
+        <div className={`rounded-xl p-4 ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+          <Zap className={`h-5 w-5 ${isDark ? 'text-blue-400' : 'text-blue-600'} mb-2`} />
+          <p className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{profile?.xp?.toLocaleString() || 0}</p>
+          <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>XP</p>
+        </div>
+        <div className={`rounded-xl p-4 ${isDark ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-orange-50 border border-orange-200'}`}>
+          <Flame className={`h-5 w-5 ${isDark ? 'text-orange-400' : 'text-orange-600'} mb-2`} />
+          <p className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{profile?.streak || 0}</p>
+          <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Streak</p>
+        </div>
+        <div className={`rounded-xl p-4 ${isDark ? 'bg-purple-500/10 border border-purple-500/20' : 'bg-purple-50 border border-purple-200'}`}>
+          <Award className={`h-5 w-5 ${isDark ? 'text-purple-400' : 'text-purple-600'} mb-2`} />
+          <p className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{profile?.courses || 0}</p>
+          <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Kurslar</p>
+        </div>
       </div>
-
-      {/* Tahrirlash */}
-      <ProfileClient
-        initialData={{
-          full_name: profile?.full_name ?? '',
-          bio: profile?.bio ?? '',
-          age: profile?.age ?? null,
-        }}
-        userId={user.id}
-      />
     </div>
   )
 }

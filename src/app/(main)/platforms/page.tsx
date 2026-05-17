@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useMountedTheme } from '@/hooks/useTheme'
 import {
   Briefcase, UserCheck, Image, DollarSign,
   MessageCircle, ChevronRight, CheckCircle2,
@@ -162,6 +163,8 @@ const SECTIONS = [
 ]
 
 export default function PlatformsPage() {
+  const { isDark } = useMountedTheme()
+
   const [activeSection, setActiveSection] = useState('platforms')
 
   return (
@@ -171,20 +174,20 @@ export default function PlatformsPage() {
       <div className="text-center space-y-3">
         <motion.div
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 text-blue-400 text-sm font-semibold px-4 py-2 rounded-full"
-          style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}
+          className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+          style={isDark ? { background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' } : { background: '#dbeafe', border: '1px solid #bfdbfe' }}
         >
           <Briefcase className="h-4 w-4" /> Freelancing platformalari
         </motion.div>
         <motion.h1
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-4xl font-bold text-white"
+          className={`text-3xl sm:text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
         >
           Qayerdan va qanday boshlash
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-          className="text-white/40 max-w-xl mx-auto text-sm leading-relaxed"
+          className={`max-w-xl mx-auto text-sm leading-relaxed ${isDark ? 'text-white/40' : 'text-gray-500'}`}
         >
           Fiverr, Upwork, Kwork va boshqa platformalarda muvaffaqiyatli ishlash uchun to&apos;liq qo&apos;llanma
         </motion.p>
@@ -203,9 +206,9 @@ export default function PlatformsPage() {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex-shrink-0 ${
                   isActive
                     ? 'text-white bg-blue-600 shadow-lg shadow-blue-900/30'
-                    : 'text-white/45 border border-white/8 hover:text-white/70 hover:border-white/15'
+                    : (isDark ? 'text-white/45 border border-white/8 hover:text-white/70 hover:border-white/15' : 'text-gray-500 border border-gray-200 hover:text-gray-700 hover:border-gray-300')
                 }`}
-                style={!isActive ? { background: 'rgba(255,255,255,0.03)' } : {}}
+                style={!isActive ? (isDark ? { background: 'rgba(255,255,255,0.03)' } : { background: 'white' }) : {}}
               >
                 <Icon className="h-4 w-4" />
                 {s.label}
@@ -226,8 +229,8 @@ export default function PlatformsPage() {
       {activeSection === 'profile' && (
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <div>
-            <h2 className="text-white font-bold text-xl mb-1">Ajoyib profil yaratish</h2>
-            <p className="text-white/40 text-sm">Birinchi taassurot eng muhim — profil sizning vitrinangiz</p>
+            <h2 className={`font-bold text-xl mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Ajoyib profil yaratish</h2>
+            <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Birinchi taassurot eng muhim — profil sizning vitrinangiz</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -237,17 +240,17 @@ export default function PlatformsPage() {
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
                 className="rounded-2xl p-5 space-y-3 hover:translate-y-[-2px] transition-transform"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
               >
                 <div className="flex items-start justify-between">
                   <span className="text-2xl">{tip.icon}</span>
-                  <span className={`text-[10px] font-bold ${tip.levelColor} px-2 py-0.5 rounded-full`}
-                    style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tip.level === 'Muhim' ? (isDark ? 'text-red-400' : 'text-red-600') : tip.level === 'Tavsiya' ? (isDark ? 'text-amber-400' : 'text-amber-600') : (isDark ? 'text-emerald-400' : 'text-emerald-600')}`}
+                    style={isDark ? { background: 'rgba(255,255,255,0.05)' } : { background: '#f3f4f6' }}>
                     {tip.level}
                   </span>
                 </div>
-                <h3 className="text-white font-semibold text-sm">{tip.title}</h3>
-                <p className="text-white/45 text-xs leading-relaxed">{tip.desc}</p>
+                <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{tip.title}</h3>
+                <p className={`text-xs leading-relaxed ${isDark ? 'text-white/45' : 'text-gray-500'}`}>{tip.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -255,9 +258,9 @@ export default function PlatformsPage() {
           {/* Checklst */}
           <div
             className="rounded-2xl p-6"
-            style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}
+            style={isDark ? { background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' } : { background: '#eff6ff', border: '1px solid #dbeafe' }}
           >
-            <h3 className="text-blue-400 font-bold text-sm mb-4 flex items-center gap-2">
+            <h3 className={`font-bold text-sm mb-4 flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
               <CheckCircle2 className="h-4 w-4" /> Profil to&apos;ldirish checklisti
             </h3>
             <div className="grid sm:grid-cols-2 gap-2">
@@ -271,8 +274,8 @@ export default function PlatformsPage() {
                 'Joylashuv to\'ldirish',
                 'Profil URL sozlash',
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 text-white/60 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-blue-400/60 flex-shrink-0" />
+                <div key={i} className={`flex items-center gap-2 text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                  <CheckCircle2 className={`h-4 w-4 flex-shrink-0 ${isDark ? 'text-blue-400/60' : 'text-blue-500'}`} />
                   {item}
                 </div>
               ))}
@@ -285,8 +288,8 @@ export default function PlatformsPage() {
       {activeSection === 'portfolio' && (
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <div>
-            <h2 className="text-white font-bold text-xl mb-1">Portfolio yaratish bo&apos;yicha qo&apos;llanma</h2>
-            <p className="text-white/40 text-sm">Ishlaringiz gapirsin — so&apos;zlaringiz emas</p>
+            <h2 className={`font-bold text-xl mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Portfolio yaratish bo&apos;yicha qo&apos;llanma</h2>
+            <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Ishlaringiz gapirsin — so&apos;zlaringiz emas</p>
           </div>
 
           {/* Qadamlar */}
@@ -296,15 +299,15 @@ export default function PlatformsPage() {
                 key={i}
                 initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.09 }}
-                className="flex items-start gap-5 p-5 rounded-2xl group hover:bg-white/3 transition-colors"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+                className="flex items-start gap-5 p-5 rounded-2xl group transition-colors"
+                style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' } : { background: 'white', border: '1px solid #e5e7eb' }}
               >
-                <span className="text-white/15 font-black text-2xl flex-shrink-0 group-hover:text-white/25 transition-colors">
+                <span className={`font-black text-2xl flex-shrink-0 transition-colors ${isDark ? 'text-white/15 group-hover:text-white/25' : 'text-gray-300 group-hover:text-gray-400'}`}>
                   {step.step}
                 </span>
                 <div>
-                  <h3 className="text-white/85 font-semibold text-sm mb-1">{step.title}</h3>
-                  <p className="text-white/45 text-xs leading-relaxed">{step.desc}</p>
+                  <h3 className={`font-semibold text-sm mb-1 ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{step.title}</h3>
+                  <p className={`text-xs leading-relaxed ${isDark ? 'text-white/45' : 'text-gray-500'}`}>{step.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -313,9 +316,9 @@ export default function PlatformsPage() {
           {/* Video darslar */}
           <div
             className="rounded-2xl p-6 space-y-4"
-            style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.15)' }}
+            style={isDark ? { background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.15)' } : { background: '#f5f3ff', border: '1px solid #ede9fe' }}
           >
-            <h3 className="text-purple-400 font-bold text-sm flex items-center gap-2">
+            <h3 className={`font-bold text-sm flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
               <Star className="h-4 w-4" /> Portfolio platformalari
             </h3>
             <div className="grid sm:grid-cols-3 gap-3">
@@ -327,12 +330,12 @@ export default function PlatformsPage() {
                 <div
                   key={i}
                   className="rounded-xl p-4 flex items-center gap-3"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}
                 >
                   <span className="text-2xl">{p.icon}</span>
                   <div>
-                    <p className="text-white/80 font-semibold text-sm">{p.name}</p>
-                    <p className="text-white/30 text-xs">{p.forWhom}</p>
+                    <p className={`font-semibold text-sm ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{p.name}</p>
+                    <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{p.forWhom}</p>
                   </div>
                 </div>
               ))}
@@ -345,8 +348,8 @@ export default function PlatformsPage() {
       {activeSection === 'pricing' && (
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <div>
-            <h2 className="text-white font-bold text-xl mb-1">Narx belgilash strategiyasi</h2>
-            <p className="text-white/40 text-sm">Arzon bo&apos;lmang — sifatli va to&apos;g&apos;ri narxlang</p>
+            <h2 className={`font-bold text-xl mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Narx belgilash strategiyasi</h2>
+            <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Arzon bo&apos;lmang — sifatli va to&apos;g&apos;ri narxlang</p>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4">
@@ -356,19 +359,19 @@ export default function PlatformsPage() {
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 className="rounded-2xl p-6 space-y-4 hover:translate-y-[-2px] transition-transform"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
               >
                 <div>
                   <span className={`bg-gradient-to-r ${s.color} text-xs font-bold px-2.5 py-1 rounded-full text-white`}>
                     {s.badge}
                   </span>
-                  <h3 className="text-white font-bold text-sm mt-3">{s.title}</h3>
-                  <p className="text-white/50 text-xs mt-0.5">Taxminiy daraja: {s.range}</p>
+                  <h3 className={`font-bold text-sm mt-3 ${isDark ? 'text-white' : 'text-gray-800'}`}>{s.title}</h3>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Taxminiy daraja: {s.range}</p>
                 </div>
                 <ul className="space-y-2">
                   {s.tips.map((tip, j) => (
-                    <li key={j} className="flex items-start gap-2 text-white/55 text-xs leading-relaxed">
-                      <ChevronRight className="h-3 w-3 text-white/25 flex-shrink-0 mt-0.5" />
+                    <li key={j} className={`flex items-start gap-2 text-xs leading-relaxed ${isDark ? 'text-white/55' : 'text-gray-600'}`}>
+                      <ChevronRight className={`h-3 w-3 flex-shrink-0 mt-0.5 ${isDark ? 'text-white/25' : 'text-gray-400'}`} />
                       {tip}
                     </li>
                   ))}
@@ -380,12 +383,12 @@ export default function PlatformsPage() {
           {/* Muhim eslatma */}
           <div
             className="rounded-2xl p-5 flex items-start gap-4"
-            style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}
+            style={isDark ? { background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' } : { background: '#fffbeb', border: '1px solid #fef3c7' }}
           >
-            <Lightbulb className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <Lightbulb className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
             <div>
-              <p className="text-amber-300 font-semibold text-sm mb-1">Asosiy qoida</p>
-              <p className="text-white/55 text-sm leading-relaxed">
+              <p className={`font-semibold text-sm mb-1 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>Asosiy qoida</p>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-white/55' : 'text-gray-600'}`}>
                 Narxni soatga emas — qadrga ko&apos;ra belgilang. 2 soatda yasagan logingiz uchun
                 mijozga 10 yil xizmat qilsa, uni $5 ga berish mantiqsiz.
                 Siz muammoni yechasiz — vaqtingizni sotmaysiz.
@@ -399,8 +402,8 @@ export default function PlatformsPage() {
       {activeSection === 'communication' && (
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
           <div>
-            <h2 className="text-white font-bold text-xl mb-1">Mijozlar bilan muloqot sirlari</h2>
-            <p className="text-white/40 text-sm">Professional muloqot — takroriy buyurtmalar kafolati</p>
+            <h2 className={`font-bold text-xl mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Mijozlar bilan muloqot sirlari</h2>
+            <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Professional muloqot — takroriy buyurtmalar kafolati</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -410,22 +413,25 @@ export default function PlatformsPage() {
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }}
                 className="rounded-2xl p-5 flex gap-4 hover:translate-y-[-1px] transition-transform"
-                style={{
+                style={isDark ? {
                   background: tip.warning ? 'rgba(244,63,94,0.05)' : 'rgba(255,255,255,0.03)',
                   border: `1px solid ${tip.warning ? 'rgba(244,63,94,0.15)' : 'rgba(255,255,255,0.07)'}`,
+                } : {
+                  background: tip.warning ? '#fef2f2' : 'white',
+                  border: `1px solid ${tip.warning ? '#fee2e2' : '#e5e7eb'}`,
                 }}
               >
                 <span className="text-2xl flex-shrink-0">{tip.emoji}</span>
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <h3 className={`font-semibold text-sm ${tip.warning ? 'text-rose-300' : 'text-white/85'}`}>
+                    <h3 className={`font-semibold text-sm ${tip.warning ? (isDark ? 'text-rose-300' : 'text-red-600') : (isDark ? 'text-white/85' : 'text-gray-800')}`}>
                       {tip.title}
                     </h3>
                     {tip.warning && (
-                      <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+                      <AlertTriangle className={`h-3.5 w-3.5 ${isDark ? 'text-rose-400' : 'text-red-500'}`} />
                     )}
                   </div>
-                  <p className="text-white/45 text-xs leading-relaxed">{tip.desc}</p>
+                  <p className={`text-xs leading-relaxed ${isDark ? 'text-white/45' : 'text-gray-500'}`}>{tip.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -434,14 +440,14 @@ export default function PlatformsPage() {
           {/* Birinchi muloqot shabloni */}
           <div
             className="rounded-2xl p-6 space-y-3"
-            style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}
+            style={isDark ? { background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' } : { background: '#eff6ff', border: '1px solid #dbeafe' }}
           >
-            <h3 className="text-blue-400 font-bold text-sm flex items-center gap-2">
+            <h3 className={`font-bold text-sm flex items-center gap-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
               <MessageCircle className="h-4 w-4" /> Birinchi xabar shabloni (Upwork)
             </h3>
             <div
-              className="rounded-xl p-4 font-mono text-xs leading-relaxed text-white/65"
-              style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}
+              className="rounded-xl p-4 font-mono text-xs leading-relaxed"
+              style={isDark ? { background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)', color: '#e5e7eb' } : { background: '#1f2937', border: '1px solid #374151', color: '#f9fafb' }}
             >
               <p>Hi [Ism],</p>
               <br />
@@ -457,7 +463,7 @@ export default function PlatformsPage() {
               <br />
               <p>Best,<br />[SIZNING ISMINGIZ]</p>
             </div>
-            <p className="text-white/30 text-[10px]">
+            <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
               * Shablonni to&apos;g&apos;ridan-to&apos;g&apos;ri ishlatmang — har bir taklif shaxsiylashtirilgan bo&apos;lishi kerak
             </p>
           </div>
@@ -468,23 +474,23 @@ export default function PlatformsPage() {
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
         className="rounded-2xl p-8 text-center relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08))', border: '1px solid rgba(59,130,246,0.2)' }}
+        style={isDark ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08))', border: '1px solid rgba(59,130,246,0.2)' } : { background: 'linear-gradient(135deg, #eff6ff, #e0e7ff)', border: '1px solid #dbeafe' }}
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/6 rounded-full blur-3xl pointer-events-none" />
-        <h2 className="text-white font-bold text-xl mb-2 relative z-10">Tayyor bo&apos;ldingizmi?</h2>
-        <p className="text-white/45 text-sm max-w-md mx-auto mb-6 relative z-10">
+        <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none ${isDark ? 'bg-blue-600/6' : 'bg-blue-200/30'}`} />
+        <h2 className={`font-bold text-xl mb-2 relative z-10 ${isDark ? 'text-white' : 'text-gray-900'}`}>Tayyor bo&apos;ldingizmi?</h2>
+        <p className={`text-sm max-w-md mx-auto mb-6 relative z-10 ${isDark ? 'text-white/45' : 'text-gray-600'}`}>
           Bilim o&apos;zi yetarli emas — birinchi qadamni bosing. Bugun Fiverr yoki Upwork da profil oching.
         </p>
         <div className="flex items-center justify-center gap-3 flex-wrap relative z-10">
           <a href="https://fiverr.com" target="_blank" rel="noopener noreferrer">
             <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.3)' }}>
+              style={isDark ? { background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.3)' } : { background: '#059669', border: '1px solid #10b981' }}>
               🟢 Fiverr da profil och <ArrowRight className="h-4 w-4" />
             </button>
           </a>
           <a href="https://upwork.com" target="_blank" rel="noopener noreferrer">
             <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-              style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.3)' }}>
+              style={isDark ? { background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.3)' } : { background: '#2563eb', border: '1px solid #3b82f6' }}>
               🔵 Upwork da profil och <ArrowRight className="h-4 w-4" />
             </button>
           </a>

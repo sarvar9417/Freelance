@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Eye, EyeOff, Loader2, GraduationCap, BookOpen } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -46,8 +46,7 @@ const ROLE_OPTIONS: RoleOption[] = [
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { theme } = useTheme()
-  const isDark = theme === 'dark' || theme === undefined || theme === null
+  const { isDark } = useMountedTheme()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)

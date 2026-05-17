@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Star } from 'lucide-react'
 
 const REVIEWS = [
@@ -63,8 +63,7 @@ const REVIEWS = [
 ]
 
 export default function Testimonials() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <section className={`relative py-20 ${isDark ? '' : 'bg-white'}`}>

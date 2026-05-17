@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { ArrowRight, BadgeCheck, Users, Star, Zap, TrendingUp, Bell } from 'lucide-react'
 
 const BADGES = [
@@ -18,8 +18,7 @@ const COURSES_MOCK = [
 ]
 
 function DashboardMockup() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <div className="relative w-full max-w-lg mx-auto">
@@ -153,8 +152,7 @@ function DashboardMockup() {
 }
 
 export default function HeroSection() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <section

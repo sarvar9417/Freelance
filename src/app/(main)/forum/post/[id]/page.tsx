@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
 import { ArrowLeft, Clock, Tag, MessageSquare, Loader2 } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { createClient } from '@/lib/supabase/client'
 import CommentSection from '@/components/forum/CommentSection'
 import PostLikeBar from '@/components/forum/PostLikeBar'
@@ -27,8 +27,7 @@ const AVATAR_COLORS = [
 ]
 
 export default function PostDetailPage({ params }: { params: { id: string } }) {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark' || theme === undefined || theme === null
+  const { isDark } = useMountedTheme()
   const supabase = createClient()
   const [post, setPost] = useState<any>(null)
   const [loading, setLoading] = useState(true)

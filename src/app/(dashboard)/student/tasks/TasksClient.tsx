@@ -9,6 +9,7 @@ import {
   Paperclip, Download, MessageSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 interface Task {
   id: string
@@ -336,6 +337,7 @@ function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
 
 export default function TasksClient({ tasks }: { tasks: Task[]; userId: string }) {
   const router = useRouter()
+  const { isDark } = useMountedTheme()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import Navbar from '@/components/home/Navbar'
 import HeroSection from '@/components/home/HeroSection'
 import StatsSection from '@/components/home/StatsSection'
@@ -11,8 +11,7 @@ import Testimonials from '@/components/home/Testimonials'
 import Footer from '@/components/home/Footer'
 
 export default function HomePage() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <div

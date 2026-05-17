@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
 import { GraduationCap, UserCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const ROLE_DASHBOARD: Record<string, string> = {
   admin: '/admin',
@@ -13,8 +13,7 @@ const ROLE_DASHBOARD: Record<string, string> = {
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark' || theme === undefined || theme === null
+  const { isDark } = useMountedTheme()
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {

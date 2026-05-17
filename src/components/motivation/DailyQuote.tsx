@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Quote, RefreshCw, Sparkles } from 'lucide-react'
 
 const QUOTES = [
@@ -38,6 +39,8 @@ function getDayQuote(): typeof QUOTES[0] {
 }
 
 export default function DailyQuote() {
+  const { isDark } = useMountedTheme()
+
   const [quote, setQuote]         = useState(getDayQuote())
   const [visible, setVisible]     = useState(true)
   const [randomMode, setRandom]   = useState(false)
@@ -59,36 +62,36 @@ export default function DailyQuote() {
 
   return (
     <div
-      className="relative rounded-2xl p-8 overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(99,102,241,0.08) 100%)', border: '1px solid rgba(59,130,246,0.2)' }}
+      className={`relative rounded-2xl p-8 overflow-hidden ${isDark ? '' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}
+      style={isDark ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(99,102,241,0.08) 100%)', border: '1px solid rgba(59,130,246,0.2)' } : { border: '1px solid #e0e7ff' }}
     >
       {/* Fon bezak */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-600/5 rounded-full blur-3xl pointer-events-none" />
+      <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none ${isDark ? 'bg-blue-600/5' : 'bg-blue-200/30'}`} />
+      <div className={`absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl pointer-events-none ${isDark ? 'bg-purple-600/5' : 'bg-purple-200/30'}`} />
 
       {/* Tepa qism */}
       <div className="flex items-center justify-between mb-6 relative z-10">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-            <Sparkles className="h-4 w-4 text-white" />
+          <div className={`h-8 w-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg ${isDark ? '' : 'shadow-blue-200'}`}>
+            <Sparkles className={`h-4 w-4 ${isDark ? 'text-white' : 'text-white'}`} />
           </div>
           <div>
-            <p className="text-white font-semibold text-sm">Kunlik ilhom</p>
+            <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Kunlik ilhom</p>
             {randomMode
-              ? <p className="text-white/30 text-[10px]">Tasodifiy iqtibos</p>
-              : <p className="text-white/30 text-[10px]">{new Date().toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long' })}</p>
+              ? <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Tasodifiy iqtibos</p>
+              : <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-500'}`}>{new Date().toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long' })}</p>
             }
           </div>
         </div>
         <div className="flex items-center gap-2">
           {randomMode && (
-            <button onClick={resetToDaily} className="text-[10px] text-white/30 hover:text-white/60 transition-colors px-2 py-1 rounded-lg hover:bg-white/5">
+            <button onClick={resetToDaily} className={`text-[10px] transition-colors px-2 py-1 rounded-lg ${isDark ? 'text-white/30 hover:text-white/60 hover:bg-white/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}>
               Bugungi
             </button>
           )}
           <button
             onClick={shuffle}
-            className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 px-3 py-1.5 rounded-xl hover:bg-white/6 border border-white/8 transition-all"
+            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl transition-all ${isDark ? 'text-white/40 hover:text-white/70 hover:bg-white/6 border border-white/8' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200'}`}
           >
             <RefreshCw className="h-3 w-3" /> Boshqasi
           </button>
@@ -104,11 +107,11 @@ export default function DailyQuote() {
             transition={{ duration: 0.28 }}
             className="relative z-10"
           >
-            <Quote className="h-8 w-8 text-blue-500/25 mb-4 -ml-1" />
-            <blockquote className="text-white text-lg sm:text-xl font-medium leading-relaxed mb-5">
+            <Quote className={`h-8 w-8 mb-4 -ml-1 ${isDark ? 'text-blue-500/25' : 'text-blue-500/40'}`} />
+            <blockquote className={`text-lg sm:text-xl font-medium leading-relaxed mb-5 ${isDark ? 'text-white' : 'text-gray-800'}`}>
               {quote.text}
             </blockquote>
-            <p className="text-white/35 text-sm font-medium">— {quote.author}</p>
+            <p className={`text-sm font-medium ${isDark ? 'text-white/35' : 'text-gray-500'}`}>— {quote.author}</p>
           </motion.div>
         )}
       </AnimatePresence>

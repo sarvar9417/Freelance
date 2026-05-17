@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Eye, EyeOff, Loader2, CheckCircle, GraduationCap } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -25,8 +25,7 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { theme } = useTheme()
-  const isDark = theme === 'dark' || theme === undefined || theme === null
+  const { isDark } = useMountedTheme()
   const [showPassword, setShowPassword] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -274,14 +273,9 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
-
   return (
     <Suspense fallback={
-      <div className={`h-96 animate-pulse rounded-xl ${
-        isDark ? 'bg-slate-800/50' : 'bg-gray-100'
-      }`} />
+      <div className="h-96 animate-pulse rounded-xl bg-slate-800/50" />
     }>
       <LoginForm />
     </Suspense>

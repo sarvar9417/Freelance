@@ -15,10 +15,11 @@ CREATE TABLE success_stories (
 ALTER TABLE success_stories ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Tasdiqlangan hikoyalar hamma uchun" ON success_stories FOR SELECT USING (approved = true);
 CREATE POLICY "O'z hikoyasini qo'shish" ON success_stories FOR INSERT WITH CHECK (auth.uid() = author_id);
-────────────────────────────────────────────────────────────────────────── */
+───────────────────────────────────────────────────────────────────────── */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Star, Trophy, TrendingUp, Plus, Send, Loader2, X, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -31,6 +32,14 @@ interface Story {
   earnings?: string
   created_at: string
 }
+
+const getThemeStyles = (isDark: boolean) => ({
+  text: isDark ? 'text-white' : 'text-gray-900',
+  textSecondary: isDark ? 'text-white/35' : 'text-gray-500',
+  textMuted: isDark ? 'text-white/40' : 'text-gray-400',
+  bg: isDark ? 'rgba(255,255,255,0.03)' : 'white',
+  border: isDark ? 'rgba(255,255,255,0.07)' : '#e5e7eb',
+})
 
 const MOCK_STORIES: Story[] = [
   {
@@ -86,9 +95,9 @@ const AVATAR_GRADIENTS = [
   'from-amber-500 to-amber-700',
 ]
 
-interface AddFormProps { onClose: () => void }
+interface AddFormProps { onClose: () => void; isDark: boolean }
 
-function AddStoryForm({ onClose }: AddFormProps) {
+function AddStoryForm({ onClose, isDark }: AddFormProps) {
   const [form, setForm]       = useState({ title: '', content: '', achievement: '', earnings: '' })
   const [loading, setLoading] = useState(false)
   const [done, setDone]       = useState(false)
@@ -125,12 +134,12 @@ function AddStoryForm({ onClose }: AddFormProps) {
   if (done) {
     return (
       <div className="text-center py-8">
-        <div className="h-12 w-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center mx-auto mb-3">
-          <Trophy className="h-6 w-6 text-emerald-400" />
+        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${isDark ? 'bg-emerald-500/15' : 'bg-emerald-50'}`}>
+          <Trophy className={`h-6 w-6 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
         </div>
-        <p className="text-white font-semibold mb-1">Hikoyangiz yuborildi!</p>
-        <p className="text-white/40 text-sm">Tekshirib ko&apos;rib, tez orada chiqaramiz.</p>
-        <button onClick={onClose} className="mt-4 text-sm text-white/40 hover:text-white/70 transition-colors">Yopish</button>
+        <p className={`font-semibold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>Hikoyangiz yuborildi!</p>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Tekshirib ko&apos;rib, tez orada chiqaramiz.</p>
+        <button onClick={onClose} className={`mt-4 text-sm transition-colors ${isDark ? 'text-white/40 hover:text-white/70' : 'text-gray-500 hover:text-gray-700'}`}>Yopish</button>
       </div>
     )
   }
@@ -138,8 +147,8 @@ function AddStoryForm({ onClose }: AddFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-white font-semibold">O&apos;z hikoyangizni ulashing</h3>
-        <button type="button" onClick={onClose} className="text-white/30 hover:text-white/60 transition-colors">
+        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>O&apos;z hikoyangizni ulashing</h3>
+        <button type="button" onClick={onClose} className={`transition-colors ${isDark ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-600'}`}>
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -150,27 +159,27 @@ function AddStoryForm({ onClose }: AddFormProps) {
         { key: 'earnings', label: 'Oylik daromad (ixtiyoriy)', placeholder: '$500/oy', type: 'input' },
       ].map(f => (
         <div key={f.key} className="space-y-1">
-          <label className="text-white/40 text-xs font-medium">{f.label}</label>
+          <label className={`text-xs font-medium ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{f.label}</label>
           <input
             type="text"
             value={(form as Record<string, string>)[f.key]}
             onChange={e => setForm(v => ({ ...v, [f.key]: e.target.value }))}
             placeholder={f.placeholder}
-            className="w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-blue-500/40"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+            className={`w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-blue-500/40 ${isDark ? 'text-white placeholder:text-white/20' : 'text-gray-900 placeholder:text-gray-400'}`}
+            style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}
           />
         </div>
       ))}
 
       <div className="space-y-1">
-        <label className="text-white/40 text-xs font-medium">Hikoyangiz</label>
+        <label className={`text-xs font-medium ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Hikoyangiz</label>
         <textarea
           value={form.content}
           onChange={e => setForm(v => ({ ...v, content: e.target.value }))}
           placeholder="Qanday boshladingiz, qiyinchiliklar, erishganlaringiz..."
           rows={5}
-          className="w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-blue-500/40 resize-none leading-relaxed"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+          className={`w-full px-3.5 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-blue-500/40 resize-none leading-relaxed ${isDark ? 'text-white placeholder:text-white/20' : 'text-gray-900 placeholder:text-gray-400'}`}
+          style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: '#f9fafb', border: '1px solid #e5e7eb' }}
         />
       </div>
 
@@ -181,36 +190,38 @@ function AddStoryForm({ onClose }: AddFormProps) {
       >
         {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Yuborilmoqda...</> : <><Send className="h-4 w-4" /> Hikoyani yuborish</>}
       </button>
-      <p className="text-white/20 text-[10px] text-center">Hikoyangiz tekshiruvdan so&apos;ng chiqariladi</p>
+      <p className={`text-[10px] text-center ${isDark ? 'text-white/20' : 'text-gray-400'}`}>Hikoyangiz tekshiruvdan so&apos;ng chiqariladi</p>
     </form>
   )
 }
 
 export default function SuccessStories() {
+  const { isDark } = useMountedTheme()
+
   const [expanded, setExpanded] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
 
-  useState(() => {
+  useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user))
-  })
+  }, [])
 
   return (
     <div className="space-y-4">
       {/* Sarlavha */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-white font-bold text-lg flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-400" />
+          <h2 className={`font-bold text-lg flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <Trophy className={`h-5 w-5 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
             Muvaffaqiyat hikoyalari
           </h2>
-          <p className="text-white/35 text-sm mt-0.5">O&apos;quvchilarimizning real natijalari</p>
+          <p className={`text-sm mt-0.5 ${isDark ? 'text-white/35' : 'text-gray-500'}`}>O&apos;quvchilarimizning real natijalari</p>
         </div>
         {isLoggedIn && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 px-3.5 py-2 rounded-xl transition-all"
+            className={`flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all ${isDark ? 'text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20' : 'text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200'}`}
           >
             <Plus className="h-3.5 w-3.5" /> O&apos;z hikoyam
           </button>
@@ -223,9 +234,9 @@ export default function SuccessStories() {
           <motion.div
             initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
             className="rounded-2xl p-5 overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <AddStoryForm onClose={() => setShowForm(false)} />
+            <AddStoryForm onClose={() => setShowForm(false)} isDark={isDark} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -245,7 +256,7 @@ export default function SuccessStories() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08, duration: 0.35 }}
               className="rounded-2xl p-5 flex flex-col gap-3 cursor-pointer group hover:translate-y-[-2px] transition-transform"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+              style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
               onClick={() => setExpanded(isOpen ? null : story.id)}
             >
               {/* Tepa */}
@@ -255,18 +266,18 @@ export default function SuccessStories() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-white/80 text-sm font-semibold">{story.author_name}</span>
+                    <span className={`text-sm font-semibold ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{story.author_name}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white bg-gradient-to-r ${achColor}`}>
                       {story.achievement}
                     </span>
                   </div>
-                  <p className="text-white font-medium text-sm leading-snug">{story.title}</p>
+                  <p className={`font-medium text-sm leading-snug ${isDark ? 'text-white' : 'text-gray-900'}`}>{story.title}</p>
                 </div>
               </div>
 
               {/* Daromad */}
               {story.earnings && (
-                <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold">
+                <div className={`flex items-center gap-1.5 text-xs font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
                   <TrendingUp className="h-3.5 w-3.5" />
                   {story.earnings}
                 </div>
@@ -278,17 +289,17 @@ export default function SuccessStories() {
                   <motion.p
                     key="full"
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="text-white/55 text-sm leading-relaxed"
+                    className={`text-sm leading-relaxed ${isDark ? 'text-white/55' : 'text-gray-600'}`}
                   >
                     {story.content}
                   </motion.p>
                 ) : (
-                  <p className="text-white/40 text-xs leading-relaxed line-clamp-2">{story.content}</p>
+                  <p className={`text-xs leading-relaxed line-clamp-2 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{story.content}</p>
                 )}
               </AnimatePresence>
 
               {/* O'qish tugmasi */}
-              <div className="flex items-center gap-1 text-blue-400/70 text-xs group-hover:text-blue-300 transition-colors mt-auto">
+              <div className={`flex items-center gap-1 text-xs transition-colors mt-auto ${isDark ? 'text-blue-400/70 group-hover:text-blue-300' : 'text-blue-500 group-hover:text-blue-600'}`}>
                 {isOpen ? 'Yopish' : "To'liq o'qish"}
                 <ChevronRight className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
               </div>
@@ -296,7 +307,7 @@ export default function SuccessStories() {
               {/* Yulduzlar */}
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, s) => (
-                  <Star key={s} className="h-3 w-3 text-amber-400 fill-amber-400" />
+                  <Star key={s} className={`h-3 w-3 ${isDark ? 'text-amber-400 fill-amber-400' : 'text-amber-400 fill-amber-400'}`} />
                 ))}
               </div>
             </motion.div>

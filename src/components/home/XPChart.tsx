@@ -2,7 +2,7 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Zap, TrendingUp } from 'lucide-react'
 
 const WEEK_DATA = [
@@ -22,8 +22,7 @@ const TODAY_IDX = 5 // Shanba
 export default function XPChart() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <section className={`relative py-20 ${isDark ? '' : 'bg-white'}`}>

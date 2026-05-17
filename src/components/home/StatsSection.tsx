@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { Users, BookOpen, Briefcase, DollarSign } from 'lucide-react'
 
 interface Stat {
@@ -96,8 +96,7 @@ function Counter({ value, prefix, suffix }: { value: number; prefix: string; suf
 }
 
 export default function StatsSection() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <section className={`relative py-20 ${isDark ? '' : 'bg-gray-50/30'}`}>

@@ -1,123 +1,98 @@
+'use client'
+
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { Trophy, Zap, Medal } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useMountedTheme } from '@/hooks/useTheme'
+import { Trophy, Medal, Crown, Zap } from 'lucide-react'
 
-export default async function LeaderboardPage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+export default function LeaderboardPage() {
+  const { isDark } = useMountedTheme()
+  const [users, setUsers] = useState<any[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  const { data: topXp } = await supabase
-    .from('user_xp')
-    .select('user_id, total_xp, current_level')
-    .order('total_xp', { ascending: false })
-    .limit(50)
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { redirect('/login'); return }
 
-  const userIds = (topXp ?? []).map(r => r.user_id)
-  const { data: profiles } = userIds.length > 0
-    ? await supabase.from('users').select('id, full_name').in('id', userIds)
-    : { data: [] }
-  const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.full_name]))
+      const { data: xpData } = await supabase.from('user_xp').select('total_xp, current_level, user_id').order('total_xp', { ascending: false }).limit(20)
+      const userIds = (xpData ?? []).map(d => d.user_id)
+      const { data: profiles } = userIds.length > 0 
+        ? await supabase.from('users').select('id, full_name').in('id', userIds)
+        : { data: [] }
+      const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p.full_name]))
 
-  const { data: myXp } = await supabase
-    .from('user_xp')
-    .select('total_xp, current_level')
-    .eq('user_id', user.id)
-    .single()
+      const sorted = (xpData ?? []).map((d, i) => ({
+        rank: i + 1,
+        name: profileMap[d.user_id] || 'Noma\'lum',
+        xp: d.total_xp,
+        level: d.current_level,
+      }))
+      setUsers(sorted)
+      
+      const myXp = sorted.find(u => xpData?.find(x => x.user_id === user?.id && x.total_xp === u.xp))
+      setCurrentUser(myXp || { rank: '-', xp: 0, level: 1 })
+      setLoading(false)
+    }
+    loadData()
+  }, [])
 
-  const myRank = (topXp ?? []).findIndex(r => r.user_id === user.id) + 1
-  const myProfile = profileMap[user.id]
-
-  const MEDAL = ['🥇', '🥈', '🥉']
+  if (loading) return <div className="max-w-3xl mx-auto animate-pulse"><div className="h-8 w-48 bg-white/10 rounded mb-2" /></div>
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Trophy className="h-6 w-6 text-amber-400" /> Reyting
-        </h1>
-        <p className="text-white/40 text-sm mt-1">Eng faol o&apos;quvchilar</p>
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Reyting</h1>
+        <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Eng faol o'quvchilar</p>
       </div>
 
-      {/* Mening o'rnim */}
-      {myXp && (
-        <div className="rounded-2xl p-4 flex items-center gap-4"
-          style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1))', border: '1px solid rgba(99,102,241,0.25)' }}>
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500/40 to-purple-500/40 flex items-center justify-center text-lg font-bold text-white flex-shrink-0">
-            {(myProfile ?? "O'quvchi")[0]}
-          </div>
-          <div className="flex-1">
-            <p className="text-white font-semibold text-sm">{myProfile ?? "Siz"}</p>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="text-amber-400 text-xs flex items-center gap-1">
-                <Zap className="h-3 w-3" /> {(myXp.total_xp ?? 0).toLocaleString()} XP
-              </span>
-              <span className="text-white/40 text-xs">Level {myXp.current_level ?? 1}</span>
+      {users.length > 0 && (
+        <div className={`rounded-2xl p-6 ${isDark ? 'bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border border-amber-500/20' : 'bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200'}`}>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <Crown className="h-8 w-8 text-yellow-500" />
+            <div>
+              <p className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{users[0].name}</p>
+              <p className={`text-sm ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{users[0].xp.toLocaleString()} XP</p>
             </div>
-          </div>
-          <div className="text-right">
-            <p className="text-white/40 text-xs">Sizning o&apos;rningiz</p>
-            <p className="text-white font-bold text-xl">#{myRank > 0 ? myRank : '50+'}</p>
           </div>
         </div>
       )}
 
-      {/* Top list */}
-      <div className="rounded-2xl overflow-hidden"
-        style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
-        {(topXp ?? []).length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-white/30 text-sm">Hali reyting mavjud emas</p>
+      <div className="space-y-2">
+        {users.slice(1).map((user, i) => (
+          <div key={user.rank} className={`flex items-center gap-4 p-4 rounded-xl ${
+            isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'
+          }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+              user.rank === 2 
+                ? isDark ? 'bg-gray-400 text-gray-900' : 'bg-gray-300 text-gray-700'
+                : isDark ? 'bg-orange-700 text-orange-200' : 'bg-orange-200 text-orange-700'
+            }`}>
+              {user.rank === 2 ? <Medal className="h-4 w-4" /> : user.rank}
+            </div>
+            <div className="flex-1">
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.name}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-500" />
+              <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.xp.toLocaleString()}</span>
+            </div>
           </div>
-        ) : (
-          <div>
-            {(topXp ?? []).map((row, i) => {
-              const isMe = row.user_id === user.id
-              const name = profileMap[row.user_id] ?? "O'quvchi"
-              const initials = name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
-              return (
-                <div
-                  key={row.user_id}
-                  className={`flex items-center gap-4 px-4 py-3.5 transition-colors ${isMe ? '' : 'hover:bg-white/[0.02]'}`}
-                  style={{
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
-                    background: isMe ? 'rgba(59,130,246,0.08)' : undefined,
-                  }}
-                >
-                  {/* Rank */}
-                  <div className="w-8 text-center flex-shrink-0">
-                    {i < 3
-                      ? <span className="text-xl">{MEDAL[i]}</span>
-                      : <span className="text-white/30 text-sm font-medium">#{i + 1}</span>
-                    }
-                  </div>
-
-                  {/* Avatar */}
-                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${
-                    isMe ? 'bg-gradient-to-br from-blue-500 to-blue-700' : 'bg-gradient-to-br from-white/10 to-white/5'
-                  }`}>
-                    {initials}
-                  </div>
-
-                  {/* Name */}
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${isMe ? 'text-blue-300' : 'text-white/80'}`}>
-                      {name} {isMe && <span className="text-blue-400/60 text-xs">(Siz)</span>}
-                    </p>
-                    <p className="text-white/30 text-xs">Level {row.current_level ?? 1}</p>
-                  </div>
-
-                  {/* XP */}
-                  <div className="flex items-center gap-1 text-amber-400 flex-shrink-0">
-                    <Zap className="h-3.5 w-3.5" />
-                    <span className="text-sm font-semibold">{(row.total_xp ?? 0).toLocaleString()}</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+        ))}
       </div>
+
+      {currentUser && (
+        <div className={`rounded-2xl p-4 ${isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-200'}`}>
+          <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Sizning o'rnigiz</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{currentUser.rank}</p>
+            <p className={`text-sm ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>{currentUser.xp} XP</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

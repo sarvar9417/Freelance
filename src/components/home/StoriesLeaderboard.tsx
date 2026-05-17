@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 import { ChevronLeft, ChevronRight, Star, Trophy, Flame, Target, Crown, Medal } from 'lucide-react'
 
 const STORIES = [
@@ -81,8 +81,7 @@ function RankIcon({ rank }: { rank: number }) {
 
 export default function StoriesLeaderboard() {
   const [index, setIndex] = useState(0)
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
   const story = STORIES[index]
 
   const prev = () => setIndex(i => (i - 1 + STORIES.length) % STORIES.length)

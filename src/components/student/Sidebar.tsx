@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import NotificationBell from '@/components/shared/NotificationBell'
-import { useTheme } from 'next-themes'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const NAV = [
   { href: '/student',             label: 'Dashboard',        icon: LayoutDashboard, exact: true },
@@ -83,8 +83,7 @@ function SidebarInner({
   userId, fullName, xp, level = 1, streak, pendingTasks = 0, unreadNotifications = 0, onClose,
 }: Props & { onClose?: () => void }) {
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark, setTheme } = useMountedTheme()
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -220,8 +219,7 @@ function SidebarInner({
 
 export default function Sidebar(props: Props) {
   const [open, setOpen] = useState(false)
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const { isDark } = useMountedTheme()
 
   return (
     <>

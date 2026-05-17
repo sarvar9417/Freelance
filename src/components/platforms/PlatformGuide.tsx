@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useMountedTheme } from '@/hooks/useTheme'
 import {
   CheckCircle2, XCircle, ChevronDown, ChevronRight,
   Zap, Shield, Globe, Star, DollarSign,
@@ -179,19 +180,21 @@ const PLATFORMS: Platform[] = [
   },
 ]
 
-function StepCard({ step }: { step: Step }) {
+function StepCard({ step, isDark }: { step: Step; isDark: boolean }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)' }}>
+    <div className="flex items-start gap-3 p-3 rounded-xl" style={isDark ? { background: 'rgba(255,255,255,0.03)' } : { background: '#f9fafb' }}>
       <span className="text-xl flex-shrink-0 mt-0.5">{step.icon}</span>
       <div>
-        <p className="text-white/80 text-sm font-semibold mb-0.5">{step.title}</p>
-        <p className="text-white/40 text-xs leading-relaxed">{step.desc}</p>
+        <p className={`text-sm font-semibold mb-0.5 ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{step.title}</p>
+        <p className={`text-xs leading-relaxed ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{step.desc}</p>
       </div>
     </div>
   )
 }
 
 export default function PlatformGuide() {
+  const { isDark } = useMountedTheme()
+
   const [active, setActive] = useState('fiverr')
   const [openStep, setOpenStep] = useState<number | null>(null)
 
@@ -208,9 +211,9 @@ export default function PlatformGuide() {
             className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${
               active === p.id
                 ? `${p.color} border-current`
-                : 'text-white/40 border-white/8 hover:text-white/70 hover:border-white/15'
+                : (isDark ? 'text-white/40 border-white/8 hover:text-white/70 hover:border-white/15' : 'text-gray-500 border-gray-200 hover:text-gray-700 hover:border-gray-300')
             }`}
-            style={active === p.id ? { background: p.bgColor } : { background: 'rgba(255,255,255,0.03)' }}
+            style={active === p.id ? { background: p.bgColor } : (isDark ? { background: 'rgba(255,255,255,0.03)' } : { background: 'white' })}
           >
             <span className="text-base">{p.logo}</span>
             {p.name}
@@ -239,21 +242,21 @@ export default function PlatformGuide() {
                   <span className="text-3xl">{platform.logo}</span>
                   <div>
                     <h2 className={`text-xl font-bold ${platform.color}`}>{platform.name}</h2>
-                    <p className="text-white/50 text-sm">{platform.url}</p>
+                    <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{platform.url}</p>
                   </div>
                 </div>
-                <p className="text-white/70 text-sm leading-relaxed max-w-lg">{platform.tagline}</p>
+                <p className={`text-sm leading-relaxed max-w-lg ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{platform.tagline}</p>
               </div>
               <div className="flex flex-col gap-2 flex-shrink-0">
                 <div className="flex items-center gap-2 text-xs">
-                  <DollarSign className="h-3.5 w-3.5 text-white/30" />
-                  <span className="text-white/40">Komissiya:</span>
+                  <DollarSign className={`h-3.5 w-3.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
+                  <span className={isDark ? 'text-white/40' : 'text-gray-500'}>Komissiya:</span>
                   <span className={`font-bold ${platform.color}`}>{platform.commission}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                  <Zap className="h-3.5 w-3.5 text-white/30" />
-                  <span className="text-white/40">Daraja:</span>
-                  <span className="text-white/70 font-medium">{platform.minLevel}</span>
+                  <Zap className={`h-3.5 w-3.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
+                  <span className={isDark ? 'text-white/40' : 'text-gray-500'}>Daraja:</span>
+                  <span className={`font-medium ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{platform.minLevel}</span>
                 </div>
               </div>
             </div>
@@ -263,15 +266,15 @@ export default function PlatformGuide() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div
               className="rounded-2xl p-5 space-y-3"
-              style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)' }}
+              style={isDark ? { background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)' } : { background: '#ecfdf5', border: '1px solid #d1fae5' }}
             >
-              <h3 className="text-emerald-400 text-sm font-bold flex items-center gap-2">
+              <h3 className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
                 <CheckCircle2 className="h-4 w-4" /> Afzalliklari
               </h3>
               <ul className="space-y-2">
                 {platform.pros.map((p, i) => (
-                  <li key={i} className="flex items-start gap-2 text-white/60 text-xs leading-relaxed">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500/60 flex-shrink-0 mt-0.5" />
+                  <li key={i} className={`flex items-start gap-2 text-xs leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                    <CheckCircle2 className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isDark ? 'text-emerald-500/60' : 'text-emerald-500'}`} />
                     {p}
                   </li>
                 ))}
@@ -279,15 +282,15 @@ export default function PlatformGuide() {
             </div>
             <div
               className="rounded-2xl p-5 space-y-3"
-              style={{ background: 'rgba(244,63,94,0.05)', border: '1px solid rgba(244,63,94,0.15)' }}
+              style={isDark ? { background: 'rgba(244,63,94,0.05)', border: '1px solid rgba(244,63,94,0.15)' } : { background: '#fef2f2', border: '1px solid #fee2e2' }}
             >
-              <h3 className="text-rose-400 text-sm font-bold flex items-center gap-2">
+              <h3 className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-rose-400' : 'text-red-600'}`}>
                 <XCircle className="h-4 w-4" /> Kamchiliklari
               </h3>
               <ul className="space-y-2">
                 {platform.cons.map((c, i) => (
-                  <li key={i} className="flex items-start gap-2 text-white/60 text-xs leading-relaxed">
-                    <XCircle className="h-3.5 w-3.5 text-rose-500/60 flex-shrink-0 mt-0.5" />
+                  <li key={i} className={`flex items-start gap-2 text-xs leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                    <XCircle className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isDark ? 'text-rose-500/60' : 'text-red-400'}`} />
                     {c}
                   </li>
                 ))}
@@ -298,10 +301,10 @@ export default function PlatformGuide() {
           {/* Qadamlar */}
           <div
             className="rounded-2xl p-5"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-              <Shield className="h-4 w-4 text-blue-400" />
+            <h3 className={`font-bold text-sm mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <Shield className={`h-4 w-4 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
               Boshlash uchun qadamlar
             </h3>
             <div className="space-y-2">
@@ -309,17 +312,17 @@ export default function PlatformGuide() {
                 <div key={i}>
                   <button
                     onClick={() => setOpenStep(openStep === i ? null : i)}
-                    className="w-full flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-white/4 transition-colors text-left"
+                    className={`w-full flex items-center gap-3 py-2.5 px-3 rounded-xl transition-colors text-left ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
                   >
                     <span className="text-lg">{step.icon}</span>
-                    <span className="text-white/75 text-sm font-medium flex-1">{step.title}</span>
-                    <ChevronDown className={`h-4 w-4 text-white/25 transition-transform ${openStep === i ? 'rotate-180' : ''}`} />
+                    <span className={`text-sm font-medium flex-1 ${isDark ? 'text-white/75' : 'text-gray-700'}`}>{step.title}</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isDark ? 'text-white/25' : 'text-gray-400'} ${openStep === i ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {openStep === i && (
                       <motion.p
                         initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                        className="text-white/45 text-xs leading-relaxed px-4 pb-2 ml-10"
+                        className={`text-xs leading-relaxed px-4 pb-2 ml-10 ${isDark ? 'text-white/45' : 'text-gray-500'}`}
                       >
                         {step.desc}
                       </motion.p>
@@ -333,17 +336,17 @@ export default function PlatformGuide() {
           {/* Maslahatlar */}
           <div
             className="rounded-2xl p-5"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-amber-400" />
+            <h3 className={`font-bold text-sm mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <Star className={`h-4 w-4 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
               Pro maslahatlar
             </h3>
             <ul className="space-y-3">
               {platform.tips.map((tip, i) => (
                 <li key={i} className="flex items-start gap-2.5">
-                  <ChevronRight className="h-3.5 w-3.5 text-amber-400/70 flex-shrink-0 mt-0.5" />
-                  <span className="text-white/60 text-sm leading-relaxed">{tip.text}</span>
+                  <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 mt-0.5 ${isDark ? 'text-amber-400/70' : 'text-amber-500'}`} />
+                  <span className={`text-sm leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{tip.text}</span>
                 </li>
               ))}
             </ul>
@@ -352,9 +355,9 @@ export default function PlatformGuide() {
           {/* Mos keladi */}
           <div
             className="rounded-2xl p-5"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <h3 className="text-white/60 text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h3 className={`text-xs font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
               <Globe className="h-3.5 w-3.5" /> Kim uchun ideal?
             </h3>
             <div className="flex flex-wrap gap-2">

@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { useTheme } from 'next-themes'
 import { Sparkles } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 import CourseFilters, { type FilterState } from '@/components/courses/CourseFilters'
 import CourseGrid, { type CourseItem } from '@/components/courses/CourseGrid'
 
@@ -83,11 +83,8 @@ const ALL_COURSES: CourseItem[] = [
 ]
 
 export default function CoursesPage() {
-  const { theme } = useTheme()
-  const isDark = theme === 'dark' || theme === undefined || theme === null
-  const [filters, setFilters] = useState<FilterState>({
-    search: '', category: 'Barchasi', level: 'Barchasi',
-  })
+  const { isDark } = useMountedTheme()
+  const [filters, setFilters] = useState<FilterState>({ search: '', category: 'Barchasi', level: 'Barchasi' })
 
   const filtered = useMemo(() => {
     return ALL_COURSES.filter(c => {
