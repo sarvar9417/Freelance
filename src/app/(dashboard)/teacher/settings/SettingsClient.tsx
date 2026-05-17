@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { motion } from 'framer-motion'
 import { User, Mail, FileText, Hash, Save, Loader2, CheckCircle2 } from 'lucide-react'
 import { updateTeacherProfile } from '../actions'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 interface Props {
   initial: {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function SettingsClient({ initial }: Props) {
+  const { isDark } = useMountedTheme()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)

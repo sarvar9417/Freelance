@@ -1,256 +1,129 @@
+'use client'
+
 import { redirect } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import { Users, TrendingUp, AlertCircle, CheckCircle2, BookOpen } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useMountedTheme } from '@/hooks/useTheme'
+import { Users, BookOpen, TrendingUp, Search } from 'lucide-react'
 
-export default async function StudentsPage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+export default function StudentsPage() {
+  const { isDark } = useMountedTheme()
+  const [students, setStudents] = useState<any[]>([])
+  const [courses, setCourses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (!['teacher', 'admin'].includes(profile?.role ?? '')) redirect('/student')
+  useEffect(() => {
+    async function loadData() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { redirect('/login'); return }
 
-  const { data: courses } = await supabase
-    .from('courses')
-    .select('id, title, emoji')
-    .eq('teacher_id', user.id)
+      const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+      if (!['teacher', 'admin'].includes(profile?.role ?? '')) { redirect('/student'); return }
 
-  const courseIds = (courses ?? []).map(c => c.id)
-  const courseMap = Object.fromEntries((courses ?? []).map(c => [c.id, c]))
+      const { data: coursesData } = await supabase.from('courses').select('id, title, emoji').eq('teacher_id', user.id)
+      const courseIds = (coursesData ?? []).map(c => c.id)
+      setCourses(coursesData ?? [])
 
-  if (courseIds.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">O&apos;quvchilarim</h1>
-          <p className="text-white/40 text-sm mt-1">Barcha kurslardagi o&apos;quvchilar</p>
-        </div>
-        <div
-          className="rounded-2xl p-12 text-center"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
-        >
-          <div className="text-5xl mb-4">👨‍🎓</div>
-          <p className="text-white/40 text-sm mb-3">Hali kurs yaratilmagan</p>
-          <Link
-            href="/teacher/courses/new"
-            className="inline-block text-emerald-400 text-sm hover:text-emerald-300 transition-colors"
-          >
-            Kurs yaratish →
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const { data: enrollments } = await supabase
-    .from('enrollments')
-    .select('id, course_id, student_id, progress, enrolled_at, last_accessed')
-    .in('course_id', courseIds)
-    .order('enrolled_at', { ascending: false })
-
-  const uniqueStudentIds = Array.from(new Set((enrollments ?? []).map(e => e.student_id).filter(Boolean)))
-
-  const { data: usersData } = uniqueStudentIds.length > 0
-    ? await supabase.from('users').select('id, full_name, email, avatar_url').in('id', uniqueStudentIds)
-    : { data: [] as { id: string; full_name: string; email: string; avatar_url: string | null }[] }
-
-  const usersMap = Object.fromEntries((usersData ?? []).map(u => [u.id, u]))
-
-  const { data: taskRows } = await supabase
-    .from('tasks')
-    .select('id, course_id')
-    .in('course_id', courseIds)
-
-  const taskIds = (taskRows ?? []).map(t => t.id)
-
-  let submissionStats: Record<string, { total: number; graded: number; pending: number; avgScore: number }> = {}
-
-  if (taskIds.length > 0 && uniqueStudentIds.length > 0) {
-    const { data: subs } = await supabase
-      .from('submissions')
-      .select('student_id, status, score')
-      .in('task_id', taskIds)
-      .in('student_id', uniqueStudentIds)
-
-    for (const sid of uniqueStudentIds) {
-      const studentSubs = (subs ?? []).filter(s => s.student_id === sid)
-      const graded = studentSubs.filter(s => s.status === 'graded')
-      const scores = graded.map(s => s.score).filter((s): s is number => s !== null)
-      submissionStats[sid] = {
-        total: studentSubs.length,
-        graded: graded.length,
-        pending: studentSubs.filter(s => s.status === 'pending').length,
-        avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+      if (courseIds.length === 0) {
+        setLoading(false)
+        return
       }
-    }
-  }
 
-  // Unique students with aggregated data
-  const studentMap: Record<string, {
-    userId: string; fullName: string; email: string
-    courses: string[]; totalProgress: number; enrollmentCount: number
-    enrolledAt: string; lastAccessed: string | null
-  }> = {}
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('student_id, course_id, progress')
+        .in('course_id', courseIds)
 
-  for (const e of enrollments ?? []) {
-    const sid = e.student_id
-    if (!sid) continue
-    const userData = usersMap[sid]
-    if (!studentMap[sid]) {
-      studentMap[sid] = {
-        userId: sid,
-        fullName: userData?.full_name ?? "O'quvchi",
-        email: userData?.email ?? '',
-        courses: [],
-        totalProgress: 0,
-        enrollmentCount: 0,
-        enrolledAt: e.enrolled_at,
-        lastAccessed: e.last_accessed,
+      const studentIds = Array.from(new Set((enrollments ?? []).map(e => e.student_id)))
+      const { data: studentProfiles } = studentIds.length > 0
+        ? await supabase.from('users').select('id, full_name').in('id', studentIds)
+        : { data: [] }
+
+      const studentMap: Record<string, any> = {}
+      for (const e of enrollments ?? []) {
+        if (!studentMap[e.student_id]) {
+          studentMap[e.student_id] = {
+            id: e.student_id,
+            name: studentProfiles?.find(p => p.id === e.student_id)?.full_name || 'Noma\'lum',
+            courses: 0,
+            totalProgress: 0,
+          }
+        }
+        studentMap[e.student_id].courses++
+        studentMap[e.student_id].totalProgress += e.progress || 0
       }
-    }
-    studentMap[sid].courses.push(courseMap[e.course_id]?.title ?? '')
-    studentMap[sid].totalProgress += e.progress ?? 0
-    studentMap[sid].enrollmentCount += 1
-    if (e.last_accessed && (!studentMap[sid].lastAccessed || e.last_accessed > studentMap[sid].lastAccessed!)) {
-      studentMap[sid].lastAccessed = e.last_accessed
-    }
-  }
 
-  const students = Object.values(studentMap).map(s => ({
-    ...s,
-    avgProgress: s.enrollmentCount > 0 ? Math.round(s.totalProgress / s.enrollmentCount) : 0,
-    ...submissionStats[s.userId] ?? { total: 0, graded: 0, pending: 0, avgScore: 0 },
-  }))
+      setStudents(Object.values(studentMap).map(s => ({
+        ...s,
+        avgProgress: s.courses > 0 ? Math.round(s.totalProgress / s.courses) : 0,
+      })))
+      setLoading(false)
+    }
+    loadData()
+  }, [])
 
-  const totalPending = students.reduce((a, s) => a + s.pending, 0)
-  const globalAvgProgress = students.length
-    ? Math.round(students.reduce((a, s) => a + s.avgProgress, 0) / students.length)
-    : 0
+  const filteredStudents = students.filter(s => 
+    !search || s.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  if (loading) return <div className="max-w-4xl mx-auto animate-pulse"><div className="h-8 w-48 bg-white/10 rounded mb-4" /></div>
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">O&apos;quvchilarim</h1>
-        <p className="text-white/40 text-sm mt-1">Barcha kurslardagi o&apos;quvchilar</p>
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>O'quvchilarim</h1>
+        <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{students.length} ta o'quvchi</p>
       </div>
 
-      {/* Statistika */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { icon: Users,        val: students.length,         label: "Jami o'quvchilar",  color: 'text-blue-400',    bg: 'rgba(59,130,246,0.08)',    border: 'rgba(59,130,246,0.15)'    },
-          { icon: TrendingUp,   val: `${globalAvgProgress}%`, label: "O'rt. progress",    color: 'text-emerald-400', bg: 'rgba(16,185,129,0.08)',    border: 'rgba(16,185,129,0.15)'    },
-          { icon: AlertCircle,  val: totalPending,            label: 'Baholanmagan',      color: 'text-amber-400',   bg: 'rgba(245,158,11,0.08)',    border: 'rgba(245,158,11,0.15)'    },
-          { icon: CheckCircle2, val: students.filter(s => s.graded > 0).length, label: "Baholangan o'quvchi", color: 'text-purple-400', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.15)' },
-        ].map(({ icon: Icon, val, label, color, bg, border }) => (
-          <div key={label} className="rounded-2xl p-5" style={{ background: bg, border: `1px solid ${border}` }}>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl" style={{ background: bg, border: `1px solid ${border}` }}>
-                <Icon className={`h-4 w-4 ${color}`} />
-              </div>
-              <div>
-                <p className="text-white/40 text-xs">{label}</p>
-                <p className={`text-2xl font-bold ${color}`}>{val}</p>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="relative">
+        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 ${isDark ? 'text-white/30' : 'text-gray-400'}`} />
+        <input
+          type="text"
+          placeholder="O'quvchi qidirish..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className={`w-full pl-11 pr-4 py-3 rounded-xl text-sm outline-none ${
+            isDark ? 'text-white placeholder-white/25 bg-white/5 border border-white/10' : 'text-gray-900 placeholder-gray-400 bg-white border border-gray-200'
+          }`}
+        />
       </div>
 
-      {/* O'quvchilar jadvali */}
-      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
-        {students.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="text-5xl mb-4">👨‍🎓</div>
-            <p className="text-white/40 text-sm">Hali hech qanday o&apos;quvchi ro&apos;yxatdan o&apos;tmagan</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <th className="text-left text-xs font-medium text-white/40 px-4 py-3">O&apos;quvchi</th>
-                  <th className="text-left text-xs font-medium text-white/40 px-4 py-3 hidden sm:table-cell">Kurslar</th>
-                  <th className="text-left text-xs font-medium text-white/40 px-4 py-3 hidden md:table-cell">Progress</th>
-                  <th className="text-left text-xs font-medium text-white/40 px-4 py-3 hidden lg:table-cell">Topshiriqlar</th>
-                  <th className="text-right text-xs font-medium text-white/40 px-4 py-3">Batafsil</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map(s => {
-                  const initials = s.fullName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
-                  const progressColor = s.avgProgress >= 70 ? 'from-emerald-600 to-emerald-400' : s.avgProgress >= 40 ? 'from-amber-600 to-amber-400' : 'from-white/20 to-white/10'
-                  const gradeColor = s.avgScore >= 80 ? 'text-emerald-400' : s.avgScore >= 60 ? 'text-blue-400' : s.avgScore > 0 ? 'text-amber-400' : 'text-white/25'
-                  return (
-                    <tr
-                      key={s.userId}
-                      className="hover:bg-white/[0.02] transition-colors"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-                    >
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/30 to-blue-500/30 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                            {initials}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="text-white text-sm font-medium truncate">{s.fullName}</p>
-                              {s.pending > 0 && (
-                                <span className="bg-amber-500 text-white text-[10px] font-bold h-4 min-w-4 px-1 rounded-full flex items-center justify-center flex-shrink-0">
-                                  {s.pending}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-white/35 text-xs truncate">{s.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 hidden sm:table-cell">
-                        <div className="flex items-center gap-1 text-white/40 text-xs">
-                          <BookOpen className="h-3 w-3 text-emerald-400" />
-                          {s.enrollmentCount} ta kurs
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 hidden md:table-cell">
-                        <div className="w-28">
-                          <div className="flex justify-between mb-1">
-                            <span className="text-white/30 text-xs">Progress</span>
-                            <span className="text-white/60 text-xs font-medium">{s.avgProgress}%</span>
-                          </div>
-                          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                            <div className={`h-full rounded-full bg-gradient-to-r ${progressColor}`} style={{ width: `${s.avgProgress}%` }} />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 hidden lg:table-cell">
-                        <div className="flex items-center gap-3 text-xs">
-                          <span className="text-white/50">{s.total} ta topshirilgan</span>
-                          {s.avgScore > 0 && (
-                            <span className={`font-semibold ${gradeColor}`}>⌀ {s.avgScore}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <Link
-                          href={`/teacher/students/${s.userId}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white/40 hover:text-white hover:bg-white/5 transition-all border border-white/5"
-                        >
-                          Batafsil
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            <div className="px-4 py-3" style={{ background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <span className="text-white/30 text-xs">
-                Jami: <span className="text-white/50 font-medium">{students.length}</span> ta o&apos;quvchi
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
+      {courses.length === 0 ? (
+        <div className={`text-center py-16 rounded-2xl ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+          <BookOpen className={`h-12 w-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+          <p className={isDark ? 'text-white/40' : 'text-gray-500'}>Hali kurs yaratilmagan</p>
+        </div>
+      ) : filteredStudents.length === 0 ? (
+        <div className={`text-center py-16 rounded-2xl ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+          <Users className={`h-12 w-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
+          <p className={isDark ? 'text-white/40' : 'text-gray-500'}>O'quvchi topilmadi</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredStudents.map(student => (
+            <Link key={student.id} href={`/teacher/students/${student.id}`} className={`flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.01] ${
+              isDark ? 'bg-white/5 border border-white/10 hover:bg-white/10' : 'bg-white border border-gray-200 hover:bg-gray-50'
+            }`}>
+              <div className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+                isDark ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' : 'bg-gradient-to-br from-emerald-400 to-emerald-500'
+              }`}>
+                {student.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex-1">
+                <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{student.name}</h3>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{student.courses} ta kurs</p>
+              </div>
+              <div className="text-right">
+                <p className={`text-lg font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>{student.avgProgress}%</p>
+                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>o'rtacha</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
