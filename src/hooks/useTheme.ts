@@ -9,13 +9,14 @@ export function useMountedTheme() {
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    // Force dark mode on mount
+    if (theme !== 'dark') {
+      setTheme('dark')
+    }
+  }, [theme, setTheme])
 
-  // Don't render content until mounted to prevent flash
-  // Default to dark before mount to match SSR
-  const isDark = mounted 
-    ? (theme === 'dark') 
-    : true
+  // Always dark for now - prevents flash
+  const isDark = true
 
-  return { isDark, mounted, theme, setTheme }
+  return { isDark, mounted, theme: 'dark', setTheme }
 }
