@@ -11,20 +11,22 @@ import Testimonials from '@/components/home/Testimonials'
 import Footer from '@/components/home/Footer'
 
 export default function HomePage() {
-  const { isDark } = useMountedTheme()
+  const { isDark, mounted } = useMountedTheme()
+
+  // Show dark background before mount to prevent white flash
+  const effectiveDark = mounted ? isDark : true
 
   return (
     <div
-      className={`min-h-screen ${isDark ? 'text-white' : 'text-gray-900'}`}
+      className={`min-h-screen ${effectiveDark ? 'text-white' : 'text-gray-900'}`}
       style={{
-        background: isDark
+        background: effectiveDark
           ? 'linear-gradient(160deg, #0B0F19 0%, #0f1628 40%, #1A0B2E 100%)'
-          : 'linear-gradient(160deg, #fafbfc 0%, #f5f5f4 50%, #f0f0ef 100%)'
+          : 'linear-gradient(180deg, #f9fafb 0%, #ffffff 50%, #f3f4f6 100%)'
       }}
     >
-      {/* Fixed animated orbs — always in bg */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {isDark ? (
+        {effectiveDark ? (
           <>
             <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-700/8 rounded-full blur-3xl animate-pulse-slow" />
             <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-purple-800/8 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '3s' }} />
@@ -32,9 +34,9 @@ export default function HomePage() {
           </>
         ) : (
           <>
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/[0.03] rounded-full blur-3xl" />
-            <div className="absolute top-1/3 right-0 w-[400px] h-[400px] bg-purple-500/[0.03] rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-1/3 w-[300px] h-[300px] bg-indigo-500/[0.02] rounded-full blur-3xl" />
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl" />
+            <div className="absolute top-1/3 right-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-1/3 w-[300px] h-[300px] bg-indigo-500/3 rounded-full blur-3xl" />
           </>
         )}
       </div>

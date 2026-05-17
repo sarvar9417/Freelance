@@ -1,25 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTheme } from 'next-themes'
 
 export function useMountedTheme() {
-  const { theme, resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-
+  const { theme, setTheme } = useTheme()
+  
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // SSR paytida default dark, mounted bo'lgandan so'ng resolvedTheme ishlat
-  const isDark = mounted 
-    ? (resolvedTheme === 'dark')
-    : true
+  // Prevent flash by rendering nothing until mounted
+  // After mount, use theme state properly
+  const isDark = useMemo(() => {
+    if (!mounted) return true // Default to dark during SSR
+    return theme === 'dark'
+  }, [mounted, theme])
 
   return { 
     isDark, 
     mounted, 
-    theme: resolvedTheme || 'dark', 
+    theme: theme || 'dark', 
     setTheme 
   }
 }
