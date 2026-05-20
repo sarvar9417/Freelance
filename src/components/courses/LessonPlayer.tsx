@@ -6,6 +6,7 @@ import {
   Play, CheckCircle2, ChevronLeft, ChevronRight,
   BookOpen, ExternalLink, Volume2,
 } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 interface Lesson {
   id: string
@@ -37,6 +38,7 @@ function getVimeoId(url: string): string | null {
 }
 
 export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigate, onGoToTask }: Props) {
+  const { isDark } = useMountedTheme()
   const [completed, setCompleted] = useState(lesson.completed)
   const [completing, setCompleting] = useState(false)
   const [tab, setTab] = useState<'video' | 'text'>('video')
@@ -58,11 +60,25 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
     onComplete(lesson.id)
   }
 
+  const heading = isDark ? 'text-white'    : 'text-gray-900'
+  const muted   = isDark ? 'text-white/40' : 'text-gray-400'
+  const subText = isDark ? 'text-white/60' : 'text-gray-600'
+  const card    = isDark
+    ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }
+    : { background: '#ffffff', border: '1px solid #e5e7eb' }
+  const navBtn  = isDark
+    ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }
+    : { background: '#f3f4f6', border: '1px solid #e5e7eb' }
+  const tabBg   = isDark
+    ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }
+    : { background: '#f3f4f6', border: '1px solid #e5e7eb' }
+  const tabInactive = isDark ? 'text-white/40 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+
   return (
     <div className="flex flex-col h-full space-y-4">
-      {/* Progress bar top */}
+      {/* Progress bar */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
           <motion.div
             className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
             initial={{ width: 0 }}
@@ -70,7 +86,7 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
             transition={{ duration: 0.6 }}
           />
         </div>
-        <span className="text-white/40 text-xs flex-shrink-0">
+        <span className={`text-xs flex-shrink-0 ${muted}`}>
           {completedCount}/{allLessons.length} dars
         </span>
       </div>
@@ -78,21 +94,19 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
       {/* Lesson title */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-white/40 text-xs mb-1">{lesson.order}-dars</p>
-          <h1 className="text-white font-bold text-xl leading-snug">{lesson.title}</h1>
+          <p className={`text-xs mb-1 ${muted}`}>{lesson.order}-dars</p>
+          <h1 className={`font-bold text-xl leading-snug ${heading}`}>{lesson.title}</h1>
         </div>
         {completed ? (
-          <div className="flex items-center gap-1.5 flex-shrink-0 text-emerald-400 text-sm font-semibold">
+          <div className="flex items-center gap-1.5 flex-shrink-0 text-emerald-500 text-sm font-semibold">
             <CheckCircle2 className="h-4 w-4" /> Ko&apos;rildi
           </div>
         ) : (
           <button onClick={handleComplete} disabled={completing}
             className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 transition-all shadow-lg shadow-emerald-900/30">
-            {completing ? (
-              <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
-            ) : (
-              <CheckCircle2 className="h-3.5 w-3.5" />
-            )}
+            {completing
+              ? <span className="h-3.5 w-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+              : <CheckCircle2 className="h-3.5 w-3.5" />}
             Bajarildi
           </button>
         )}
@@ -100,14 +114,15 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
 
       {/* Tab switcher */}
       {lesson.video_url && lesson.content && (
-        <div className="flex gap-1 p-1 rounded-xl w-fit"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="flex gap-1 p-1 rounded-xl w-fit" style={tabBg}>
           {(['video', 'text'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                tab === t ? 'bg-blue-600 text-white' : 'text-white/40 hover:text-white'
+                tab === t ? 'bg-blue-600 text-white' : tabInactive
               }`}>
-              {t === 'video' ? <><Play className="h-3.5 w-3.5" />Video</> : <><BookOpen className="h-3.5 w-3.5" />Matn</>}
+              {t === 'video'
+                ? <><Play className="h-3.5 w-3.5" />Video</>
+                : <><BookOpen className="h-3.5 w-3.5" />Matn</>}
             </button>
           ))}
         </div>
@@ -115,23 +130,21 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
 
       {/* Video player */}
       {(tab === 'video' || !lesson.content) && lesson.video_url && (
-        <div className="rounded-2xl overflow-hidden bg-black aspect-video w-full"
-          style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className={`rounded-2xl overflow-hidden bg-black aspect-video w-full ${isDark ? '' : 'shadow-sm'}`}
+          style={{ border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e5e7eb' }}>
           {ytId ? (
             <iframe
               src={`https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1`}
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title={lesson.title}
+              allowFullScreen title={lesson.title}
             />
           ) : vimeoId ? (
             <iframe
               src={`https://player.vimeo.com/video/${vimeoId}?color=3b82f6&title=0&byline=0`}
               className="w-full h-full"
               allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
-              title={lesson.title}
+              allowFullScreen title={lesson.title}
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-3">
@@ -149,22 +162,23 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
       {/* No video placeholder */}
       {!lesson.video_url && (
         <div className="rounded-2xl aspect-video flex flex-col items-center justify-center gap-3"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.07)' }}>
-          <BookOpen className="h-10 w-10 text-white/20" />
-          <p className="text-white/30 text-sm">Bu dars uchun video mavjud emas</p>
-          <p className="text-white/20 text-xs">Quyida matn formatida o&apos;qing</p>
+          style={isDark
+            ? { background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.07)' }
+            : { background: '#f9fafb', border: '2px dashed #e5e7eb' }}>
+          <BookOpen className={`h-10 w-10 ${muted}`} />
+          <p className={`text-sm ${muted}`}>Bu dars uchun video mavjud emas</p>
+          <p className={`text-xs ${isDark ? 'text-white/20' : 'text-gray-300'}`}>Quyida matn formatida o&apos;qing</p>
         </div>
       )}
 
       {/* Text content */}
       {(tab === 'text' || !lesson.video_url) && lesson.content && (
-        <div className="rounded-2xl p-6"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="rounded-2xl p-6" style={card}>
           <div className="flex items-center gap-2 mb-4">
-            <BookOpen className="h-4 w-4 text-blue-400" />
-            <h3 className="text-white font-semibold text-sm">Dars matni</h3>
+            <BookOpen className="h-4 w-4 text-blue-500" />
+            <h3 className={`font-semibold text-sm ${heading}`}>Dars matni</h3>
           </div>
-          <div className="text-white/60 text-sm leading-relaxed whitespace-pre-line">
+          <div className={`text-sm leading-relaxed whitespace-pre-line ${subText}`}>
             {lesson.content}
           </div>
         </div>
@@ -175,33 +189,27 @@ export default function LessonPlayer({ lesson, allLessons, onComplete, onNavigat
         <button
           onClick={() => prevLesson && onNavigate(prevLesson.id)}
           disabled={!prevLesson}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed ${heading}`}
+          style={navBtn}>
           <ChevronLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">
-            {prevLesson ? prevLesson.title : 'Oldingi dars'}
-          </span>
+          <span className="hidden sm:inline">{prevLesson ? prevLesson.title : 'Oldingi dars'}</span>
           <span className="sm:hidden">Oldingi</span>
         </button>
 
         {onGoToTask && (
           <button onClick={onGoToTask}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-            style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.25)' }}>
-            <span className="text-amber-400">📋</span>
-            <span className="text-amber-300">Topshiriqqa o&apos;tish</span>
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)' }}>
+            <span>📋</span>
+            <span className="text-amber-500">Topshiriqqa o&apos;tish</span>
           </button>
         )}
 
         <button
           onClick={() => nextLesson && onNavigate(nextLesson.id)}
           disabled={!nextLesson}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
-        >
-          <span className="hidden sm:inline">
-            {nextLesson ? nextLesson.title : 'Keyingi dars'}
-          </span>
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-blue-600">
+          <span className="hidden sm:inline">{nextLesson ? nextLesson.title : 'Keyingi dars'}</span>
           <span className="sm:hidden">Keyingi</span>
           <ChevronRight className="h-4 w-4" />
         </button>

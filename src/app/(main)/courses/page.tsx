@@ -80,6 +80,33 @@ const ALL_COURSES: CourseItem[] = [
     lessons: 11, students: 198, rating: 4.8,
     enrolled: false,
   },
+  {
+    id: '9', title: 'Adobe Photoshop & Illustrator', emoji: '🖼️',
+    description: "Photoshop va Illustrator asoslaridan logo dizayn, brending, rang nazariyasi va tipografiyagacha to'liq kurs.",
+    instructor: 'Malika Yusupova', instructorAvatar: 'MY',
+    category: 'Dizayn', level: "Boshlang'ich",
+    color: 'from-orange-500 to-red-600', duration: '20 soat',
+    lessons: 16, students: 356, rating: 4.9,
+    enrolled: false,
+  },
+  {
+    id: '10', title: 'React va Modern Frontend', emoji: '⚛️',
+    description: "React, Hooks, Context API va zamonaviy frontend development texnikalari bilan web-ilovalar yaratish.",
+    instructor: 'Jasur Toshmatov', instructorAvatar: 'JT',
+    category: 'Dasturlash', level: "O'rta",
+    color: 'from-sky-500 to-blue-700', duration: '16 soat',
+    lessons: 20, students: 289, rating: 4.8,
+    enrolled: false,
+  },
+  {
+    id: '11', title: 'Backend, Database va Deployment', emoji: '🗄️',
+    description: "Node.js, Express.js, MongoDB/PostgreSQL bilan server yaratish va cloudga deploy qilish to'liq kursi.",
+    instructor: 'Jasur Toshmatov', instructorAvatar: 'JT',
+    category: 'Dasturlash', level: 'Yuqori',
+    color: 'from-slate-600 to-gray-800', duration: '22 soat',
+    lessons: 24, students: 167, rating: 4.7,
+    enrolled: false,
+  },
 ]
 
 export default function CoursesPage() {
