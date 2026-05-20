@@ -6,22 +6,24 @@ import { useTheme } from 'next-themes'
 export function useMountedTheme() {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
-  
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Prevent flash by rendering nothing until mounted
-  // After mount, use theme state properly
   const isDark = useMemo(() => {
-    if (!mounted) return true // Default to dark during SSR
-    return theme === 'dark'
+    if (mounted) return theme === 'dark'
+    // Read the class next-themes already set on <html> before React mounts
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark')
+    }
+    return true // SSR fallback
   }, [mounted, theme])
 
-  return { 
-    isDark, 
-    mounted, 
-    theme: theme || 'dark', 
-    setTheme 
+  return {
+    isDark,
+    mounted,
+    theme: theme || 'dark',
+    setTheme
   }
 }

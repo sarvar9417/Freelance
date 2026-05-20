@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { GraduationCap, UserCircle } from 'lucide-react'
+import { GraduationCap, UserCircle, Sun, Moon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { useMountedTheme } from '@/hooks/useTheme'
@@ -13,7 +13,7 @@ const ROLE_DASHBOARD: Record<string, string> = {
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const { isDark } = useMountedTheme()
+  const { isDark, setTheme } = useMountedTheme()
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
@@ -85,6 +85,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </nav>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className={`p-2 rounded-xl transition-all ${
+                isDark
+                  ? 'text-white/40 hover:text-white hover:bg-white/5'
+                  : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+              }`}
+              aria-label="Mavzuni o'zgartirish"
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
             {user ? (
               <>
                 <Link href="/profile" className={`flex items-center gap-1.5 text-sm font-medium transition-colors px-3 py-2 rounded-xl ${
