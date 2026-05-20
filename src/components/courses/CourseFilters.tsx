@@ -1,11 +1,14 @@
 'use client'
 
 import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { METHODOLOGY_LABELS } from '@/types'
+import type { Methodology } from '@/types'
 
 export interface FilterState {
   search: string
   category: string
   level: string
+  methodology: string
 }
 
 interface Props {
@@ -17,14 +20,15 @@ interface Props {
 
 const CATEGORIES = ['Barchasi', 'Freelancing', 'Dizayn', 'Marketing', 'Dasturlash', 'Copywriting', 'SMM']
 const LEVELS = ['Barchasi', "Boshlang'ich", "O'rta", 'Yuqori']
+const ALL_METHODOLOGIES = Object.entries(METHODOLOGY_LABELS) as [Methodology, typeof METHODOLOGY_LABELS[Methodology]][]
 
 export default function CourseFilters({ filters, onChange, totalResults, isDark = true }: Props) {
   const set = (key: keyof FilterState) => (val: string) =>
     onChange({ ...filters, [key]: val })
 
-  const hasActive = filters.category !== 'Barchasi' || filters.level !== 'Barchasi' || filters.search !== ''
+  const hasActive = filters.category !== 'Barchasi' || filters.level !== 'Barchasi' || filters.methodology !== 'Barchasi' || filters.search !== ''
 
-  const reset = () => onChange({ search: '', category: 'Barchasi', level: 'Barchasi' })
+  const reset = () => onChange({ search: '', category: 'Barchasi', level: 'Barchasi', methodology: 'Barchasi' })
 
   return (
     <div className="space-y-4">
@@ -101,6 +105,29 @@ export default function CourseFilters({ filters, onChange, totalResults, isDark 
               }`}
               style={filters.level !== lvl ? (isDark ? { background: 'rgba(255,255,255,0.05)' } : { background: 'transparent' }) : {}}>
               {lvl}
+            </button>
+          ))}
+        </div>
+
+        <div className={`h-4 w-px hidden sm:block flex-shrink-0 ${
+          isDark ? 'bg-white/10' : 'bg-gray-200'
+        }`} />
+
+        {/* Methodology chips */}
+        <div className="flex flex-wrap gap-2">
+          {ALL_METHODOLOGIES.map(([key, m]) => (
+            <button key={key} onClick={() => set('methodology')(filters.methodology === key ? 'Barchasi' : key)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                filters.methodology === key
+                  ? isDark
+                    ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/30'
+                    : 'bg-cyan-600 text-white shadow-sm'
+                  : isDark
+                    ? 'text-white/40 hover:text-white hover:bg-white/8'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+              style={filters.methodology !== key ? (isDark ? { background: 'rgba(255,255,255,0.05)' } : { background: 'transparent' }) : {}}>
+              {m.icon} {m.short}
             </button>
           ))}
         </div>

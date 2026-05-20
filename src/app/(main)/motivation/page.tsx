@@ -26,16 +26,36 @@ import DailyQuote from '@/components/motivation/DailyQuote'
 import SuccessStories from '@/components/motivation/SuccessStories'
 import { createClient } from '@/lib/supabase/client'
 
-/* ── Haftaning eng yaxshi o'quvchisi (mock) ── */
-const TOP_STUDENTS = [
-  { rank: 1, name: 'Jasur Toshmatov',  xp: 2840, badge: '🥇', streak: 21, achievement: 'Forum yulduzi' },
-  { rank: 2, name: 'Malika Yusupova',  xp: 2610, badge: '🥈', streak: 14, achievement: 'Kurs bitiruvchi' },
-  { rank: 3, name: 'Bobur Karimov',    xp: 2390, badge: '🥉', streak: 18, achievement: 'Loyiha ustasi' },
-  { rank: 4, name: 'Dilnoza Xasanova', xp: 2100, badge: '4️⃣', streak: 9,  achievement: 'Izohlar qiroli' },
-  { rank: 5, name: 'Ulugbek Mirzaev',  xp: 1980, badge: '5️⃣', streak: 7,  achievement: 'Yangi yulduz' },
+interface LeaderboardEntry {
+  rank: number
+  user_id: string
+  full_name: string
+  total_xp: number
+  current_level: number
+  streak: number
+  achievement: string
+}
+
+const XP_ACHIEVEMENTS = [
+  { min: 5000, title: 'Freelance ustasi', emoji: '🏆' },
+  { min: 3000, title: 'Loyiha yulduzi', emoji: '⭐' },
+  { min: 1500, title: 'Kurs bitiruvchi', emoji: '🎓' },
+  { min: 500, title: 'Yangi yulduz', emoji: '🌱' },
+  { min: 0, title: 'Boshlovchi', emoji: '💪' },
 ]
 
-/* ── Motivatsion videolar (mock) ── */
+function getAchievement(xp: number) {
+  return XP_ACHIEVEMENTS.find(a => xp >= a.min) ?? XP_ACHIEVEMENTS[XP_ACHIEVEMENTS.length - 1]
+}
+
+function getLevelBadge(level: number) {
+  if (level >= 20) return '🥇'
+  if (level >= 10) return '🥈'
+  if (level >= 5) return '🥉'
+  return level <= 1 ? '🌱' : '⭐'
+}
+
+/* ── Motivatsion videolar ── */
 const VIDEOS = [
   {
     id: 1,
@@ -46,6 +66,7 @@ const VIDEOS = [
     category: 'Fiverr',
     color: 'from-emerald-600 to-emerald-800',
     emoji: '💰',
+    youtubeId: 'BGHhOGagI7Q',
   },
   {
     id: 2,
@@ -56,6 +77,7 @@ const VIDEOS = [
     category: 'Upwork',
     color: 'from-blue-600 to-blue-800',
     emoji: '🚀',
+    youtubeId: 'VyocT99c2VI',
   },
   {
     id: 3,
@@ -66,6 +88,7 @@ const VIDEOS = [
     category: 'Portfolio',
     color: 'from-purple-600 to-purple-800',
     emoji: '🎨',
+    youtubeId: '6zxJvxs-LNw',
   },
   {
     id: 4,
@@ -76,6 +99,7 @@ const VIDEOS = [
     category: 'Muloqot',
     color: 'from-rose-600 to-rose-800',
     emoji: '🤝',
+    youtubeId: 'aLMCdZowCQo',
   },
   {
     id: 5,
@@ -86,6 +110,7 @@ const VIDEOS = [
     category: 'Biznes',
     color: 'from-amber-600 to-amber-800',
     emoji: '📊',
+    youtubeId: 'ESl-1vI8nfs',
   },
   {
     id: 6,
@@ -96,6 +121,7 @@ const VIDEOS = [
     category: 'Til',
     color: 'from-cyan-600 to-cyan-800',
     emoji: '🌍',
+    youtubeId: 'BGHhOGagI7Q',
   },
 ]
 
@@ -115,6 +141,246 @@ const AVATAR_GRADIENTS = [
   'from-amber-500 to-amber-700',
 ]
 
+/* ── Frilanserlik bilimdon — Didaktik oʻyin ── */
+const QUIZ_QUESTIONS = [
+  {
+    question: 'Frilanserlikda eng katta platforma?',
+    options: ['Upwork', 'Freelancer', 'Fiverr'],
+    correct: 0,
+  },
+  {
+    question: 'Mijoz bilan birinchi muloqotda nima qilish kerak?',
+    options: ['Darhol narx aytish', 'Aniq savol berish', 'Portfolio yuborish'],
+    correct: 1,
+  },
+  {
+    question: "Portfolio'da nechta ish bo'lishi kerak?",
+    options: ['1-2 ta', '3-5 ta', '10+ ta'],
+    correct: 1,
+  },
+  {
+    question: "Fiverr'da yangi boshlovchi qancha narx qo'yishi mumkin?",
+    options: ['$5-25', '$50-100', '$200+'],
+    correct: 0,
+  },
+  {
+    question: "Mijozni jalb qilishning eng yaxshi usuli?",
+    options: ["Ko'p taklif yuborish", "Sifatli taklif yozish", "Arzon narx qo'yish"],
+    correct: 1,
+  },
+]
+
+function DidacticGame({ isDark }: { isDark: boolean }) {
+  const [open, setOpen] = useState(false)
+  const [step, setStep] = useState(0)
+  const [score, setScore] = useState(0)
+  const [selected, setSelected] = useState<number | null>(null)
+  const [showResult, setShowResult] = useState(false)
+  const [finished, setFinished] = useState(false)
+
+  const reset = () => {
+    setStep(0)
+    setScore(0)
+    setSelected(null)
+    setShowResult(false)
+    setFinished(false)
+  }
+
+  const handleAnswer = (idx: number) => {
+    if (selected !== null) return
+    setSelected(idx)
+    if (idx === QUIZ_QUESTIONS[step].correct) setScore(s => s + 1)
+    setTimeout(() => {
+      if (step < QUIZ_QUESTIONS.length - 1) {
+        setStep(s => s + 1)
+        setSelected(null)
+      } else {
+        setShowResult(true)
+        setFinished(true)
+      }
+    }, 800)
+  }
+
+  const progress = ((step + (showResult ? 1 : 0)) / QUIZ_QUESTIONS.length) * 100
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg`}>
+            <span className="text-sm">🧠</span>
+          </div>
+          <div>
+            <h2 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Frilanserlik bilimdon</h2>
+            <p className={`text-sm ${isDark ? 'text-white/35' : 'text-gray-500'}`}>
+              {finished ? `${score}/${QUIZ_QUESTIONS.length} to'g'ri` : 'Bilimingizni sinang'}
+            </p>
+          </div>
+        </div>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => { setOpen(!open); if (!open) reset() }}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 transition-all shadow-lg shadow-emerald-900/30"
+        >
+          {open ? 'Yopish' : 'O\'ynash'}
+          <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </motion.div>
+        </motion.button>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: 'easeInOut' }}
+            className="overflow-hidden rounded-2xl"
+            style={isDark ? { border: '1px solid rgba(255,255,255,0.07)' } : { border: '1px solid #e5e7eb' }}
+          >
+            <div className={`p-6 ${isDark ? '' : 'bg-white'}`}>
+              {!finished ? (
+                <div className="space-y-6">
+                  {/* Progress bar */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={isDark ? { background: 'rgba(255,255,255,0.07)' } : { background: '#e5e7eb' }}>
+                      <motion.div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.5 }}
+                      />
+                    </div>
+                    <span className={`text-xs font-semibold tabular-nums flex-shrink-0 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+                      {step + 1}/{QUIZ_QUESTIONS.length}
+                    </span>
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={step}
+                      initial={{ opacity: 0, x: 24 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -24 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4"
+                    >
+                      <p className={`text-base font-semibold leading-relaxed ${isDark ? 'text-white/85' : 'text-gray-800'}`}>
+                        {QUIZ_QUESTIONS[step].question}
+                      </p>
+
+                      <div className="grid gap-2.5">
+                        {QUIZ_QUESTIONS[step].options.map((opt, idx) => {
+                          let borderColor = ''
+                          let bgColor = ''
+                          if (selected === idx) {
+                            if (idx === QUIZ_QUESTIONS[step].correct) {
+                              borderColor = isDark ? 'border-emerald-500/50' : 'border-emerald-500'
+                              bgColor = isDark ? 'rgba(16,185,129,0.1)' : '#ecfdf5'
+                            } else {
+                              borderColor = isDark ? 'border-rose-500/50' : 'border-rose-500'
+                              bgColor = isDark ? 'rgba(244,63,94,0.1)' : '#fef2f2'
+                            }
+                          } else if (selected !== null && idx === QUIZ_QUESTIONS[step].correct) {
+                            borderColor = isDark ? 'border-emerald-500/50' : 'border-emerald-500'
+                            bgColor = isDark ? 'rgba(16,185,129,0.08)' : '#f0fdf4'
+                          }
+
+                          return (
+                            <motion.button
+                              key={idx}
+                              whileHover={selected === null ? { scale: 1.01 } : {}}
+                              whileTap={selected === null ? { scale: 0.99 } : {}}
+                              onClick={() => handleAnswer(idx)}
+                              disabled={selected !== null}
+                              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                selected !== null ? 'cursor-default' : 'cursor-pointer'
+                              } ${isDark ? 'text-white/80' : 'text-gray-700'}`}
+                              style={{
+                                background: bgColor || (isDark ? 'rgba(255,255,255,0.04)' : '#f9fafb'),
+                                border: `1px solid ${borderColor || (isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb')}`,
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
+                                  selected !== null && idx === QUIZ_QUESTIONS[step].correct
+                                    ? 'bg-emerald-500 text-white'
+                                    : selected === idx
+                                    ? 'bg-rose-500 text-white'
+                                    : isDark
+                                    ? 'bg-white/10 text-white/40'
+                                    : 'bg-gray-200 text-gray-500'
+                                }`}>
+                                  {selected !== null && idx === QUIZ_QUESTIONS[step].correct
+                                    ? '✓'
+                                    : selected === idx
+                                    ? '✗'
+                                    : String.fromCharCode(65 + idx)}
+                                </span>
+                                {opt}
+                              </div>
+                            </motion.button>
+                          )
+                        })}
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-6 space-y-4"
+                >
+                  <span className="text-5xl block">
+                    {score === QUIZ_QUESTIONS.length ? '🏆' : score >= 3 ? '👏' : '💪'}
+                  </span>
+                  <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {score === QUIZ_QUESTIONS.length
+                      ? "Mukammal! Siz frilanserlik bo'yicha ekspertsiz!"
+                      : score >= 3
+                      ? "Yaxshi! Yana bir oz o'rganish kerak"
+                      : "Qayta urinib ko'ring!"}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+                    {score}/{QUIZ_QUESTIONS.length} ta to&apos;g&apos;ri javob
+                  </p>
+                  <div className="flex justify-center gap-1.5">
+                    {Array.from({ length: QUIZ_QUESTIONS.length }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
+                          i < score
+                            ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
+                            : isDark
+                            ? 'bg-white/5 text-white/20 border border-white/10'
+                            : 'bg-gray-100 text-gray-300 border border-gray-200'
+                        }`}
+                      >
+                        {i < score ? '✓' : i + 1}
+                      </div>
+                    ))}
+                  </div>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={reset}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 transition-all shadow-lg shadow-emerald-900/30"
+                  >
+                    Qayta o&apos;ynash
+                  </motion.button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  )
+}
+
 export default function MotivationPage() {
   const { isDark } = useMountedTheme()
 
@@ -125,6 +391,7 @@ export default function MotivationPage() {
   const [goalsFetched, setGoalsFetched] = useState(false)
   const [userId, setUserId]       = useState<string | null>(null)
   const [playingId, setPlayingId] = useState<number | null>(null)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
 
   /* ── Foydalanuvchi & maqsadlarni yuklash ── */
   useEffect(() => {
@@ -139,6 +406,29 @@ export default function MotivationPage() {
         .order('created_at', { ascending: false })
       setGoals(g ?? [])
       setGoalsFetched(true)
+
+      const { data: lb } = await supabase
+        .from('user_xp')
+        .select('user_id, total_xp, current_level, users!inner(full_name, avatar_url)')
+        .order('total_xp', { ascending: false })
+        .limit(10)
+
+      if (lb) {
+        const mapped: LeaderboardEntry[] = lb.map((row: { user_id: string; total_xp: number; current_level: number; users: { full_name: string }[] }, idx: number) => {
+          const ach = getAchievement(row.total_xp)
+          const user = row.users?.[0]
+          return {
+            rank: idx + 1,
+            user_id: row.user_id,
+            full_name: user?.full_name ?? 'Foydalanuvchi',
+            total_xp: row.total_xp,
+            current_level: row.current_level,
+            streak: Math.min(Math.floor(row.total_xp / 100), 365),
+            achievement: ach.title,
+          }
+        })
+        setLeaderboard(mapped)
+      }
     })
   }, [])
 
@@ -223,42 +513,55 @@ export default function MotivationPage() {
           className="rounded-2xl overflow-hidden"
           style={isDark ? { border: '1px solid rgba(255,255,255,0.07)' } : { border: '1px solid #e5e7eb' }}
         >
-          {TOP_STUDENTS.map((s, i) => {
-            const initials = s.name.split(' ').map(w => w[0]).join('').toUpperCase()
-            const gradColor = AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]
-            const isTop3 = i < 3
+          {leaderboard.length === 0 ? (
+            <div className={`px-5 py-8 text-center ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+              <p className="text-sm">Reyting yuklanmoqda...</p>
+            </div>
+          ) : (
+            leaderboard.map((s, i) => {
+              const initials = s.full_name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+              const gradColor = AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]
+              const isTop3 = i < 3
+              const badge = getLevelBadge(s.current_level)
 
-            return (
-              <motion.div
-                key={s.rank}
-                initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07, duration: 0.3 }}
-                className={`flex items-center gap-4 px-5 py-4 transition-colors ${isDark ? (i < TOP_STUDENTS.length - 1 ? 'border-b border-white/5' : '') : (i < TOP_STUDENTS.length - 1 ? 'border-b border-gray-100' : '')} ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'} ${isTop3 ? '' : ''}`}
-                style={i === 0 ? (isDark ? { background: 'rgba(245,158,11,0.06)' } : { background: '#fefce8' }) : {}}
-              >
-                <span className="text-xl w-7 text-center flex-shrink-0">{s.badge}</span>
-
-                <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${gradColor} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md`}>
-                  {initials}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold truncate ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{s.name}</p>
-                  <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{s.achievement}</p>
-                </div>
-
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className={`flex items-center gap-1 text-xs ${isDark ? 'text-amber-400/70' : 'text-amber-600'}`}>
-                    <Flame className="h-3 w-3" />
-                    <span>{s.streak} kun</span>
+              return (
+                <motion.div
+                  key={s.rank}
+                  initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.07, duration: 0.3 }}
+                  className={`flex items-center gap-4 px-5 py-4 transition-colors ${isDark ? (i < leaderboard.length - 1 ? 'border-b border-white/5' : '') : (i < leaderboard.length - 1 ? 'border-b border-gray-100' : '')} ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
+                  style={i === 0 ? (isDark ? { background: 'rgba(245,158,11,0.06)' } : { background: '#fefce8' }) : {}}
+                >
+                  <div className="relative w-7 text-center flex-shrink-0">
+                    {isTop3 ? (
+                      <span className="text-xl">{['🥇', '🥈', '🥉'][i]}</span>
+                    ) : (
+                      <span className={`text-xs font-bold ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{s.rank}</span>
+                    )}
                   </div>
-                  <div className={`font-bold text-sm tabular-nums ${isTop3 ? (isDark ? 'text-amber-400' : 'text-amber-600') : (isDark ? 'text-white/50' : 'text-gray-400')}`}>
-                    {s.xp.toLocaleString()} XP
+
+                  <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${gradColor} flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md`}>
+                    {initials}
                   </div>
-                </div>
-              </motion.div>
-            )
-          })}
+
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-semibold truncate ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{s.full_name}</p>
+                    <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{badge} {s.achievement}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className={`flex items-center gap-1 text-xs ${isDark ? 'text-amber-400/70' : 'text-amber-600'}`}>
+                      <Flame className="h-3 w-3" />
+                      <span>{s.streak} kun</span>
+                    </div>
+                    <div className={`font-bold text-sm tabular-nums ${isTop3 ? (isDark ? 'text-amber-400' : 'text-amber-600') : (isDark ? 'text-white/50' : 'text-gray-400')}`}>
+                      {s.total_xp.toLocaleString()} XP
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })
+          )}
         </div>
       </section>
 
@@ -319,18 +622,23 @@ export default function MotivationPage() {
                 </div>
               </div>
 
-              {/* "Tez kunda" placeholder */}
+              {/* YouTube player */}
               <AnimatePresence>
-                {playingId === v.id && (
+                {playingId === v.id && v.youtubeId && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="px-4 pb-4 overflow-hidden"
-                    style={isDark ? { background: 'rgba(255,255,255,0.03)' } : { background: '#f9fafb' }}
+                    className="overflow-hidden"
                   >
-                    <p className={`text-xs text-center py-2 rounded-xl ${isDark ? 'text-white/40 border border-white/8' : 'text-gray-500 border border-gray-200'}`}>
-                      🎬 Video tez orada qo&apos;shiladi
-                    </p>
+                    <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                      <iframe
+                        src={`https://www.youtube.com/embed/${v.youtubeId}?autoplay=1`}
+                        title={v.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                      />
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -481,6 +789,9 @@ export default function MotivationPage() {
           </div>
         )}
       </section>
+
+      {/* ── Didaktik oʻyin ── */}
+      <DidacticGame isDark={isDark} />
 
       {/* ── Haftalik chaqiruv ── */}
       <motion.section

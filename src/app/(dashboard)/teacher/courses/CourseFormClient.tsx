@@ -8,6 +8,8 @@ import {
   Image, Link as LinkIcon, Tag, BarChart2, Globe,
 } from 'lucide-react'
 import { createCourse, updateCourse, deleteCourse } from '../actions'
+import type { Methodology } from '@/types'
+import { METHODOLOGY_LABELS } from '@/types'
 
 const CATEGORIES = [
   'Web Development', 'Graphic Design', 'Content Writing',
@@ -25,6 +27,7 @@ interface FormData {
   emoji: string
   image_url: string
   preview_video_url: string
+  methodologies: string[]
   is_published: boolean
 }
 
@@ -43,6 +46,7 @@ export default function CourseFormClient({ mode, courseId, initial }: Props) {
     title: '', description: '', full_description: '',
     category: CATEGORIES[0], level: LEVELS[0],
     emoji: '📚', image_url: '', preview_video_url: '',
+    methodologies: [],
     is_published: false,
   })
 
@@ -168,8 +172,49 @@ export default function CourseFormClient({ mode, courseId, initial }: Props) {
           </div>
         </motion.div>
 
+        {/* Metodikalar */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          className="rounded-2xl p-5 space-y-3"
+          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+        >
+          <h2 className="text-white text-sm font-semibold flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-cyan-400" /> Metodikalar (ixtiyoriy)
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {(Object.entries(METHODOLOGY_LABELS) as [Methodology, typeof METHODOLOGY_LABELS[Methodology]][]).map(([key, m]) => {
+              const selected = form.methodologies.includes(key)
+              return (
+                <button key={key} type="button" onClick={() => {
+                  setForm(prev => ({
+                    ...prev,
+                    methodologies: selected
+                      ? prev.methodologies.filter(k => k !== key)
+                      : [...prev.methodologies, key],
+                  }))
+                }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                    selected
+                      ? 'text-white'
+                      : 'text-white/30 border-white/10 hover:text-white/60'
+                  }`}
+                  style={selected ? {
+                    background: `${m.color.replace('text-', '').replace('-400', '')}30`,
+                    borderColor: `${m.color.replace('text-', '').replace('-400', '')}60`,
+                    color: m.color.replace('text-', ''),
+                  } : { background: 'rgba(255,255,255,0.04)' }}>
+                  <span>{m.icon}</span>
+                  <span className="ml-1">{m.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          {form.methodologies.length > 0 && (
+            <p className="text-white/20 text-xs">Tanlangan metodikalar kurs kartasida ko&apos;rinadi</p>
+          )}
+        </motion.div>
+
         {/* Media */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="rounded-2xl p-5 space-y-4"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
         >

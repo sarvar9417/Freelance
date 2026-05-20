@@ -17,10 +17,10 @@ CREATE POLICY "Tasdiqlangan hikoyalar hamma uchun" ON success_stories FOR SELECT
 CREATE POLICY "O'z hikoyasini qo'shish" ON success_stories FOR INSERT WITH CHECK (auth.uid() = author_id);
 ───────────────────────────────────────────────────────────────────────── */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useMountedTheme } from '@/hooks/useTheme'
-import { Star, Trophy, TrendingUp, Plus, Send, Loader2, X, ChevronRight } from 'lucide-react'
+import { Star, Trophy, TrendingUp, Plus, Send, Loader2, X, ChevronRight, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Story {
@@ -41,9 +41,9 @@ const getThemeStyles = (isDark: boolean) => ({
   border: isDark ? 'rgba(255,255,255,0.07)' : '#e5e7eb',
 })
 
-const MOCK_STORIES: Story[] = [
+const SEED_STORIES: Story[] = [
   {
-    id: '1',
+    id: 'seed-1',
     author_name: 'Jasur Toshmatov',
     title: 'Fiverr da birinchi $500 ni qanday topdim',
     content: 'FreelancerSchool ga yozilishimdan 3 oy o\'tib, Fiverr da birinchi buyurtmamni oldim. Logo dizayn xizmati uchun $15 dan boshladim. Har kuni sifat yaxshilab, 6 oyda $500+ oylik daromadga erishdim. Eng muhimi — mijozlar bilan samimiy muloqot.',
@@ -52,7 +52,7 @@ const MOCK_STORIES: Story[] = [
     created_at: '2024-11-15',
   },
   {
-    id: '2',
+    id: 'seed-2',
     author_name: 'Malika Yusupova',
     title: 'Upwork da Top Rated Status ga erishdim',
     content: 'Tarjimon sifatida Upwork da ish boshladim. Birinchi 3 oy qiyin edi — faqat 2 ta buyurtma oldim. Lekin profil to\'ldirib, portfolio qo\'shib, Job Success 100%ga yetkazdim. Endi oyiga 15-20 ta loyiha bajaraman.',
@@ -61,7 +61,7 @@ const MOCK_STORIES: Story[] = [
     created_at: '2024-12-01',
   },
   {
-    id: '3',
+    id: 'seed-3',
     author_name: 'Bobur Karimov',
     title: 'O\'zbek o\'quvchisidan xalqaro freelancerga',
     content: 'Dasturlashni bilardim, lekin mijoz topishni bilmasdim. FreelancerSchool kurslari orqali CV va profil yozishni o\'rgandim. Birinchi mijozim Germaniyadan edi. Endi remote asosda ishlayman va oylik daromadim avvalgidan 3 barobar ko\'paydi.',
@@ -70,7 +70,7 @@ const MOCK_STORIES: Story[] = [
     created_at: '2025-01-10',
   },
   {
-    id: '4',
+    id: 'seed-4',
     author_name: 'Dilnoza Xasanova',
     title: 'SMM manager sifatida mustaqil biznesga',
     content: 'Ijtimoiy tarmoqlarni yaxshi bilar edim, lekin daromad yo\'q edi. Kurs orqali narx belgilash va shartnoma tuzishni o\'rgandim. Hozir 5 ta doimiy mijozim bor — har oyda barqaror daromad.',
@@ -201,11 +201,28 @@ export default function SuccessStories() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+  const [dbStories, setDbStories] = useState<Story[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchStories = useCallback(async () => {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('success_stories')
+      .select('*')
+      .eq('approved', true)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    setDbStories(data ?? [])
+    setLoading(false)
+  }, [])
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user))
-  }, [])
+    fetchStories()
+  }, [fetchStories])
+
+  const stories = dbStories.length > 0 ? dbStories : SEED_STORIES
 
   return (
     <div className="space-y-4">
@@ -236,14 +253,23 @@ export default function SuccessStories() {
             className="rounded-2xl p-5 overflow-hidden"
             style={isDark ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' } : { background: 'white', border: '1px solid #e5e7eb' }}
           >
-            <AddStoryForm onClose={() => setShowForm(false)} isDark={isDark} />
+            <AddStoryForm onClose={() => { setShowForm(false); fetchStories() }} isDark={isDark} />
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Hikoyalar ro'yxati */}
       <div className="grid gap-4 sm:grid-cols-2">
-        {MOCK_STORIES.map((story, i) => {
+        {loading ? (
+          <div className="col-span-2 flex justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-white/30" />
+          </div>
+        ) : stories.length === 0 ? (
+          <div className={`col-span-2 text-center py-8 text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+            Hali hikoyalar yo'q. Birinchi bo'ling!
+          </div>
+        ) : null}
+        {stories.map((story, i) => {
           const initials = story.author_name.split(' ').map(w => w[0]).join('').toUpperCase()
           const gradColor = AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]
           const achColor  = ACHIEVEMENT_COLORS[story.achievement] ?? 'from-blue-600 to-blue-800'

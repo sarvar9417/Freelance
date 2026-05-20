@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useMountedTheme } from '@/hooks/useTheme'
 import {
   Briefcase, UserCheck, Image, DollarSign,
-  MessageCircle, ChevronRight, CheckCircle2,
+  MessageCircle, CreditCard, ChevronRight, CheckCircle2,
   Lightbulb, Star, AlertTriangle, ArrowRight,
 } from 'lucide-react'
 import PlatformGuide from '@/components/platforms/PlatformGuide'
@@ -154,12 +154,57 @@ const COMMUNICATION_TIPS = [
   },
 ]
 
+/* ── To'lov tizimlari ── */
+const PAYMENT_METHODS = [
+  {
+    icon: '🌍',
+    name: 'PayPal',
+    desc: 'Xalqaro freelancerlar orasida eng keng tarqalgan to\'lov tizimi. Fiverr, Upwork va boshqa platformalardan to\'lovlarni qabul qilish uchun ideal.',
+    pros: ['Dunyo bo\'ylab eng keng tarqalgan', 'Xavfsiz va tez to\'lovlar', 'Fiverr/Upwork bilan integratsiya'],
+    cons: ['O\'zbekistonda hisob ochish cheklangan', 'Komissiya 4-5% gacha', 'Ba\'zi mamlakatlarda ishlamaydi'],
+    limits: '$50 – $10,000 / oy',
+  },
+  {
+    icon: '💳',
+    name: 'Payoneer',
+    desc: 'Freelancerlar uchun maxsus yaratilgan to\'lov platformasi. Fiverr, Upwork va Freelancer.com dan to\'g\'ridan-to\'g\'ri pul chiqarish mumkin.',
+    pros: ['Fiverr/Upwork bilan to\'g\'ridan-to\'g\'ri integratsiya', 'O\'zbek karta bilan olish mumkin', 'Global miqyosda qabul qilinadi'],
+    cons: ['Yillik xizmat haqqi $29.95', 'Ayrim xizmatlar uchun qo\'shimcha komissiya', 'Karta chiqarish biroz vaqt oladi'],
+    limits: '$1 – $15,000 / oy',
+  },
+  {
+    icon: '🏦',
+    name: 'Wise (TransferWise)',
+    desc: 'Eng past komissiyali xalqaro pul o\'tkazmalari. Real kurs bo\'yicha konvertatsiya — banklardan 8-10 barobar arzon.',
+    pros: ['Real ayirboshlash kursi', 'Past komissiya (0.4-1%)', 'Tez yetib boradi (1-2 kun)'],
+    cons: ['O\'zbekistonda to\'liq ishlamaydi', 'Ayrim banklar bilan muammo bo\'lishi mumkin'],
+    limits: '$1 – $1,000,000 / yil',
+  },
+  {
+    icon: '₿',
+    name: 'Crypto hamyonlar (BTC, USDT)',
+    desc: 'Kriptovalyuta orqali to\'lov — eng tez va eng arzon usul. USDT (Tether) eng ko\'p tavsiya qilinadi.',
+    pros: ['Juda tez (daqiqalar ichida)', 'Kam komissiya (< 1%)', 'Har qanday davlatdan qabul', 'Limit yo\'q'],
+    cons: ['Kurs o\'zgarishi xavfi (BTC)', 'Uzbekistonda regulyatsiya noaniq', 'Texnik bilim talab qiladi'],
+    limits: 'Cheklanmagan',
+  },
+  {
+    icon: '🇺🇿',
+    name: 'Mahalliy to\'lov tizimlari',
+    desc: 'O\'zbekistondagi eng ommabop to\'lov tizimlari — Uzum, Click, Payme. Kichik summalar uchun eng qulay.',
+    pros: ['Tez va oson — karta kerak emas', 'Har kuni ishlatiladi', 'Past komissiya'],
+    cons: ['Faqat O\'zbekiston ichida', 'Katta summalar cheklangan', 'Xalqaro platformalarda ishlamaydi'],
+    limits: 'Uzum: 10 mln so\'m/kun | Click: 7 mln so\'m/kun | Payme: 15 mln so\'m/kun',
+  },
+]
+
 const SECTIONS = [
   { id: 'platforms', label: 'Platformalar', icon: Briefcase },
   { id: 'profile', label: 'Profil maslahat', icon: UserCheck },
   { id: 'portfolio', label: 'Portfolio', icon: Image },
   { id: 'pricing', label: 'Narx strategiyasi', icon: DollarSign },
   { id: 'communication', label: 'Mijozlar bilan', icon: MessageCircle },
+  { id: 'payments', label: "To'lov tizimlari", icon: CreditCard },
 ]
 
 export default function PlatformsPage() {
@@ -466,6 +511,83 @@ export default function PlatformsPage() {
             <p className={`text-[10px] ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
               * Shablonni to&apos;g&apos;ridan-to&apos;g&apos;ri ishlatmang — har bir taklif shaxsiylashtirilgan bo&apos;lishi kerak
             </p>
+          </div>
+        </motion.section>
+      )}
+
+      {/* ── To'lov tizimlari ── */}
+      {activeSection === 'payments' && (
+        <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+          <div>
+            <h2 className={`font-bold text-xl mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>To&apos;lov tizimlari</h2>
+            <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Pulingizni qanday olish va qanday tizimlar eng qulayligi</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {PAYMENT_METHODS.map((pm, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="rounded-2xl p-5 space-y-3 hover:translate-y-[-2px] transition-transform"
+                style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{pm.icon}</span>
+                  <h3 className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{pm.name}</h3>
+                </div>
+                <p className={`text-xs leading-relaxed ${isDark ? 'text-white/45' : 'text-gray-500'}`}>{pm.desc}</p>
+
+                <div>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-emerald-400/70' : 'text-emerald-600'}`}>Afzalliklari</p>
+                  <ul className="space-y-1">
+                    {pm.pros.map((pro, j) => (
+                      <li key={j} className={`flex items-start gap-2 text-xs leading-relaxed ${isDark ? 'text-white/55' : 'text-gray-600'}`}>
+                        <CheckCircle2 className={`h-3 w-3 flex-shrink-0 mt-0.5 ${isDark ? 'text-emerald-500/60' : 'text-emerald-500'}`} />
+                        {pro}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 ${isDark ? 'text-rose-400/70' : 'text-red-600'}`}>Kamchiliklari</p>
+                  <ul className="space-y-1">
+                    {pm.cons.map((con, j) => (
+                      <li key={j} className={`flex items-start gap-2 text-xs leading-relaxed ${isDark ? 'text-white/55' : 'text-gray-600'}`}>
+                        <AlertTriangle className={`h-3 w-3 flex-shrink-0 mt-0.5 ${isDark ? 'text-rose-500/60' : 'text-red-400'}`} />
+                        {con}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div
+                  className="rounded-xl px-3 py-2 text-xs"
+                  style={isDark ? { background: 'rgba(255,255,255,0.04)' } : { background: '#f9fafb' }}
+                >
+                  <span className={`font-semibold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Limit: </span>
+                  <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{pm.limits}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Muhim eslatma */}
+          <div
+            className="rounded-2xl p-5 flex items-start gap-4"
+            style={isDark ? { background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' } : { background: '#eff6ff', border: '1px solid #dbeafe' }}
+          >
+            <DollarSign className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-500'}`} />
+            <div>
+              <p className={`font-semibold text-sm mb-1 ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>Muhim tavsiya</p>
+              <p className={`text-sm leading-relaxed ${isDark ? 'text-white/55' : 'text-gray-600'}`}>
+                Eng yaxshi strategiya — bir nechta to&apos;lov tizimiga ega bo&apos;lish. PayPal + Payoneer + Crypto
+                kombinatsiyasi sizga har qanday mijoz bilan ishlash imkonini beradi.
+                O&apos;zbekistonda eng qulay yo&apos;l: Upwork/Fiverr dan Payoneer ga, keyin O&apos;zbek karta yoki
+                mahalliy tizim orqali naqdlashtirish.
+              </p>
+            </div>
           </div>
         </motion.section>
       )}

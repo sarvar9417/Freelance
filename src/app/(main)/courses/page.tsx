@@ -111,7 +111,7 @@ const ALL_COURSES: CourseItem[] = [
 
 export default function CoursesPage() {
   const { isDark } = useMountedTheme()
-  const [filters, setFilters] = useState<FilterState>({ search: '', category: 'Barchasi', level: 'Barchasi' })
+  const [filters, setFilters] = useState<FilterState>({ search: '', category: 'Barchasi', level: 'Barchasi', methodology: 'Barchasi' })
 
   const filtered = useMemo(() => {
     return ALL_COURSES.filter(c => {
@@ -121,7 +121,8 @@ export default function CoursesPage() {
         c.description.toLowerCase().includes(filters.search.toLowerCase())
       const matchCat = filters.category === 'Barchasi' || c.category === filters.category
       const matchLvl = filters.level === 'Barchasi' || c.level === filters.level
-      return matchSearch && matchCat && matchLvl
+      const matchMethodology = filters.methodology === 'Barchasi' || (c.methodologies ?? []).includes(filters.methodology)
+      return matchSearch && matchCat && matchLvl && matchMethodology
     })
   }, [filters])
 

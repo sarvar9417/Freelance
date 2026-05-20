@@ -3,6 +3,8 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Users, Clock, BookOpen, Star, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { METHODOLOGY_LABELS } from '@/types'
+import type { Methodology } from '@/types'
 
 export interface CourseItem {
   id: string
@@ -20,6 +22,7 @@ export interface CourseItem {
   rating: number
   enrolled?: boolean
   progress?: number
+  methodologies?: string[]
 }
 
 interface Props {
@@ -75,6 +78,22 @@ export default function CourseGrid({ courses, isDark = true }: Props) {
                 style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}>
                 {course.category}
               </span>
+              {(course.methodologies ?? []).slice(0, 2).map(m => {
+                const meta = METHODOLOGY_LABELS[m as Methodology]
+                if (!meta) return null
+                return (
+                  <span key={m} className="text-xs font-semibold px-2 py-1 rounded-full"
+                    style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)' }}>
+                    {meta.icon} {meta.short}
+                  </span>
+                )
+              })}
+              {(course.methodologies?.length ?? 0) > 2 && (
+                <span className="text-xs font-semibold px-2 py-1 rounded-full text-white/60"
+                  style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)' }}>
+                  +{(course.methodologies?.length ?? 0) - 2}
+                </span>
+              )}
             </div>
 
             <div className="absolute top-3 right-3">

@@ -36,6 +36,7 @@ export async function createCourse(formData: {
   emoji: string
   image_url: string
   preview_video_url: string
+  methodologies: string[]
   is_published: boolean
 }) {
   const { supabase, userId } = await requireTeacher()
@@ -55,6 +56,7 @@ export async function createCourse(formData: {
       emoji: formData.emoji || '📚',
       image_url: formData.image_url.trim() || null,
       preview_video_url: formData.preview_video_url.trim() || null,
+      methodologies: formData.methodologies,
       teacher_id: userId,
       is_published: formData.is_published,
       status: 'pending',
@@ -76,6 +78,7 @@ export async function updateCourse(courseId: string, formData: {
   emoji: string
   image_url: string
   preview_video_url: string
+  methodologies: string[]
   is_published: boolean
 }) {
   const { supabase, userId } = await requireTeacher()
@@ -94,6 +97,7 @@ export async function updateCourse(courseId: string, formData: {
       emoji: formData.emoji || '📚',
       image_url: formData.image_url.trim() || null,
       preview_video_url: formData.preview_video_url.trim() || null,
+      methodologies: formData.methodologies,
       is_published: formData.is_published,
       updated_at: new Date().toISOString(),
     })
@@ -229,6 +233,10 @@ export async function createTask(courseId: string, formData: {
   max_score: number
   allowed_formats: string[]
   task_file_urls?: string[]
+  difficulty_level: number
+  order_index: number
+  task_type?: string
+  template_data?: Record<string, unknown> | null
 }) {
   const { supabase, userId } = await requireTeacher()
 
@@ -256,6 +264,10 @@ export async function createTask(courseId: string, formData: {
       max_score: formData.max_score,
       allowed_formats: formData.allowed_formats,
       task_file_urls: formData.task_file_urls ?? [],
+      difficulty_level: formData.difficulty_level,
+      order_index: formData.order_index,
+      task_type: formData.task_type ?? 'standard',
+      template_data: formData.template_data ?? null,
     })
 
   if (error) return { error: error.message }
@@ -271,6 +283,10 @@ export async function updateTask(taskId: string, courseId: string, formData: {
   max_score: number
   allowed_formats: string[]
   task_file_urls?: string[]
+  difficulty_level: number
+  order_index: number
+  task_type?: string
+  template_data?: Record<string, unknown> | null
 }) {
   const { supabase, userId } = await requireTeacher()
 
@@ -295,6 +311,10 @@ export async function updateTask(taskId: string, courseId: string, formData: {
       max_score: formData.max_score,
       allowed_formats: formData.allowed_formats,
       task_file_urls: formData.task_file_urls ?? [],
+      difficulty_level: formData.difficulty_level,
+      order_index: formData.order_index,
+      task_type: formData.task_type ?? 'standard',
+      template_data: formData.template_data ?? null,
     })
     .eq('id', taskId)
     .eq('course_id', courseId)
@@ -352,10 +372,14 @@ export async function reviewSubmission(submissionId: string, score: number, feed
     return { error: `Baho 0-${maxScore} oralig'ida bo'lishi kerak` }
   }
 
+  const percentage = score / maxScore
+  const grade = percentage >= 0.86 ? '5' : percentage >= 0.71 ? '4' : '3'
+
   const { error } = await supabase
     .from('submissions')
     .update({
       score,
+      grade,
       feedback: feedback.trim(),
       status: 'graded',
       reviewed_at: new Date().toISOString(),

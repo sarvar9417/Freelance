@@ -24,6 +24,8 @@ interface Props {
     max_score: number
     allowed_formats: string[]
     task_file_urls: string[]
+    difficulty_level: number
+    order_index: number
   }
 }
 
@@ -48,6 +50,8 @@ export default function TaskEditClient({ courseId, taskId, courseTitle, lessons,
     deadline: initial.deadline ? new Date(initial.deadline).toISOString().slice(0, 16) : '',
     max_score: initial.max_score,
     allowed_formats: initial.allowed_formats,
+    difficulty_level: initial.difficulty_level ?? 1,
+    order_index: initial.order_index ?? 0,
   })
 
   const set = <K extends keyof typeof form>(key: K) => (val: typeof form[K]) =>
@@ -101,6 +105,8 @@ export default function TaskEditClient({ courseId, taskId, courseTitle, lessons,
         max_score: form.max_score,
         allowed_formats: form.allowed_formats,
         task_file_urls: taskFiles,
+        difficulty_level: form.difficulty_level,
+        order_index: form.order_index,
       })
       if (result.error) { setError(result.error); return }
       router.push(`/teacher/courses/${courseId}/tasks`)
@@ -196,6 +202,47 @@ export default function TaskEditClient({ courseId, taskId, courseTitle, lessons,
                 style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'white', border: '1px solid #e5e7eb' }}
               />
             </div>
+            <div>
+              <label className={`text-xs mb-1.5 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+                <BookOpen className="h-3 w-3" /> Tartib raqami
+              </label>
+              <input
+                type="number" min={0} value={form.order_index}
+                onChange={e => set('order_index')(Number(e.target.value))}
+                className={`w-full px-3 py-2.5 rounded-xl text-sm outline-none focus:ring-1 focus:ring-amber-500/50 ${isDark ? 'text-white' : 'text-gray-900'}`}
+                style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'white', border: '1px solid #e5e7eb' }}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          className="rounded-2xl p-5"
+          style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
+        >
+          <label className={`text-xs mb-3 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+            <Star className="h-3 w-3" /> Qiyinchilik darajasi *
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { level: 1, label: 'Reproduktiv', icon: '🔄', activeBg: 'rgba(16,185,129,0.15)', activeText: '#34d399', activeBorder: 'rgba(16,185,129,0.3)', inactiveBg: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', inactiveText: isDark ? 'rgba(255,255,255,0.3)' : '#6b7280', inactiveBorder: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb' },
+              { level: 2, label: 'Produktiv', icon: '⚙️', activeBg: 'rgba(59,130,246,0.15)', activeText: '#60a5fa', activeBorder: 'rgba(59,130,246,0.3)', inactiveBg: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', inactiveText: isDark ? 'rgba(255,255,255,0.3)' : '#6b7280', inactiveBorder: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb' },
+              { level: 3, label: 'Qisman-izlanishli', icon: '🔍', activeBg: 'rgba(245,158,11,0.15)', activeText: '#fbbf24', activeBorder: 'rgba(245,158,11,0.3)', inactiveBg: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', inactiveText: isDark ? 'rgba(255,255,255,0.3)' : '#6b7280', inactiveBorder: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb' },
+              { level: 4, label: 'Kreativ', icon: '🎯', activeBg: 'rgba(168,85,247,0.15)', activeText: '#c084fc', activeBorder: 'rgba(168,85,247,0.3)', inactiveBg: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6', inactiveText: isDark ? 'rgba(255,255,255,0.3)' : '#6b7280', inactiveBorder: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb' },
+            ].map(opt => (
+              <button key={opt.level} type="button" onClick={() => set('difficulty_level')(opt.level)}
+                className="p-3 rounded-xl text-xs font-medium transition-all border"
+                style={{
+                  background: form.difficulty_level === opt.level ? opt.activeBg : opt.inactiveBg,
+                  color: form.difficulty_level === opt.level ? opt.activeText : opt.inactiveText,
+                  borderColor: form.difficulty_level === opt.level ? opt.activeBorder : opt.inactiveBorder,
+                }}
+              >
+                <span className="block text-lg mb-1">{opt.icon}</span>
+                {opt.label}
+              </button>
+            ))}
           </div>
         </motion.div>
 

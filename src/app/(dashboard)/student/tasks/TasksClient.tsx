@@ -6,10 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   ClipboardList, Clock, CheckCircle2, RotateCcw, AlertCircle,
   ChevronDown, Upload, X, Loader2, Star, Calendar, Search, Zap,
-  Paperclip, Download, MessageSquare,
+  Paperclip, Download, MessageSquare, Lock,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useMountedTheme } from '@/hooks/useTheme'
+
+import MethodologyTemplate from '@/components/tasks/MethodologyTemplate'
 
 interface Task {
   id: string
@@ -21,6 +23,10 @@ interface Task {
   task_file_urls: string[] | null
   course_id: string
   lesson_id: string | null
+  difficulty_level: number
+  order_index: number
+  task_type: string
+  template_data: Record<string, unknown> | null
   course: { id: string; title: string; emoji: string | null } | null
   submission: {
     id: string; task_id: string; status: string; score: number | null
@@ -32,6 +38,13 @@ const STATUS_MAP = {
   pending:  { label: 'Tekshirilmoqda', color: 'text-amber-400',   bg: 'bg-amber-500/10 border-amber-500/20',     icon: Clock },
   graded:   { label: 'Baholandi',       color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
   revision: { label: 'Qayta topshiring', color: 'text-red-400',   bg: 'bg-red-500/10 border-red-500/20',         icon: RotateCcw },
+}
+
+const DIFFICULTY_LABELS: Record<number, { label: string; icon: string; color: string; bg: string }> = {
+  1: { label: 'Reproduktiv', icon: '🔄', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+  2: { label: 'Produktiv', icon: '⚙️', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  3: { label: 'Qisman-izlanishli', icon: '🔍', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+  4: { label: 'Kreativ', icon: '🎯', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
 }
 
 const TOAST_STYLE = {
@@ -56,7 +69,7 @@ function getFileIcon(url: string) {
   return '📎'
 }
 
-function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
+function TaskCard({ task, locked, onRefresh }: { task: Task; locked?: boolean; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [comment, setComment] = useState('')
@@ -64,6 +77,7 @@ function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
   const [isPending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const isLocked = locked ?? false
   const sub = task.submission
   const deadline = task.deadline ? new Date(task.deadline) : null
   const daysLeft = deadline ? Math.ceil((deadline.getTime() - Date.now()) / 86400000) : null
@@ -155,12 +169,12 @@ function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden"
+      className={`rounded-2xl overflow-hidden ${isLocked ? 'opacity-60' : ''}`}
       style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
     >
       {/* Header */}
       <button
-        onClick={() => setExpanded(v => !v)}
+        onClick={() => !isLocked && setExpanded(v => !v)}
         className="w-full flex items-start gap-3 p-4 text-left hover:bg-white/[0.02] transition-colors"
       >
         <div className="p-2 rounded-lg flex-shrink-0 mt-0.5"
@@ -168,7 +182,14 @@ function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
           <ClipboardList className={`h-4 w-4 ${sub ? 'text-emerald-400' : 'text-amber-400'}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium truncate">{task.title}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-white text-sm font-medium truncate">{task.title}</p>
+            {DIFFICULTY_LABELS[task.difficulty_level] && (
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${DIFFICULTY_LABELS[task.difficulty_level].bg} ${DIFFICULTY_LABELS[task.difficulty_level].color}`}>
+                {DIFFICULTY_LABELS[task.difficulty_level].icon} {DIFFICULTY_LABELS[task.difficulty_level].label}
+              </span>
+            )}
+          </div>
           <p className="text-white/40 text-xs mt-0.5 truncate">
             {task.course?.emoji} {task.course?.title ?? '—'}
           </p>
@@ -207,6 +228,15 @@ function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
         <ChevronDown className={`h-4 w-4 text-white/30 flex-shrink-0 mt-1 transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
+      {isLocked && (
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <Lock className="h-4 w-4 text-amber-400 flex-shrink-0" />
+            <p className="text-amber-400 text-xs">Avval oldingi darajadagi topshiriqlarni bajaring</p>
+          </div>
+        </div>
+      )}
+
       {/* Expanded */}
       <AnimatePresence>
         {expanded && (
@@ -219,6 +249,13 @@ function TaskCard({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
             <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
               {task.description && (
                 <p className="text-white/60 text-sm leading-relaxed">{task.description}</p>
+              )}
+
+              {task.task_type && task.task_type !== 'standard' && (
+                <MethodologyTemplate
+                  taskType={task.task_type}
+                  templateData={task.template_data}
+                />
               )}
 
               {/* O'qituvchi biriktirgan fayllar */}
@@ -350,8 +387,16 @@ export default function TasksClient({ tasks }: { tasks: Task[]; userId: string }
     if (filter === 'submitted') return t.submission?.status === 'pending'
     if (filter === 'graded')    return t.submission?.status === 'graded'
     if (filter === 'revision')  return t.submission?.status === 'revision'
+    if (filter === 'level1')    return t.difficulty_level === 1
+    if (filter === 'level2')    return t.difficulty_level === 2
+    if (filter === 'level3')    return t.difficulty_level === 3
+    if (filter === 'level4')    return t.difficulty_level === 4
     return true
   })
+
+  const submittedLevels = new Set(
+    tasks.filter(t => t.submission).map(t => t.difficulty_level)
+  )
 
   const counts = {
     all:       tasks.length,
@@ -359,14 +404,22 @@ export default function TasksClient({ tasks }: { tasks: Task[]; userId: string }
     submitted: tasks.filter(t => t.submission?.status === 'pending').length,
     graded:    tasks.filter(t => t.submission?.status === 'graded').length,
     revision:  tasks.filter(t => t.submission?.status === 'revision').length,
+    level1:    tasks.filter(t => t.difficulty_level === 1).length,
+    level2:    tasks.filter(t => t.difficulty_level === 2).length,
+    level3:    tasks.filter(t => t.difficulty_level === 3).length,
+    level4:    tasks.filter(t => t.difficulty_level === 4).length,
   }
 
   const filters = [
-    { key: 'all',       label: 'Barchasi',         color: 'text-white/60' },
-    { key: 'pending',   label: 'Topshirilmagan',   color: 'text-white/60' },
-    { key: 'submitted', label: 'Tekshirilmoqda',   color: 'text-amber-400' },
-    { key: 'graded',    label: 'Baholangan',       color: 'text-emerald-400' },
-    { key: 'revision',  label: 'Qayta topshirish', color: 'text-red-400' },
+    { key: 'all',       label: 'Barchasi',              color: 'text-white/60' },
+    { key: 'pending',   label: 'Topshirilmagan',        color: 'text-white/60' },
+    { key: 'submitted', label: 'Tekshirilmoqda',        color: 'text-amber-400' },
+    { key: 'graded',    label: 'Baholangan',            color: 'text-emerald-400' },
+    { key: 'revision',  label: 'Qayta topshirish',      color: 'text-red-400' },
+    { key: 'level1',    label: 'Reproduktiv',            color: 'text-emerald-400' },
+    { key: 'level2',    label: 'Produktiv',              color: 'text-blue-400' },
+    { key: 'level3',    label: 'Qisman-izlanishli',      color: 'text-amber-400' },
+    { key: 'level4',    label: 'Kreativ',                color: 'text-purple-400' },
   ]
 
   return (
@@ -398,9 +451,12 @@ export default function TasksClient({ tasks }: { tasks: Task[]; userId: string }
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map(task => (
-            <TaskCard key={task.id} task={task} onRefresh={() => router.refresh()} />
-          ))}
+          {filtered.map(task => {
+            const locked = task.difficulty_level > 1 && !submittedLevels.has(task.difficulty_level - 1)
+            return (
+              <TaskCard key={task.id} task={task} locked={locked} onRefresh={() => router.refresh()} />
+            )
+          })}
         </div>
       )}
     </div>

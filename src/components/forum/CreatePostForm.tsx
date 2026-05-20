@@ -6,14 +6,16 @@ import { motion } from 'framer-motion'
 import { Send, Loader2, ChevronDown, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
-const CATEGORIES = ['Savol', 'Muhokama', 'Yangilik', 'Tavsiya', 'Yordam']
+const CATEGORIES = ['Savol', 'Muhokama', 'Yangilik', 'Tavsiya', 'Yordam', 'Master-klass', 'Hamkor qidirish']
 
 const CATEGORY_STYLES: Record<string, { dot: string; text: string }> = {
-  Savol:    { dot: 'bg-blue-500',    text: 'Savol' },
-  Muhokama: { dot: 'bg-purple-500',  text: 'Muhokama' },
-  Yangilik: { dot: 'bg-emerald-500', text: 'Yangilik' },
-  Tavsiya:  { dot: 'bg-amber-500',   text: 'Tavsiya' },
-  Yordam:   { dot: 'bg-rose-500',    text: 'Yordam' },
+  Savol:           { dot: 'bg-blue-500',    text: 'Savol' },
+  Muhokama:        { dot: 'bg-purple-500',  text: 'Muhokama' },
+  Yangilik:        { dot: 'bg-emerald-500', text: 'Yangilik' },
+  Tavsiya:         { dot: 'bg-amber-500',   text: 'Tavsiya' },
+  Yordam:          { dot: 'bg-rose-500',    text: 'Yordam' },
+  'Master-klass':  { dot: 'bg-cyan-500',    text: 'Master-klass' },
+  'Hamkor qidirish': { dot: 'bg-teal-500',    text: 'Hamkor qidirish' },
 }
 
 interface Props {

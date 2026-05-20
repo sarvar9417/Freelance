@@ -1,5 +1,27 @@
 export type Role = 'student' | 'teacher' | 'admin'
 
+export type DifficultyLevel = 1 | 2 | 3 | 4
+
+export type Methodology = 'web_kvest' | 'flipped' | 'pbl' | 'muammoli'
+
+export type TaskType = 'standard' | 'web_kvest' | 'flipped_homework' | 'flipped_inclass' | 'pbl_project' | 'muammoli_problem'
+
+export const METHODOLOGY_LABELS: Record<Methodology, { label: string; short: string; icon: string; color: string }> = {
+  web_kvest: { label: 'Veb-Kvest', short: 'Kvest', icon: '🌐', color: 'text-cyan-400' },
+  flipped: { label: 'Flipped Classroom', short: 'Flipped', icon: '🔄', color: 'text-violet-400' },
+  pbl: { label: "Project-Based Learning", short: 'PBL', icon: '📐', color: 'text-orange-400' },
+  muammoli: { label: "Muammoli ta'lim", short: 'Muammoli', icon: '🧩', color: 'text-rose-400' },
+}
+
+export const TASK_TYPE_LABELS: Record<TaskType, { label: string; icon: string }> = {
+  standard: { label: 'Standart topshiriq', icon: '📋' },
+  web_kvest: { label: 'Veb-Kvest topshirig\'i', icon: '🌐' },
+  flipped_homework: { label: 'Flipped — Uy vazifasi', icon: '🏠' },
+  flipped_inclass: { label: 'Flipped — Sinf ishi', icon: '🏫' },
+  pbl_project: { label: 'PBL — Loyiha ishi', icon: '📐' },
+  muammoli_problem: { label: "Muammoli vaziyat", icon: '🧩' },
+}
+
 export interface ForumPost {
   id: string
   title: string
@@ -73,6 +95,7 @@ export interface Course {
   emoji: string | null
   image_url: string | null
   preview_video_url: string | null
+  methodologies: string[]
   is_published: boolean
   status: 'pending' | 'approved' | 'rejected' | 'active'
   created_at: string
@@ -99,6 +122,10 @@ export interface Task {
   deadline: string | null
   max_score: number
   allowed_formats: string[] | null
+  difficulty_level: number
+  order_index: number
+  task_type: string
+  template_data: Record<string, unknown> | null
   created_at: string
 }
 
@@ -110,6 +137,8 @@ export interface Submission {
   score: number | null
   feedback: string | null
   file_urls: string[] | null
+  grade: string | null
+  assessment_criteria: Record<string, unknown> | null
   submitted_at: string
   reviewed_at: string | null
 }
@@ -164,4 +193,37 @@ export interface Notification {
   is_read: boolean
   data: Record<string, unknown> | null
   created_at: string
+}
+
+export interface MasterClass {
+  id: string
+  teacher_id: string
+  title: string
+  description: string
+  category: string
+  level: string
+  difficulty_level: DifficultyLevel
+  price: number
+  max_participants: number
+  scheduled_date: string
+  duration_minutes: number
+  image_url: string | null
+  is_published: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface TeamFinding {
+  id: string
+  owner_id: string
+  title: string
+  description: string
+  required_skills: string[]
+  team_size: number
+  current_members: number
+  category: string
+  status: 'open' | 'closed' | 'in_progress'
+  deadline: string | null
+  created_at: string
+  updated_at: string
 }

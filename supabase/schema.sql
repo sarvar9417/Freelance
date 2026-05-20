@@ -593,9 +593,9 @@ INSERT INTO courses (id, teacher_id, title, description, full_description, categ
 
 -- Darslar (course 1 uchun)
 INSERT INTO lessons (course_id, title, order_num, video_url, content) VALUES
-  ('11111111-0001-0000-0000-000000000001', 'HTML Kirish va Asosiy Teglar', 1, 'https://www.youtube.com/watch?v=qz0aGYrrlhU', 'HTML (HyperText Markup Language) web sahifalarning asosini tashkil etadi. Ushbu darsda biz asosiy HTML teglarini o''rganamiz.'),
-  ('11111111-0001-0000-0000-000000000001', 'CSS Stillash Asoslari', 2, 'https://www.youtube.com/watch?v=1PnVor36_40', 'CSS yordamida HTML elementlarini stillash, ranglar, shriftlar va joylashtirish.'),
-  ('11111111-0001-0000-0000-000000000001', 'JavaScript Kirish', 3, 'https://www.youtube.com/watch?v=W6NZfCO5SIk', 'JavaScript web sahifalarni interaktiv qilish uchun ishlatiladi.'),
+  ('11111111-0001-0000-0000-000000000001', 'HTML Kirish va Asosiy Teglar', 1, 'https://www.youtube.com/watch?v=FouHAtrFgJs', 'HTML (HyperText Markup Language) web sahifalarning asosini tashkil etadi. Ushbu darsda biz asosiy HTML teglarini o''rganamiz.'),
+  ('11111111-0001-0000-0000-000000000001', 'CSS Stillash Asoslari', 2, 'https://www.youtube.com/watch?v=jdCpkiesDuw', 'CSS yordamida HTML elementlarini stillash, ranglar, shriftlar va joylashtirish.'),
+  ('11111111-0001-0000-0000-000000000001', 'JavaScript Kirish', 3, 'https://www.youtube.com/watch?v=ZwBw9hGOgBg', 'JavaScript web sahifalarni interaktiv qilish uchun ishlatiladi.'),
   ('11111111-0001-0000-0000-000000000001', 'Responsive Design', 4, NULL, 'Media queries va Flexbox yordamida moslashuvchan dizayn yaratish.'),
   ('11111111-0001-0000-0000-000000000001', 'Portfolio Loyiha', 5, NULL, 'O''rganilgan bilimlar asosida shaxsiy portfolio sayt yaratish.');
 

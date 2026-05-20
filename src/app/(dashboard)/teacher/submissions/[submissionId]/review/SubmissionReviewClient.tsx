@@ -266,6 +266,23 @@ export default function SubmissionReviewClient({ submission: s }: { submission: 
                 <label className="text-white/50 text-xs">Ball (0–{s.max_score})</label>
                 <span className="text-white font-bold text-lg">{score}</span>
               </div>
+
+              {(() => {
+                const pct = score / s.max_score
+                let grade: { label: string; sub: string; emoji: string; color: string }
+                if (pct >= 0.86) grade = { label: '5', sub: 'Yuqori', emoji: '🏆', color: 'from-emerald-500/30 to-emerald-400/10 border-emerald-500/30 text-emerald-400' }
+                else if (pct >= 0.71) grade = { label: '4', sub: "O'rta", emoji: '⭐', color: 'from-blue-500/30 to-blue-400/10 border-blue-500/30 text-blue-400' }
+                else grade = { label: '3', sub: 'Quyi', emoji: '📋', color: 'from-amber-500/30 to-amber-400/10 border-amber-500/30 text-amber-400' }
+                return (
+                  <div className={`mt-2 py-3 px-4 rounded-xl bg-gradient-to-br ${grade.color} border flex items-center gap-3 justify-center`}>
+                    <span className="text-2xl">{grade.emoji}</span>
+                    <div className="text-center">
+                      <span className="text-xl font-bold block leading-none">{grade.label}-daraja</span>
+                      <span className="text-xs opacity-75">{grade.sub}</span>
+                    </div>
+                  </div>
+                )
+              })()}
               <input
                 type="range" min={0} max={s.max_score} value={score}
                 onChange={e => setScore(Number(e.target.value))}

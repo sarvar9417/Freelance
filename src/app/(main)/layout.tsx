@@ -13,7 +13,7 @@ const ROLE_DASHBOARD: Record<string, string> = {
 }
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const { isDark, setTheme } = useMountedTheme()
+  const { isDark, setTheme, mounted } = useMountedTheme()
   const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const dashboardHref = user ? '/student' : '/student'
 
   return (
-    <div
+    <div suppressHydrationWarning
       className={`min-h-screen ${isDark ? 'text-white' : 'text-gray-900'}`}
       style={{
         background: isDark
@@ -32,7 +32,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           : 'linear-gradient(160deg, #f9fafb 0%, #f5f5f4 50%, #f0f0ef 100%)'
       }}
     >
-      {isDark && (
+      {mounted && isDark && (
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-blue-800/6 rounded-full blur-3xl" />
           <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-purple-800/5 rounded-full blur-3xl" />

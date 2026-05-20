@@ -17,6 +17,7 @@ export default function TeacherCourseEditPage({ params }: { params: { id: string
     description: '',
     category: '',
     emoji: '',
+    methodologies: [] as string[],
     is_published: false,
   })
 

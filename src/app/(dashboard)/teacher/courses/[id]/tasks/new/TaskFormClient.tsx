@@ -6,8 +6,17 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Save, Loader2, Calendar, Star, BookOpen, FileCheck, Paperclip, X, Download } from 'lucide-react'
 import { createTask } from '../../../../actions'
 import { useMountedTheme } from '@/hooks/useTheme'
+import { TASK_TYPE_LABELS } from '@/types'
+import type { TaskType } from '@/types'
 
 const FORMAT_OPTIONS = ['pdf', 'doc', 'docx', 'zip', 'jpg', 'png', 'mp4', 'xlsx']
+
+const DIFFICULTY_OPTIONS = [
+  { level: 1, emoji: '🔄', label: 'Reproduktiv', color: '#14b8a6' },
+  { level: 2, emoji: '⚙️', label: 'Produktiv', color: '#3b82f6' },
+  { level: 3, emoji: '🔍', label: 'Qisman-izlanishli', color: '#f59e0b' },
+  { level: 4, emoji: '🎯', label: 'Kreativ', color: '#a855f7' },
+] as const
 
 interface Lesson { id: string; title: string; order_num: number }
 
@@ -18,6 +27,8 @@ interface Props {
   initial?: {
     title: string; lesson_id: string; description: string
     deadline: string; max_score: number; allowed_formats: string[]
+    difficulty_level?: number; order_index?: number
+    task_type?: string; template_data?: Record<string, unknown> | null
   }
   mode?: 'create' | 'edit'
   taskId?: string
@@ -49,6 +60,10 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
     description: initial?.description ?? '',
     deadline: initial?.deadline ? new Date(initial.deadline).toISOString().slice(0, 16) : defaultDeadline(),
     max_score: initial?.max_score ?? 100,
+    difficulty_level: initial?.difficulty_level ?? 1,
+    order_index: initial?.order_index ?? 0,
+    task_type: initial?.task_type ?? 'standard',
+    template_data: initial?.template_data ?? null,
     allowed_formats: initial?.allowed_formats ?? ['pdf', 'doc', 'docx', 'zip', 'jpg', 'png'],
   })
 
@@ -101,6 +116,10 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
         description: form.description,
         deadline: new Date(form.deadline).toISOString(),
         max_score: form.max_score,
+        difficulty_level: form.difficulty_level,
+        order_index: form.order_index,
+        task_type: form.task_type,
+        template_data: form.template_data,
         allowed_formats: form.allowed_formats,
         task_file_urls: taskFiles,
       })
@@ -137,6 +156,14 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
             <input type="text" value={form.title} onChange={e => set('title')(e.target.value)}
               placeholder="Masalan: HTML sahifa yaratish"
               className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-amber-500/50 ${isDark ? 'text-white placeholder-white/25' : 'text-gray-900 placeholder-gray-400'}`}
+              style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'white', border: '1px solid #e5e7eb' }} />
+          </div>
+
+          <div>
+            <label className={`text-xs mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>Tartib raqami (order_index)</label>
+            <input type="number" min={0} value={form.order_index}
+              onChange={e => set('order_index')(Number(e.target.value))}
+              className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-amber-500/50 ${isDark ? 'text-white' : 'text-gray-900'}`}
               style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'white', border: '1px solid #e5e7eb' }} />
           </div>
 
@@ -188,7 +215,83 @@ export default function TaskFormClient({ courseId, courseTitle, lessons, initial
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          className="rounded-2xl p-5"
+          style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
+        >
+          <label className={`text-xs mb-3 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+            Qiyinchilik darajasi
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {DIFFICULTY_OPTIONS.map(({ level, emoji, label, color }) => (
+              <button key={level} type="button" onClick={() => set('difficulty_level')(level)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border flex items-center gap-1.5 ${
+                  form.difficulty_level === level
+                    ? isDark ? 'text-white' : 'text-gray-900'
+                    : isDark ? 'bg-white/5 text-white/30 border-white/10 hover:text-white/60' : 'bg-gray-100 text-gray-600 border-gray-200 hover:text-gray-900'
+                }`}
+                style={form.difficulty_level === level ? {
+                  background: isDark ? `${color}30` : `${color}15`,
+                  borderColor: isDark ? `${color}60` : `${color}40`,
+                  color: color,
+                } : {}}>
+                <span>{emoji}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
+          className="rounded-2xl p-5"
+          style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
+        >
+          <label className={`text-xs mb-3 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+            Topshiriq turi
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {(Object.entries(TASK_TYPE_LABELS) as [TaskType, typeof TASK_TYPE_LABELS[TaskType]][]).map(([key, tt]) => (
+              <button key={key} type="button" onClick={() => set('task_type')(key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                  form.task_type === key
+                    ? isDark ? 'text-white' : 'text-gray-900'
+                    : isDark ? 'bg-white/5 text-white/30 border-white/10 hover:text-white/60' : 'bg-gray-100 text-gray-600 border-gray-200 hover:text-gray-900'
+                }`}
+                style={form.task_type === key ? {
+                  background: isDark ? 'rgba(6,182,212,0.2)' : 'rgba(6,182,212,0.1)',
+                  borderColor: isDark ? 'rgba(6,182,212,0.5)' : 'rgba(6,182,212,0.3)',
+                } : {}}>
+                <span>{tt.icon}</span>
+                <span className="ml-1">{tt.label}</span>
+              </button>
+            ))}
+          </div>
+          {form.task_type !== 'standard' && (
+            <div className="mt-3">
+              <label className={`text-xs mb-1.5 block ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+                Qo&apos;shimcha ma&apos;lumot (ixtiyoriy)
+              </label>
+              <textarea
+                value={(form.template_data?.description as string) ?? ''}
+                onChange={e => setForm(prev => ({
+                  ...prev,
+                  template_data: { ...(prev.template_data ?? {}), description: e.target.value },
+                }))}
+                placeholder={form.task_type === 'web_kvest'
+                  ? "Veb-manzillar, qidiruv vazifalari..."
+                  : form.task_type === 'flipped_homework' || form.task_type === 'flipped_inclass'
+                    ? "Video havola, o'qish materiallari..."
+                    : form.task_type === 'pbl_project'
+                      ? "Loyiha talablari, mezonlar..."
+                      : "Muammoli vaziyat tavsifi, yo'riqnoma..."}
+                rows={3}
+                className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none ${isDark ? 'text-white placeholder-white/25' : 'text-gray-900 placeholder-gray-400'}`}
+                style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'white', border: '1px solid #e5e7eb' }} />
+            </div>
+          )}
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09 }}
           className="rounded-2xl p-5"
           style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'white', border: '1px solid #e5e7eb' }}
         >

@@ -9,6 +9,13 @@ import {
 } from 'lucide-react'
 import { deleteTask } from '../../../actions'
 
+const DIFFICULTY_LABELS: Record<number, { label: string; icon: string; color: string; bg: string }> = {
+  1: { label: 'Reproduktiv', icon: '🔄', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+  2: { label: 'Produktiv', icon: '⚙️', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  3: { label: 'Qisman-izlanishli', icon: '🔍', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+  4: { label: 'Kreativ', icon: '🎯', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+}
+
 interface Task {
   id: string
   title: string
@@ -17,6 +24,7 @@ interface Task {
   max_score: number
   allowed_formats: string[] | null
   lesson_id: string | null
+  difficulty_level: number
   total: number
   pending: number
 }
@@ -66,7 +74,12 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
   const [tasks, setTasks] = useState(init)
   const [deleteTarget, setDeleteTarget] = useState<Task | null>(null)
   const [error, setError] = useState('')
+  const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const filteredTasks = difficultyFilter
+    ? tasks.filter(t => t.difficulty_level === difficultyFilter)
+    : tasks
 
   const handleDelete = () => {
     if (!deleteTarget) return
@@ -102,8 +115,20 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
       {error && (
         <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
       )}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button onClick={() => setDifficultyFilter(null)}
+          className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${difficultyFilter === null ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white hover:bg-white/5'}`}>
+          Barchasi
+        </button>
+        {Object.entries(DIFFICULTY_LABELS).map(([level, { label, icon, color, bg }]) => (
+          <button key={level} onClick={() => setDifficultyFilter(Number(level))}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${difficultyFilter === Number(level) ? `${bg} ${color}` : 'text-white/40 hover:text-white hover:bg-white/5'}`}>
+            {icon} {label}
+          </button>
+        ))}
+      </div>
       <div className="space-y-3">
-        {tasks.map((task, i) => {
+        {filteredTasks.map((task, i) => {
           const isOverdue = task.deadline && new Date(task.deadline) < new Date()
           return (
             <motion.div key={task.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
@@ -115,6 +140,11 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
                   <div className="flex items-center gap-2 mb-1">
                     <ClipboardList className="h-4 w-4 text-amber-400 flex-shrink-0" />
                     <h3 className="text-white font-semibold text-sm truncate">{task.title}</h3>
+                    {DIFFICULTY_LABELS[task.difficulty_level] && (
+                      <span className={`flex-shrink-0 px-2 py-0.5 rounded-lg text-[10px] font-medium border ${DIFFICULTY_LABELS[task.difficulty_level].color} ${DIFFICULTY_LABELS[task.difficulty_level].bg}`}>
+                        {DIFFICULTY_LABELS[task.difficulty_level].icon} {DIFFICULTY_LABELS[task.difficulty_level].label}
+                      </span>
+                    )}
                   </div>
                   {task.description && (
                     <p className="text-white/40 text-xs line-clamp-2 mb-3">{task.description}</p>

@@ -6,12 +6,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Plus, MessageSquare, TrendingUp,
   Loader2, Wifi, X, FileText,
+  Calendar, MapPin, GraduationCap, Users,
+  ChevronDown, ChevronUp, ExternalLink,
 } from 'lucide-react'
 import {
   fetchPosts, fetchTopPosts, subscribeToPosts,
   getUserPostLikes, formatTimeAgo, type ForumPost,
 } from '@/lib/supabase/realtime'
 import PostCard from '@/components/forum/PostCard'
+import { createClient } from '@/lib/supabase/client'
 
 const CATEGORIES = ['Barchasi', 'Savol', 'Muhokama', 'Yangilik', 'Tavsiya', 'Yordam']
 
@@ -37,6 +40,10 @@ export default function StudentForumClient({ userId, userName }: Props) {
   const [category, setCategory]         = useState('Barchasi')
   const [userLikes, setUserLikes]       = useState<Record<string, 'like' | 'dislike'>>({})
   const [newPostCount, setNewPostCount] = useState(0)
+  const [masterClasses, setMasterClasses] = useState<any[]>([])
+  const [teamPosts, setTeamPosts] = useState<any[]>([])
+  const [masterOpen, setMasterOpen] = useState(false)
+  const [teamOpen, setTeamOpen] = useState(false)
   const searchTimer = useRef<ReturnType<typeof setTimeout>>()
 
   /* ── Postlarni yuklash ── */
@@ -57,6 +64,34 @@ export default function StudentForumClient({ userId, userName }: Props) {
   /* ── Eng ko'p muhokama ── */
   useEffect(() => {
     fetchTopPosts(5).then(setTopPosts).catch(() => {})
+  }, [])
+
+  /* ── Master-klass e'lonlarini yuklash ── */
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('master_classes')
+      .select('*')
+      .gte('datetime', new Date().toISOString())
+      .order('datetime', { ascending: true })
+      .limit(5)
+      .then(({ data }) => {
+        if (data) setMasterClasses(data)
+      })
+  }, [])
+
+  /* ── Hamkor qidirish e'lonlarini yuklash ── */
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('team_findings')
+      .select('*, users!inner(full_name, avatar_url)')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(6)
+      .then(({ data }) => {
+        if (data) setTeamPosts(data)
+      })
   }, [])
 
   /* ── Real-time yangilash ── */
@@ -171,6 +206,233 @@ export default function StudentForumClient({ userId, userName }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Master-klass e'lonlari */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
+        <button
+          onClick={() => setMasterOpen(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center shadow-lg shadow-blue-900/30">
+              <GraduationCap className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-sm font-semibold text-white">
+              Master-klass e'lonlari
+            </span>
+            {masterClasses.length > 0 && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-300">
+                {masterClasses.length} ta
+              </span>
+            )}
+          </div>
+          {masterOpen ? (
+            <ChevronUp className="h-4 w-4 text-white/40" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-white/40" />
+          )}
+        </button>
+
+        <AnimatePresence initial={false}>
+          {masterOpen && (
+            <motion.div
+              key="master-content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4">
+                {masterClasses.length === 0 ? (
+                  <p className="text-xs text-center py-6 text-white/20">
+                    Hozircha master-klass e'lonlari mavjud emas
+                  </p>
+                ) : (
+                  <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                    {masterClasses.map(mc => (
+                      <div
+                        key={mc.id}
+                        className="flex-shrink-0 w-72 rounded-xl p-4 space-y-3"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(147,51,234,0.08) 100%)',
+                          border: '1px solid rgba(59,130,246,0.2)',
+                        }}
+                      >
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-semibold leading-snug line-clamp-2 text-white">
+                            {mc.title}
+                          </h4>
+                          <p className="text-xs text-white/50">
+                            {mc.speaker_name}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="flex items-center gap-1 text-white/40">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(mc.datetime).toLocaleDateString('uz-UZ', {
+                              day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                            mc.is_online ? 'text-emerald-300 bg-emerald-500/10' : 'text-amber-300 bg-amber-500/10'
+                          }`}>
+                            <MapPin className="h-2.5 w-2.5" />
+                            {mc.is_online ? 'Online' : 'Offline'}
+                          </span>
+                        </div>
+
+                        <a
+                          href={mc.link || '#'}
+                          target={mc.link ? '_blank' : undefined}
+                          rel={mc.link ? 'noopener noreferrer' : undefined}
+                          onClick={e => { if (!mc.link) e.preventDefault() }}
+                          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-all ${
+                            mc.link
+                              ? 'text-blue-300 bg-blue-500/15 hover:bg-blue-500/25'
+                              : 'text-white bg-white/8 hover:bg-white/12'
+                          }`}
+                        >
+                          {mc.link ? (
+                            <><ExternalLink className="h-3 w-3" /> Qatnashish</>
+                          ) : (
+                            <>Ro'yxatdan o'tish</>
+                          )}
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Hamkor qidirish */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+      >
+        <button
+          onClick={() => setTeamOpen(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+              <Users className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-sm font-semibold text-white">
+              Hamkor qidirish
+            </span>
+            {teamPosts.length > 0 && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">
+                {teamPosts.length} ta
+              </span>
+            )}
+          </div>
+          {teamOpen ? (
+            <ChevronUp className="h-4 w-4 text-white/40" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-white/40" />
+          )}
+        </button>
+
+        <AnimatePresence initial={false}>
+          {teamOpen && (
+            <motion.div
+              key="team-content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4">
+                {teamPosts.length === 0 ? (
+                  <p className="text-xs text-center py-6 text-white/20">
+                    Hozircha hamkorlik e'lonlari mavjud emas
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {teamPosts.map(tp => (
+                      <div
+                        key={tp.id}
+                        className="rounded-xl p-4 space-y-2.5"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(20,184,166,0.05) 100%)',
+                          border: '1px solid rgba(16,185,129,0.15)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-6 w-6 rounded-full bg-cover bg-center flex-shrink-0"
+                            style={{
+                              backgroundImage: tp.users?.avatar_url
+                                ? `url(${tp.users.avatar_url})`
+                                : undefined,
+                              background: !tp.users?.avatar_url
+                                ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                                : undefined,
+                            }}
+                          />
+                          <span className="text-xs font-medium text-white/60">
+                            {tp.users?.full_name || 'Noma\'lum'}
+                          </span>
+                        </div>
+
+                        <h4 className="text-sm font-semibold leading-snug line-clamp-1 text-white">
+                          {tp.title}
+                        </h4>
+
+                        <p className="text-xs leading-relaxed line-clamp-2 text-white/50">
+                          {tp.description}
+                        </p>
+
+                        {tp.skills && tp.skills.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {tp.skills.slice(0, 4).map((skill: string, i: number) => (
+                              <span
+                                key={i}
+                                className="text-[10px] px-2 py-0.5 rounded-full bg-white/8 text-white/50"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {tp.skills.length > 4 && (
+                              <span className="text-[10px] text-white/30">
+                                +{tp.skills.length - 4}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[10px] text-white/20">
+                            {tp.contact?.slice(0, 3)}...
+                          </span>
+                          <button
+                            className="text-[10px] font-semibold px-3 py-1 rounded-lg text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
+                          >
+                            Murojaat qilish
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Asosiy kontent */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
