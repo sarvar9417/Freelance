@@ -47,7 +47,11 @@ export default function ForgotPasswordPage() {
       })
 
       if (error) {
-        setServerError("Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.")
+        if (error.status === 429 || error.message?.toLowerCase().includes('rate limit')) {
+          setServerError("Juda ko'p urinish. Iltimos, bir necha daqiqa kutib qayta urinib ko'ring.")
+        } else {
+          setServerError("Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.")
+        }
         return
       }
 
