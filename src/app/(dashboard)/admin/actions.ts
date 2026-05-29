@@ -173,6 +173,56 @@ export async function approveStory(storyId: string) {
   return { success: true }
 }
 
+// ─── Kursni o'chirish (barcha darslar, topshiriqlar, enrollmentlar bilan) ───
+export async function deleteCourse(courseId: string) {
+  const supabase = await requireAdmin()
+
+  const { error } = await supabase.from('courses').delete().eq('id', courseId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin/courses')
+  return { success: true }
+}
+
+// ─── Topshiriqni o'chirish (admin, teacher_id tekshirilmaydi) ─────────────────
+export async function deleteTask(taskId: string) {
+  const supabase = await requireAdmin()
+
+  const { error } = await supabase.from('tasks').delete().eq('id', taskId)
+  if (error) return { error: error.message }
+
+  revalidatePath('/admin/courses')
+  return { success: true }
+}
+
+// ─── Foydalanuvchi parolini tiklash (yangi tasdiqlash emaili yuboradi) ────────
+export async function resetUserPassword(userId: string) {
+  await requireAdmin()
+
+  try {
+    const adminClient = getAdminClient()
+
+    const { data: userData } = await adminClient
+      .from('users')
+      .select('email')
+      .eq('id', userId)
+      .single()
+
+    if (!userData?.email) return { error: "Foydalanuvchi emaili topilmadi" }
+
+    const { error } = await adminClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: userData.email,
+    })
+
+    if (error) return { error: error.message }
+
+    return { success: true, message: `${userData.email} ga tiklash havolasi yuborildi` }
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Parolni tiklashda xatolik" }
+  }
+}
+
 // ─── Sayt sozlamalarini saqlash ───────────────────────────────────────────────
 export async function saveSiteSettings(settings: Record<string, string>) {
   const supabase = await requireAdmin()
