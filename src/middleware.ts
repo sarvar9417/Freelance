@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/forum', '/courses', '/motivation', '/platforms']
+const PUBLIC_ROUTES = ['/login', '/register', '/forgot-password', '/forum', '/courses', '/tasks', '/motivation', '/platforms']
 const AUTH_ROUTES = ['/login', '/register']
 
 const ROLE_REDIRECTS: Record<string, string> = {
