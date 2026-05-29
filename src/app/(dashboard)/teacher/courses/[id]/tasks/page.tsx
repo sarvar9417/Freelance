@@ -1,36 +1,93 @@
 'use client'
 
-import { redirect } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useMountedTheme } from '@/hooks/useTheme'
-import { ClipboardCheck, Plus, FileText } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
+import TasksClient from './TasksClient'
+
+interface Task {
+  id: string
+  title: string
+  description: string | null
+  deadline: string | null
+  max_score: number
+  allowed_formats: string[] | null
+  lesson_id: string | null
+  difficulty_level: number
+  total: number
+  pending: number
+}
 
 export default function TeacherCourseTasksPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
   const { isDark } = useMountedTheme()
-  const [tasks, setTasks] = useState<any[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function loadData() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { redirect('/login'); return }
+  const load = useCallback(async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
 
-      const { data: tasksData } = await supabase
-        .from('tasks')
-        .select('id, title, description, max_score, deadline, is_published')
-        .eq('course_id', params.id)
-        .order('created_at', { ascending: false })
+    const { data: tasksData } = await supabase
+      .from('tasks')
+      .select('id, title, description, deadline, max_score, allowed_formats, lesson_id, difficulty_level')
+      .eq('course_id', params.id)
+      .order('difficulty_level', { ascending: true })
+      .order('created_at', { ascending: false })
 
-      setTasks(tasksData ?? [])
+    if (!tasksData?.length) {
+      setTasks([])
       setLoading(false)
+      return
     }
-    loadData()
-  }, [params.id])
 
-  if (loading) return <div className="max-w-5xl mx-auto animate-pulse"><div className="h-8 w-48 bg-white/10 rounded mb-4" /></div>
+    const taskIds = tasksData.map(t => t.id)
+
+    const { data: submissions } = await supabase
+      .from('submissions')
+      .select('task_id, status')
+      .in('task_id', taskIds)
+
+    const countMap: Record<string, { total: number; pending: number }> = {}
+    for (const s of submissions ?? []) {
+      if (!countMap[s.task_id]) countMap[s.task_id] = { total: 0, pending: 0 }
+      countMap[s.task_id].total++
+      if (s.status === 'pending') countMap[s.task_id].pending++
+    }
+
+    setTasks(
+      tasksData.map(t => ({
+        ...t,
+        max_score: t.max_score ?? 100,
+        allowed_formats: t.allowed_formats ?? null,
+        lesson_id: t.lesson_id ?? null,
+        difficulty_level: t.difficulty_level ?? 1,
+        total: countMap[t.id]?.total ?? 0,
+        pending: countMap[t.id]?.pending ?? 0,
+      }))
+    )
+    setLoading(false)
+  }, [params.id, router])
+
+  useEffect(() => { load() }, [load])
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-3 animate-pulse">
+        <div className="flex items-center justify-between mb-6">
+          <div className={`h-8 w-40 rounded-xl ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+          <div className={`h-10 w-36 rounded-xl ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+        </div>
+        {[1, 2, 3].map(i => (
+          <div key={i} className={`h-24 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-gray-100'}`} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -39,40 +96,13 @@ export default function TeacherCourseTasksPage({ params }: { params: { id: strin
           <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Topshiriqlar</h1>
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tasks.length} ta topshiriq</p>
         </div>
-        <Link href={`/teacher/courses/${params.id}/tasks/new`} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium ${
-          isDark ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'
-        }`}>
+        <Link href={`/teacher/courses/${params.id}/tasks/new`}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-amber-600 hover:bg-amber-500 transition-all">
           <Plus className="h-4 w-4" /> Yangi topshiriq
         </Link>
       </div>
 
-      {tasks.length === 0 ? (
-        <div className={`text-center py-16 rounded-2xl ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
-          <ClipboardCheck className={`h-12 w-12 mx-auto mb-4 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />
-          <p className={isDark ? 'text-white/40' : 'text-gray-500'}>Hali topshiriq yaratilmagan</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {tasks.map(task => (
-            <div key={task.id} className={`flex items-center gap-4 p-4 rounded-xl ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>
-              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${isDark ? 'bg-amber-500/20' : 'bg-amber-100'}`}>
-                <FileText className={`h-5 w-5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
-              </div>
-              <div className="flex-1">
-                <h3 className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{task.title}</h3>
-                <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{task.max_score} ball • {task.deadline ? new Date(task.deadline).toLocaleDateString('uz-UZ') : 'Deadline yo\'q'}</p>
-              </div>
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                task.is_published 
-                  ? isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-100 text-emerald-600'
-                  : isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'
-              }`}>
-                {task.is_published ? 'Faol' : 'Nofaol'}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      <TasksClient courseId={params.id} tasks={tasks} />
     </div>
   )
 }
