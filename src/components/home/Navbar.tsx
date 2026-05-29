@@ -7,11 +7,11 @@ import { GraduationCap, Menu, X, ArrowRight, Sun, Moon } from 'lucide-react'
 import { useMountedTheme } from '@/hooks/useTheme'
 
 const NAV_LINKS = [
-  { href: '/courses',     label: 'Kurslar',      external: false },
-  { href: '/forum',       label: 'Onlayn forum',         external: false },
-  { href: '/motivation',  label: 'Motivatsiyani oshirish',   external: false },
-  { href: '/platforms',   label: 'Frilanserlik platformalari',  external: false },
-  { href: '#leaderboard', label: 'Topshiriqlar',   external: false },
+  { href: '/courses',     label: 'Kurslar',                    external: false },
+  { href: '/tasks',       label: 'Topshiriqlar',               external: false },
+  { href: '/forum',       label: 'Onlayn forum',               external: false },
+  { href: '/motivation',  label: 'Motivatsiyani oshirish',     external: false },
+  { href: '/platforms',   label: 'Frilanserlik platformalari', external: false },
 ]
 
 export default function Navbar() {
