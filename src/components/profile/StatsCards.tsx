@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { BookOpen, ClipboardList, MessageSquare, Zap, Target, Flame, Star, Award } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 export interface ProfileStats {
   courses: number
@@ -33,6 +34,7 @@ function AnimatedNumber({ value }: { value: number }) {
 }
 
 export default function StatsCards({ stats, isTeacher, teacherStudents = 0, teacherCourses = 0 }: Props) {
+  const { isDark } = useMountedTheme()
   const studentCards = [
     {
       icon: BookOpen,
@@ -143,7 +145,7 @@ export default function StatsCards({ stats, isTeacher, teacherStudents = 0, teac
 
   return (
     <div className="space-y-3">
-      <h2 className="text-white/50 text-xs font-semibold uppercase tracking-widest">Statistika</h2>
+      <h2 className={`text-xs font-semibold uppercase tracking-widest ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Statistika</h2>
       <div className={`grid grid-cols-2 ${isTeacher ? 'sm:grid-cols-4' : 'sm:grid-cols-3 lg:grid-cols-6'} gap-3`}>
         {cards.map(({ icon: Icon, label, value, suffix, color, bg, border, glow }, i) => (
           <motion.div
@@ -161,7 +163,7 @@ export default function StatsCards({ stats, isTeacher, teacherStudents = 0, teac
               <p className={`text-xl sm:text-2xl font-extrabold ${color} tabular-nums leading-none`}>
                 <AnimatedNumber value={value} />{suffix}
               </p>
-              <p className="text-white/35 text-[10px] mt-1 leading-snug">{label}</p>
+              <p className={`text-[10px] mt-1 leading-snug ${isDark ? 'text-white/35' : 'text-gray-500'}`}>{label}</p>
             </div>
           </motion.div>
         ))}
@@ -179,17 +181,17 @@ export default function StatsCards({ stats, isTeacher, teacherStudents = 0, teac
           </div>
           <div>
             <p className="text-indigo-300 font-bold text-sm">{stats.xp.toLocaleString()} XP</p>
-            <p className="text-white/30 text-xs">Jami tajriba ballari</p>
+            <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Jami tajriba ballari</p>
           </div>
         </div>
-        <div className="h-8 w-px bg-white/8" />
+        <div className={`h-8 w-px ${isDark ? 'bg-white/8' : 'bg-gray-200'}`} />
         <div className="flex items-center gap-3 flex-1">
           <div className="h-9 w-9 rounded-xl bg-orange-500/20 flex items-center justify-center">
             <Flame className="h-5 w-5 text-orange-400" />
           </div>
           <div>
-            <p className="text-orange-300 font-bold text-sm">{stats.streak} kun 🔥</p>
-            <p className="text-white/30 text-xs">Ketma-ket faollik</p>
+            <p className="text-orange-400 font-bold text-sm">{stats.streak} kun 🔥</p>
+            <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Ketma-ket faollik</p>
           </div>
         </div>
       </motion.div>

@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Save, Loader2, CheckCircle2, AlertCircle, User, Calendar, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Kamida 2 ta belgi').max(80, 'Ko\'pi bilan 80 ta belgi'),
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function EditProfileForm({ userId, initialData }: Props) {
+  const { isDark } = useMountedTheme()
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const {
@@ -115,7 +117,7 @@ export default function EditProfileForm({ userId, initialData }: Props) {
       {/* Matn maydonlari */}
       {fields.map(({ key, label, icon: Icon, placeholder, required }) => (
         <div key={key} className="space-y-1.5">
-          <label className="flex items-center gap-1.5 text-white/50 text-xs font-semibold uppercase tracking-wider">
+          <label className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
             <Icon className="h-3 w-3" />
             {label}
             {required && <span className="text-rose-400 normal-case font-normal">*</span>}
@@ -124,8 +126,12 @@ export default function EditProfileForm({ userId, initialData }: Props) {
             {...register(key)}
             type={key === 'age' ? 'number' : 'text'}
             placeholder={placeholder}
-            className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
-            style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${errors[key] ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.08)'}` }}
+            className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-blue-500/50 transition-all ${
+              isDark ? 'text-white placeholder:text-white/20' : 'text-gray-900 placeholder:text-gray-400 bg-white'
+            }`}
+            style={isDark
+              ? { background: 'rgba(255,255,255,0.05)', border: `1px solid ${errors[key] ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.08)'}` }
+              : { border: `1px solid ${errors[key] ? '#f87171' : '#d1d5db'}` }}
           />
           {errors[key] && (
             <p className="text-rose-400 text-xs flex items-center gap-1">
@@ -138,17 +144,20 @@ export default function EditProfileForm({ userId, initialData }: Props) {
 
       {/* Bio */}
       <div className="space-y-1.5">
-        <label className="flex items-center gap-1.5 text-white/50 text-xs font-semibold uppercase tracking-wider">
-          <FileText className="h-3 w-3" />
-          Bio
+        <label className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+          <FileText className="h-3 w-3" />Bio
         </label>
         <div className="relative">
           <textarea
             {...register('bio')}
             rows={4}
-            placeholder="O'zingiz haqingizda qisqacha... Ko'nikmalaringiz, maqsadlaringiz, qiziqishlaringiz."
-            className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-blue-500/50 transition-all resize-none leading-relaxed"
-            style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${errors.bio ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.08)'}` }}
+            placeholder="O'zingiz haqingizda qisqacha..."
+            className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-blue-500/50 transition-all resize-none leading-relaxed ${
+              isDark ? 'text-white placeholder:text-white/20' : 'text-gray-900 placeholder:text-gray-400 bg-white'
+            }`}
+            style={isDark
+              ? { background: 'rgba(255,255,255,0.05)', border: `1px solid ${errors.bio ? 'rgba(244,63,94,0.5)' : 'rgba(255,255,255,0.08)'}` }
+              : { border: `1px solid ${errors.bio ? '#f87171' : '#d1d5db'}` }}
           />
         </div>
         {errors.bio && (
@@ -157,13 +166,13 @@ export default function EditProfileForm({ userId, initialData }: Props) {
             {errors.bio.message}
           </p>
         )}
-        <p className="text-white/20 text-[10px]">Ko&apos;pi bilan 300 ta belgi</p>
+        <p className={`text-[10px] ${isDark ? 'text-white/20' : 'text-gray-400'}`}>Ko&apos;pi bilan 300 ta belgi</p>
       </div>
 
       {/* Saqlash tugmasi */}
       <div className="flex items-center justify-between pt-2">
-        <p className="text-white/25 text-xs">
-          {isDirty ? '⚠️ Saqlanmagan o\'zgarishlar bor' : ''}
+        <p className={`text-xs ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
+          {isDirty ? "⚠️ Saqlanmagan o'zgarishlar bor" : ''}
         </p>
         <motion.button
           type="submit"

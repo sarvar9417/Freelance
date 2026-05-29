@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { BookOpen, Award, CheckCircle2, Lock, Clock, Users, ClipboardList } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const MOCK_COURSES = [
   {
@@ -80,17 +81,22 @@ interface Props {
 }
 
 export default function ProgressChart({ isTeacher }: Props) {
+  const { isDark } = useMountedTheme()
+  const card = isDark
+    ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }
+    : { background: '#ffffff', border: '1px solid #e5e7eb' }
+  const innerCard = isDark
+    ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }
+    : { background: '#f9fafb', border: '1px solid #e5e7eb' }
+  const bar = isDark ? { background: 'rgba(255,255,255,0.07)' } : { background: '#e5e7eb' }
+
   return (
     <div className="space-y-4">
 
       {/* ── Kurslar bo'yicha progress ── */}
-      <div
-        className="rounded-2xl p-6"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-      >
-        <h2 className="text-white font-semibold text-sm flex items-center gap-2 mb-5">
-          <BookOpen className="h-4 w-4 text-blue-400" />
-          {isTeacher ? "Yaratgan kurslar" : "Kurslar bo'yicha progress"}
+      <div className="rounded-2xl p-6" style={card}>
+        <h2 className={`font-semibold text-sm flex items-center gap-2 mb-5 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <BookOpen className="h-4 w-4 text-blue-400" />{isTeacher ? "Yaratgan kurslar" : "Kurslar bo'yicha progress"}
         </h2>
 
         {isTeacher ? (
@@ -101,28 +107,24 @@ export default function ProgressChart({ isTeacher }: Props) {
                 initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.08 }}
                 className="flex items-center gap-4 p-3.5 rounded-xl"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                style={innerCard}
               >
                 <span className="text-2xl">{course.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-white/80 text-sm font-medium truncate">{course.title}</p>
-                    <span className="text-emerald-400 text-xs font-bold flex-shrink-0 ml-2">
-                      {course.avgProgress}%
-                    </span>
+                    <p className={`text-sm font-medium truncate ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{course.title}</p>
+                    <span className="text-emerald-400 text-xs font-bold flex-shrink-0 ml-2">{course.avgProgress}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                    <motion.div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                  <div className="h-1.5 rounded-full overflow-hidden" style={bar}>
+                    <motion.div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
                       initial={{ width: 0 }} animate={{ width: `${course.avgProgress}%` }}
-                      transition={{ duration: 0.9, delay: 0.2 + i * 0.1 }}
-                    />
+                      transition={{ duration: 0.9, delay: 0.2 + i * 0.1 }} />
                   </div>
                   <div className="flex items-center gap-4 mt-1.5">
-                    <span className="text-white/25 text-[10px] flex items-center gap-1">
+                    <span className={`text-[10px] flex items-center gap-1 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
                       <Users className="h-2.5 w-2.5" />{course.students} o&apos;quvchi
                     </span>
-                    <span className="text-white/25 text-[10px] flex items-center gap-1">
+                    <span className={`text-[10px] flex items-center gap-1 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
                       <ClipboardList className="h-2.5 w-2.5" />{course.lessons} dars
                     </span>
                   </div>
@@ -140,37 +142,34 @@ export default function ProgressChart({ isTeacher }: Props) {
               >
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-lg">{course.emoji}</span>
-                  <span className="text-white/75 text-sm font-medium flex-1 truncate">{course.name}</span>
+                  <span className={`text-sm font-medium flex-1 truncate ${isDark ? 'text-white/75' : 'text-gray-700'}`}>{course.name}</span>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     {course.status === 'completed' && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />}
-                    {course.status === 'locked'    && <Lock className="h-3.5 w-3.5 text-white/20" />}
+                    {course.status === 'locked'    && <Lock className={`h-3.5 w-3.5 ${isDark ? 'text-white/20' : 'text-gray-300'}`} />}
                     {course.status === 'active'    && <Clock className="h-3.5 w-3.5 text-blue-400" />}
                     <span className={`text-xs font-bold tabular-nums ${
                       course.progress === 100 ? 'text-emerald-400' :
-                      course.progress === 0   ? 'text-white/20'    : 'text-blue-400'
+                      course.progress === 0   ? (isDark ? 'text-white/20' : 'text-gray-300') : 'text-blue-400'
                     }`}>
                       {course.progress}%
                     </span>
                   </div>
                 </div>
 
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                  <motion.div
-                    className={`h-full rounded-full ${course.barColor}`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${course.progress}%` }}
-                    transition={{ duration: 1, delay: 0.15 + i * 0.1, ease: 'easeOut' }}
-                  />
+                <div className="h-2 rounded-full overflow-hidden" style={bar}>
+                  <motion.div className={`h-full rounded-full ${course.barColor}`}
+                    initial={{ width: 0 }} animate={{ width: `${course.progress}%` }}
+                    transition={{ duration: 1, delay: 0.15 + i * 0.1, ease: 'easeOut' }} />
                 </div>
 
                 <div className="flex items-center justify-between mt-1.5">
-                  <span className="text-white/25 text-[10px]">
+                  <span className={`text-[10px] ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
                     {course.completedLessons}/{course.totalLessons} dars
                   </span>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                    course.status === 'completed' ? 'text-emerald-300 bg-emerald-500/10' :
-                    course.status === 'locked'    ? 'text-white/20 bg-white/5'            :
-                                                    'text-blue-300 bg-blue-500/10'
+                    course.status === 'completed' ? 'text-emerald-400 bg-emerald-500/10' :
+                    course.status === 'locked'    ? (isDark ? 'text-white/20 bg-white/5' : 'text-gray-400 bg-gray-100') :
+                                                    'text-blue-400 bg-blue-500/10'
                   }`}>
                     {course.status === 'completed' ? 'Tugatildi' :
                      course.status === 'locked'    ? 'Qulflangan' : 'Jarayonda'}
@@ -184,79 +183,63 @@ export default function ProgressChart({ isTeacher }: Props) {
 
       {/* ── Haftalik faollik grafik ── */}
       {!isTeacher && (
-        <div
-          className="rounded-2xl p-6"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-        >
-          <h2 className="text-white font-semibold text-sm mb-5">
-            📅 Haftalik faollik
-          </h2>
+        <div className="rounded-2xl p-6" style={card}>
+          <h2 className={`font-semibold text-sm mb-5 ${isDark ? 'text-white' : 'text-gray-900'}`}>📅 Haftalik faollik</h2>
           <div className="flex items-end gap-2 h-24">
             {WEEKLY_ACTIVITY.map((d, i) => (
               <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
                 <div className="w-full relative flex items-end justify-center" style={{ height: '72px' }}>
                   <motion.div
-                    className={`w-full rounded-t-lg ${d.active ? 'bg-gradient-to-t from-blue-600 to-blue-400' : 'bg-white/5'}`}
+                    className={`w-full rounded-t-lg ${d.active ? 'bg-gradient-to-t from-blue-600 to-blue-400' : (isDark ? 'bg-white/5' : 'bg-gray-200')}`}
                     initial={{ height: 0 }}
                     animate={{ height: `${d.xp === 0 ? 4 : (d.xp / maxXP) * 100}%` }}
                     transition={{ duration: 0.6, delay: i * 0.06, ease: 'easeOut' }}
-                    style={{ minHeight: '4px' }}
-                  />
+                    style={{ minHeight: '4px' }} />
                   {d.active && d.xp > 0 && (
-                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-blue-300 text-[9px] font-bold whitespace-nowrap">
-                      +{d.xp}
-                    </span>
+                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-blue-400 text-[9px] font-bold whitespace-nowrap">+{d.xp}</span>
                   )}
                 </div>
-                <span className={`text-[10px] font-medium ${d.active ? 'text-white/50' : 'text-white/15'}`}>
+                <span className={`text-[10px] font-medium ${d.active ? (isDark ? 'text-white/50' : 'text-gray-500') : (isDark ? 'text-white/15' : 'text-gray-300')}`}>
                   {d.day}
                 </span>
               </div>
             ))}
           </div>
-          <p className="text-white/20 text-xs mt-3 text-center">
+          <p className={`text-xs mt-3 text-center ${isDark ? 'text-white/20' : 'text-gray-400'}`}>
             So&apos;nggi 7 kun · Jami {WEEKLY_ACTIVITY.reduce((s, d) => s + d.xp, 0)} XP
           </p>
         </div>
       )}
 
       {/* ── Sertifikatlar ── */}
-      <div
-        className="rounded-2xl p-6"
-        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-      >
-        <h2 className="text-white font-semibold text-sm flex items-center gap-2 mb-4">
+      <div className="rounded-2xl p-6" style={card}>
+        <h2 className={`font-semibold text-sm flex items-center gap-2 mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
           <Award className="h-4 w-4 text-amber-400" />
           Sertifikatlar
           {CERTS.length > 0 && (
-            <span className="text-amber-400 text-xs font-bold bg-amber-400/10 px-2 py-0.5 rounded-full">
-              {CERTS.length} ta
-            </span>
+            <span className="text-amber-400 text-xs font-bold bg-amber-400/10 px-2 py-0.5 rounded-full">{CERTS.length} ta</span>
           )}
         </h2>
 
         {CERTS.length === 0 ? (
-          <div
-            className="text-center py-8 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.06)' }}
-          >
-            <Award className="h-8 w-8 text-white/10 mx-auto mb-2" />
-            <p className="text-white/25 text-sm">Hali sertifikat yo&apos;q</p>
-            <p className="text-white/15 text-xs mt-1">Kursni 100% tugatib, sertifikat qo&apos;lga kiriting</p>
+          <div className="text-center py-8 rounded-xl"
+            style={isDark
+              ? { background: 'rgba(255,255,255,0.02)', border: '2px dashed rgba(255,255,255,0.06)' }
+              : { background: '#f9fafb', border: '2px dashed #e5e7eb' }}>
+            <Award className={`h-8 w-8 mx-auto mb-2 ${isDark ? 'text-white/10' : 'text-gray-300'}`} />
+            <p className={`text-sm ${isDark ? 'text-white/25' : 'text-gray-400'}`}>Hali sertifikat yo&apos;q</p>
+            <p className={`text-xs mt-1 ${isDark ? 'text-white/15' : 'text-gray-300'}`}>Kursni 100% tugatib, sertifikat qo&apos;lga kiriting</p>
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 gap-3">
             {CERTS.map((cert, i) => (
-              <motion.div
-                key={cert.name}
-                initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              <motion.div key={cert.name} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
                 className="flex items-center gap-4 p-4 rounded-xl cursor-pointer hover:scale-[1.02] transition-transform"
-                style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05))', border: '1px solid rgba(245,158,11,0.2)' }}
-              >
+                style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05))', border: '1px solid rgba(245,158,11,0.2)' }}>
                 <span className="text-2xl">{cert.emoji}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white/85 text-sm font-semibold truncate">{cert.name}</p>
+                  <p className={`text-sm font-semibold truncate ${isDark ? 'text-white/85' : 'text-gray-800'}`}>{cert.name}</p>
                   <p className="text-amber-400/70 text-xs mt-0.5 flex items-center gap-1">
                     <Award className="h-3 w-3" /> Sertifikat olindi
                   </p>
