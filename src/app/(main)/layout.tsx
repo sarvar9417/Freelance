@@ -67,6 +67,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             }`}>
               Kurslar
             </Link>
+            <Link href="/tasks" className={`text-sm font-medium transition-colors ${
+              isDark ? 'text-white/60 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+            }`}>
+              Topshiriqlar
+            </Link>
             <Link href="/forum" className={`text-sm font-medium transition-colors ${
               isDark ? 'text-white/60 hover:text-white' : 'text-gray-600 hover:text-gray-900'
             }`}>
