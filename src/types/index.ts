@@ -197,33 +197,26 @@ export interface Notification {
 
 export interface MasterClass {
   id: string
-  teacher_id: string
   title: string
-  description: string
-  category: string
-  level: string
-  difficulty_level: DifficultyLevel
-  price: number
-  max_participants: number
-  scheduled_date: string
-  duration_minutes: number
-  image_url: string | null
-  is_published: boolean
+  description: string | null
+  speaker_name: string
+  speaker_bio: string | null
+  datetime: string
+  link: string | null
+  max_participants: number | null
+  is_online: boolean
+  created_by: string
   created_at: string
-  updated_at: string
 }
 
 export interface TeamFinding {
   id: string
-  owner_id: string
+  user_id: string
   title: string
   description: string
-  required_skills: string[]
-  team_size: number
-  current_members: number
-  category: string
-  status: 'open' | 'closed' | 'in_progress'
-  deadline: string | null
+  skills_needed: string[]
+  project_type: string | null
+  contact_info: string | null
+  is_active: boolean
   created_at: string
-  updated_at: string
 }

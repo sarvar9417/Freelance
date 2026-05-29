@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Users, BookOpen, MessageSquare, Activity, TrendingUp } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 interface StatCard {
   label: string
@@ -26,7 +27,7 @@ interface Props {
   registrationChart: DayData[]
 }
 
-function StatCardItem({ card, index }: { card: StatCard; index: number }) {
+function StatCardItem({ card, index, isDark }: { card: StatCard; index: number; isDark: boolean }) {
   const Icon = card.icon
   return (
     <motion.div
@@ -43,10 +44,10 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
         <Icon className={`h-5 w-5 ${card.color}`} />
       </div>
       <div className="min-w-0">
-        <p className="text-white/40 text-xs font-medium mb-1">{card.label}</p>
+        <p className={`text-xs font-medium mb-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{card.label}</p>
         <p className={`text-3xl font-bold ${card.color}`}>{card.value.toLocaleString()}</p>
         {card.change && (
-          <p className="text-white/30 text-xs mt-1 flex items-center gap-1">
+          <p className={`text-xs mt-1 flex items-center gap-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
             <TrendingUp className="h-3 w-3 text-emerald-400" />
             {card.change}
           </p>
@@ -56,7 +57,7 @@ function StatCardItem({ card, index }: { card: StatCard; index: number }) {
   )
 }
 
-function RegistrationChart({ data }: { data: DayData[] }) {
+function RegistrationChart({ data, isDark }: { data: DayData[]; isDark: boolean }) {
   const max = Math.max(...data.map(d => d.count), 1)
 
   return (
@@ -64,12 +65,12 @@ function RegistrationChart({ data }: { data: DayData[] }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
-      className="rounded-2xl p-5 col-span-full md:col-span-2"
-      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+      className={`rounded-2xl p-5 col-span-full md:col-span-2 ${isDark ? '' : 'bg-white border border-gray-200'}`}
+      style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : {}}
     >
       <div className="flex items-center gap-2 mb-5">
         <TrendingUp className="h-4 w-4 text-purple-400" />
-        <h3 className="text-white text-sm font-semibold">Yangi ro&apos;yxatdan o&apos;tganlar (so&apos;nggi 7 kun)</h3>
+        <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>Yangi ro&apos;yxatdan o&apos;tganlar (so&apos;nggi 7 kun)</h3>
       </div>
 
       <div className="flex items-end gap-2 h-28">
@@ -77,7 +78,7 @@ function RegistrationChart({ data }: { data: DayData[] }) {
           const height = max > 0 ? Math.max((d.count / max) * 100, 4) : 4
           return (
             <div key={d.date} className="flex-1 flex flex-col items-center gap-1.5">
-              <span className="text-white/40 text-xs">{d.count > 0 ? d.count : ''}</span>
+              <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{d.count > 0 ? d.count : ''}</span>
               <motion.div
                 className="w-full rounded-t-md"
                 style={{
@@ -90,7 +91,7 @@ function RegistrationChart({ data }: { data: DayData[] }) {
                 animate={{ scaleY: 1, originY: 1 }}
                 transition={{ delay: i * 0.06 + 0.4, duration: 0.5, ease: 'easeOut' }}
               />
-              <span className="text-white/30 text-xs">
+              <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
                 {new Date(d.date).toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' })}
               </span>
             </div>
@@ -102,6 +103,7 @@ function RegistrationChart({ data }: { data: DayData[] }) {
 }
 
 export default function StatsOverview({ usersCount, coursesCount, postsCount, activeToday, registrationChart }: Props) {
+  const { isDark } = useMountedTheme()
   const cards: StatCard[] = [
     {
       label: 'Jami foydalanuvchilar',
@@ -141,10 +143,10 @@ export default function StatsOverview({ usersCount, coursesCount, postsCount, ac
     <div className="space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card, i) => (
-          <StatCardItem key={card.label} card={card} index={i} />
+          <StatCardItem key={card.label} card={card} index={i} isDark={isDark} />
         ))}
       </div>
-      <RegistrationChart data={registrationChart} />
+      <RegistrationChart data={registrationChart} isDark={isDark} />
     </div>
   )
 }
