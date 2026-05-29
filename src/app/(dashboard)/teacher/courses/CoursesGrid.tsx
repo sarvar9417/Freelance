@@ -8,6 +8,7 @@ import {
   AlertTriangle, X, Loader2, CheckCircle, Clock, GraduationCap, Plus,
 } from 'lucide-react'
 import { deleteCourse } from '../actions'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 interface Course {
   id: string
@@ -24,8 +25,8 @@ interface Course {
 }
 
 function DeleteModal({
-  course, onClose, onConfirm, loading,
-}: { course: Course; onClose: () => void; onConfirm: () => void; loading: boolean }) {
+  course, onClose, onConfirm, loading, isDark,
+}: { course: Course; onClose: () => void; onConfirm: () => void; loading: boolean; isDark: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -36,27 +37,27 @@ function DeleteModal({
         initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
         onClick={e => e.stopPropagation()}
         className="rounded-2xl p-6 w-full max-w-sm"
-        style={{ background: '#10141f', border: '1px solid rgba(255,255,255,0.1)' }}
+        style={isDark ? { background: '#10141f', border: '1px solid rgba(255,255,255,0.1)' } : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.1)' }}
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-xl bg-red-500/10">
             <AlertTriangle className="h-5 w-5 text-red-400" />
           </div>
-          <h3 className="text-white font-semibold">Kursni o&apos;chirish</h3>
-          <button onClick={onClose} className="ml-auto text-white/30 hover:text-white">
+          <h3 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>Kursni o&apos;chirish</h3>
+          <button onClick={onClose} className={'ml-auto ' + (isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-900')}>
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-white/50 text-sm mb-1">
-          <span className="text-white font-medium">{course.emoji} {course.title}</span> kursini o&apos;chirishni tasdiqlaysizmi?
+        <p className={`${isDark ? 'text-white/50' : 'text-gray-600'} text-sm mb-1`}>
+          <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>{course.emoji} {course.title}</span> kursini o&apos;chirishni tasdiqlaysizmi?
         </p>
         <p className="text-red-400/70 text-xs mb-6">Barcha darslar, topshiriqlar va o&apos;quvchilar ma&apos;lumotlari o&apos;chiriladi!</p>
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white hover:bg-white/5 transition-all border border-white/5">
+          <button onClick={onClose} className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${isDark ? 'text-white/50 hover:text-white hover:bg-white/5 border-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-gray-200'}`}>
             Bekor qilish
           </button>
           <button onClick={onConfirm} disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500/80 hover:bg-red-500 text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+            className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500/80 hover:bg-red-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             O&apos;chirish
           </button>
@@ -71,6 +72,7 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const { isDark } = useMountedTheme()
 
   const handleDelete = () => {
     if (!deleteTarget) return
@@ -88,14 +90,14 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-12 text-center"
-        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+        style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.07)' }}
       >
         <div className="mb-4 text-5xl">📚</div>
-        <p className="text-white/50 text-sm mb-1">Hali hech qanday kurs yaratilmagan</p>
-        <p className="text-white/25 text-xs mb-6">Birinchi kursingizni yarating va o&apos;quvchilarni jalb qiling</p>
+        <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-sm mb-1`}>Hali hech qanday kurs yaratilmagan</p>
+        <p className={`${isDark ? 'text-white/25' : 'text-gray-400'} text-xs mb-6`}>Birinchi kursingizni yarating va o&apos;quvchilarni jalb qiling</p>
         <Link
           href="/teacher/courses/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white shadow-lg"
+          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium shadow-lg ${isDark ? 'text-white' : 'text-gray-900'}`}
           style={{ background: 'linear-gradient(135deg, rgba(5,150,105,0.9), rgba(4,120,87,0.9))' }}
         >
           <Plus className="h-4 w-4" />
@@ -118,7 +120,7 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06 }}
             className="rounded-2xl overflow-hidden flex flex-col"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(0,0,0,0.06)' }}
           >
             {/* Cover */}
             <div
@@ -133,7 +135,7 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
               <span className={`absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full border font-medium ${
                 course.is_published
                   ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25'
-                  : 'bg-white/5 text-white/40 border-white/10'
+                  : isDark ? 'bg-white/5 text-white/40 border-white/10' : 'bg-gray-100 text-gray-500 border-gray-200'
               }`}>
                 {course.is_published ? 'Nashr etilgan' : 'Qoralama'}
               </span>
@@ -142,12 +144,12 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
             {/* Kontent */}
             <div className="p-4 flex-1 flex flex-col gap-3">
               <div>
-                <h3 className="text-white font-semibold text-sm line-clamp-1">{course.title}</h3>
-                <p className="text-white/40 text-xs mt-0.5">{course.category}</p>
+                <h3 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold text-sm line-clamp-1`}>{course.title}</h3>
+                <p className={`${isDark ? 'text-white/40' : 'text-gray-500'} text-xs mt-0.5`}>{course.category}</p>
               </div>
 
               {/* Statistika */}
-              <div className="flex items-center gap-3 text-xs text-white/40">
+              <div className={`flex items-center gap-3 text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
                 <span className="flex items-center gap-1">
                   <Users className="h-3 w-3 text-blue-400" />
                   {course.students}
@@ -177,19 +179,19 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
               {/* Tugmalar */}
               <div className="grid grid-cols-2 gap-2 mt-auto">
                 <Link href={`/teacher/courses/${course.id}/edit`}
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all border ${isDark ? 'text-white/60 hover:text-white hover:bg-white/5 border-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 border-gray-200'}`}>
                   <Edit2 className="h-3 w-3" /> Tahrirlash
                 </Link>
                 <Link href={`/teacher/courses/${course.id}/lessons`}
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all border ${isDark ? 'text-white/60 hover:text-white hover:bg-white/5 border-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 border-gray-200'}`}>
                   <BookOpen className="h-3 w-3" /> Darslar
                 </Link>
                 <Link href={`/teacher/courses/${course.id}/tasks`}
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all border ${isDark ? 'text-white/60 hover:text-white hover:bg-white/5 border-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 border-gray-200'}`}>
                   <ClipboardList className="h-3 w-3" /> Topshiriqlar
                 </Link>
                 <Link href={`/teacher/courses/${course.id}/students`}
-                  className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all border ${isDark ? 'text-white/60 hover:text-white hover:bg-white/5 border-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100 border-gray-200'}`}>
                   <GraduationCap className="h-3 w-3" /> O&apos;quvchilar
                 </Link>
               </div>
@@ -211,6 +213,7 @@ export default function CoursesGrid({ courses: init }: { courses: Course[] }) {
             onClose={() => setDeleteTarget(null)}
             onConfirm={handleDelete}
             loading={isPending}
+            isDark={isDark}
           />
         )}
       </AnimatePresence>

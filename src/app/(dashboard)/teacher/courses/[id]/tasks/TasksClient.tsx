@@ -8,6 +8,7 @@ import {
   Edit2, Trash2, AlertTriangle, X, Loader2, Plus,
 } from 'lucide-react'
 import { deleteTask } from '../../../actions'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const DIFFICULTY_LABELS: Record<number, { label: string; icon: string; color: string; bg: string }> = {
   1: { label: 'Reproduktiv', icon: '🔄', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
@@ -29,8 +30,8 @@ interface Task {
   pending: number
 }
 
-function DeleteModal({ task, onClose, onConfirm, loading }: {
-  task: Task; onClose: () => void; onConfirm: () => void; loading: boolean
+function DeleteModal({ task, onClose, onConfirm, loading, isDark }: {
+  task: Task; onClose: () => void; onConfirm: () => void; loading: boolean; isDark: boolean
 }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -40,27 +41,27 @@ function DeleteModal({ task, onClose, onConfirm, loading }: {
       <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
         onClick={e => e.stopPropagation()}
         className="rounded-2xl p-6 w-full max-w-sm"
-        style={{ background: '#10141f', border: '1px solid rgba(255,255,255,0.1)' }}
+        style={isDark ? { background: '#10141f', border: '1px solid rgba(255,255,255,0.1)' } : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.1)' }}
       >
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 rounded-xl bg-red-500/10">
             <AlertTriangle className="h-5 w-5 text-red-400" />
           </div>
-          <h3 className="text-white font-semibold">Topshiriqni o&apos;chirish</h3>
-          <button onClick={onClose} className="ml-auto text-white/30 hover:text-white">
+          <h3 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>Topshiriqni o&apos;chirish</h3>
+          <button onClick={onClose} className={`ml-auto ${isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-600'}`}>
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-white/50 text-sm mb-2">
-          <span className="text-white font-medium">{task.title}</span> topshirig&apos;ini o&apos;chirishni tasdiqlaysizmi?
+        <p className={`${isDark ? 'text-white/50' : 'text-gray-600'} text-sm mb-2`}>
+          <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>{task.title}</span> topshirig&apos;ini o&apos;chirishni tasdiqlaysizmi?
         </p>
         <p className="text-red-400/70 text-xs mb-6">Barcha topshirilgan ishlar ham o&apos;chiriladi!</p>
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white hover:bg-white/5 transition-all border border-white/5">
+          <button onClick={onClose} className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${isDark ? 'text-white/50 hover:text-white hover:bg-white/5 border-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border-gray-200'}`}>
             Bekor qilish
           </button>
           <button onClick={onConfirm} disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500/80 hover:bg-red-500 text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+            className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium bg-red-500/80 hover:bg-red-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${isDark ? 'text-white' : 'text-white'}`}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             O&apos;chirish
           </button>
@@ -76,6 +77,7 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
   const [error, setError] = useState('')
   const [difficultyFilter, setDifficultyFilter] = useState<number | null>(null)
   const [isPending, startTransition] = useTransition()
+  const { isDark } = useMountedTheme()
 
   const filteredTasks = difficultyFilter
     ? tasks.filter(t => t.difficulty_level === difficultyFilter)
@@ -96,13 +98,13 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-12 text-center"
-        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+        style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.07)' }}
       >
         <div className="text-5xl mb-4">📝</div>
-        <p className="text-white/50 text-sm mb-1">Hali topshiriq yaratilmagan</p>
-        <p className="text-white/25 text-xs mb-6">O&apos;quvchilar uchun birinchi topshiriqni yarating</p>
+        <p className={`${isDark ? 'text-white/50' : 'text-gray-600'} text-sm mb-1`}>Hali topshiriq yaratilmagan</p>
+        <p className={`${isDark ? 'text-white/25' : 'text-gray-400'} text-xs mb-6`}>O&apos;quvchilar uchun birinchi topshiriqni yarating</p>
         <Link href={`/teacher/courses/${courseId}/tasks/new`}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white shadow-lg"
+          className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium shadow-lg ${isDark ? 'text-white' : 'text-white'}`}
           style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.8), rgba(217,119,6,0.8))' }}>
           <Plus className="h-4 w-4" /> Topshiriq yaratish
         </Link>
@@ -117,12 +119,14 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
       )}
       <div className="flex flex-wrap gap-2 mb-4">
         <button onClick={() => setDifficultyFilter(null)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${difficultyFilter === null ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white hover:bg-white/5'}`}>
+          className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${difficultyFilter === null
+            ? (isDark ? 'bg-white/10 text-white' : 'bg-gray-200 text-gray-900')
+            : (isDark ? 'text-white/40 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100')}`}>
           Barchasi
         </button>
         {Object.entries(DIFFICULTY_LABELS).map(([level, { label, icon, color, bg }]) => (
           <button key={level} onClick={() => setDifficultyFilter(Number(level))}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${difficultyFilter === Number(level) ? `${bg} ${color}` : 'text-white/40 hover:text-white hover:bg-white/5'}`}>
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${difficultyFilter === Number(level) ? `${bg} ${color}` : (isDark ? 'text-white/40 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100')}`}>
             {icon} {label}
           </button>
         ))}
@@ -133,13 +137,13 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
           return (
             <motion.div key={task.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
               className="rounded-2xl p-5 group"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+              style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' } : { background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(0,0,0,0.06)' }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <ClipboardList className="h-4 w-4 text-amber-400 flex-shrink-0" />
-                    <h3 className="text-white font-semibold text-sm truncate">{task.title}</h3>
+                    <h3 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold text-sm truncate`}>{task.title}</h3>
                     {DIFFICULTY_LABELS[task.difficulty_level] && (
                       <span className={`flex-shrink-0 px-2 py-0.5 rounded-lg text-[10px] font-medium border ${DIFFICULTY_LABELS[task.difficulty_level].color} ${DIFFICULTY_LABELS[task.difficulty_level].bg}`}>
                         {DIFFICULTY_LABELS[task.difficulty_level].icon} {DIFFICULTY_LABELS[task.difficulty_level].label}
@@ -147,21 +151,21 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
                     )}
                   </div>
                   {task.description && (
-                    <p className="text-white/40 text-xs line-clamp-2 mb-3">{task.description}</p>
+                    <p className={`${isDark ? 'text-white/40' : 'text-gray-600'} text-xs line-clamp-2 mb-3`}>{task.description}</p>
                   )}
                   <div className="flex flex-wrap items-center gap-3 text-xs">
                     {task.deadline && (
-                      <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-400' : 'text-white/40'}`}>
+                      <span className={`flex items-center gap-1 ${isOverdue ? 'text-red-400' : (isDark ? 'text-white/40' : 'text-gray-600')}`}>
                         <Calendar className="h-3 w-3" />
                         {new Date(task.deadline).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short', year: 'numeric' })}
                         {isOverdue && ' (muddati o\'tgan)'}
                       </span>
                     )}
-                    <span className="flex items-center gap-1 text-white/40">
+                    <span className={`flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-600'}`}>
                       <Star className="h-3 w-3 text-yellow-400" />
                       Maks: {task.max_score} ball
                     </span>
-                    <span className="flex items-center gap-1 text-white/40">
+                    <span className={`flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-600'}`}>
                       <Users className="h-3 w-3 text-blue-400" />
                       {task.total} ta topshirilgan
                     </span>
@@ -175,18 +179,18 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
                   {task.allowed_formats && task.allowed_formats.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {task.allowed_formats.map(f => (
-                        <span key={f} className="text-xs px-1.5 py-0.5 rounded bg-white/5 text-white/30">.{f}</span>
+                        <span key={f} className={`text-xs px-1.5 py-0.5 rounded ${isDark ? 'bg-white/5 text-white/30' : 'bg-gray-100 text-gray-500'}`}>.{f}</span>
                       ))}
                     </div>
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <Link href={`/teacher/courses/${courseId}/tasks/${task.id}/edit`}
-                    className="p-1.5 rounded-lg text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                    className={`p-1.5 rounded-lg transition-all ${isDark ? 'text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10' : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-100'}`}>
                     <Edit2 className="h-3.5 w-3.5" />
                   </Link>
                   <button onClick={() => setDeleteTarget(task)}
-                    className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                    className={`p-1.5 rounded-lg transition-all ${isDark ? 'text-white/30 hover:text-red-400 hover:bg-red-500/10' : 'text-gray-400 hover:text-red-600 hover:bg-red-100'}`}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -198,7 +202,7 @@ export default function TasksClient({ courseId, tasks: init }: { courseId: strin
 
       <AnimatePresence>
         {deleteTarget && (
-          <DeleteModal task={deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} loading={isPending} />
+          <DeleteModal task={deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} loading={isPending} isDark={isDark} />
         )}
       </AnimatePresence>
     </>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Star, Loader2, FileText, CheckCircle2, User } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 export interface SubmissionData {
   id: string
@@ -30,6 +31,7 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const { isDark } = useMountedTheme()
 
   useEffect(() => {
     if (open && submission) {
@@ -80,38 +82,38 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
 
             <div className="w-full max-w-lg rounded-2xl pointer-events-auto overflow-hidden"
-              style={{ background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={isDark ? { background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' } : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.1)' }}
               onClick={e => e.stopPropagation()}>
 
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-white/5">
+              <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
                 <div className="flex items-center gap-2.5">
                   <div className="bg-amber-500/15 p-2 rounded-lg">
                     <Star className="h-4 w-4 text-amber-400" />
                   </div>
-                  <h2 className="text-white font-semibold">Baholash</h2>
+                  <h2 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>Baholash</h2>
                 </div>
-                <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
+                <button onClick={onClose} className={`${isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-900'} transition-colors`}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               {/* Submission info */}
-              <div className="p-6 border-b border-white/5 space-y-3">
+              <div className={`p-6 border-b ${isDark ? 'border-white/5' : 'border-gray-200'} space-y-3`}>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center flex-shrink-0">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{submission.studentName}</p>
-                    <p className="text-white/40 text-xs">{submission.course}</p>
+                    <p className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold text-sm`}>{submission.studentName}</p>
+                    <p className={`${isDark ? 'text-white/40' : 'text-gray-500'} text-xs`}>{submission.course}</p>
                   </div>
                 </div>
                 <div className="rounded-xl p-3.5"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p className="text-white/60 text-xs mb-0.5">Topshiriq</p>
-                  <p className="text-white text-sm font-medium">{submission.taskTitle}</p>
-                  <p className="text-white/30 text-xs mt-1">{submission.submittedAt} da yuborilgan</p>
+                  style={isDark ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' } : { background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <p className={`${isDark ? 'text-white/60' : 'text-gray-700'} text-xs mb-0.5`}>Topshiriq</p>
+                  <p className={`${isDark ? 'text-white' : 'text-gray-900'} text-sm font-medium`}>{submission.taskTitle}</p>
+                  <p className={`${isDark ? 'text-white/30' : 'text-gray-400'} text-xs mt-1`}>{submission.submittedAt} da yuborilgan</p>
                 </div>
 
                 {/* File */}
@@ -144,9 +146,9 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
                     {/* Grade slider */}
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <label className="text-white/60 text-xs font-medium">Baho</label>
+                        <label className={`${isDark ? 'text-white/60' : 'text-gray-700'} text-xs font-medium`}>Baho</label>
                         <span className={`text-2xl font-extrabold ${gradeColor}`}>
-                          {grade}<span className="text-sm text-white/30">/{submission.maxGrade}</span>
+                          {grade}<span className={`text-sm ${isDark ? 'text-white/30' : 'text-gray-400'}`}>/{submission.maxGrade}</span>
                         </span>
                       </div>
 
@@ -159,7 +161,7 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
                           } ${pct}%, rgba(255,255,255,0.1) ${pct}%)`,
                         }} />
 
-                      <div className="flex justify-between text-xs text-white/20 mt-1">
+                      <div className={`flex justify-between text-xs ${isDark ? 'text-white/20' : 'text-gray-300'} mt-1`}>
                         <span>0</span>
                         <span className="text-amber-400/60">50</span>
                         <span className="text-emerald-400/60">{submission.maxGrade}</span>
@@ -172,8 +174,8 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
                             onClick={() => setGrade(Math.min(v, submission.maxGrade))}
                             className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                               grade === v
-                                ? 'bg-white/20 text-white'
-                                : 'bg-white/5 text-white/30 hover:text-white hover:bg-white/10'
+                                ? isDark ? 'bg-white/20 text-white' : 'bg-gray-300 text-gray-900'
+                                : isDark ? 'bg-white/5 text-white/30 hover:text-white hover:bg-white/10' : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
                             }`}>
                             {v}
                           </button>
@@ -183,13 +185,13 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
 
                     {/* Feedback */}
                     <div>
-                      <label className="text-white/60 text-xs font-medium mb-1.5 block">
+                      <label className={`${isDark ? 'text-white/60' : 'text-gray-700'} text-xs font-medium mb-1.5 block`}>
                         O&apos;qituvchi izohi *
                       </label>
                       <textarea value={feedback} onChange={e => { setFeedback(e.target.value); setError('') }}
                         placeholder="O'quvchiga fikr-mulohaza yozing..."
                         rows={4}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-amber-500/50 transition-colors resize-none" />
+                        className={`w-full ${isDark ? 'bg-white/5 border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border-gray-300 text-gray-900 placeholder:text-gray-300'} border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-amber-500/50 transition-colors resize-none`} />
                     </div>
 
                     {error && (
@@ -198,8 +200,8 @@ export default function GradingModal({ open, onClose, submission, onGrade }: Pro
 
                     <div className="flex gap-3">
                       <button type="button" onClick={onClose}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white transition-all"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${isDark ? 'text-white/50 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-all`}
+                        style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)' }}>
                         Bekor qilish
                       </button>
                       <button type="submit" disabled={loading}

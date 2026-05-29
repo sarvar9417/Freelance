@@ -58,8 +58,8 @@ export default function SettingsClient({ initial }: Props) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Sozlamalar</h1>
-        <p className="text-white/40 text-sm mt-1">Profil ma&apos;lumotlaringizni yangilang</p>
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Sozlamalar</h1>
+        <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Profil ma&apos;lumotlaringizni yangilang</p>
       </div>
 
       {success && (
@@ -81,16 +81,16 @@ export default function SettingsClient({ initial }: Props) {
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           className="rounded-2xl p-5"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+          style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-xl font-bold text-white flex-shrink-0 shadow-lg shadow-emerald-900/40">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-lg shadow-emerald-900/40">
               {initials}
             </div>
             <div>
-              <p className="text-white font-semibold">{form.full_name || "O'qituvchi"}</p>
-              <p className="text-white/40 text-sm">{initial.email}</p>
-              <p className="text-white/25 text-xs mt-1">O&apos;qituvchi</p>
+              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{form.full_name || "O'qituvchi"}</p>
+              <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{initial.email}</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>O&apos;qituvchi</p>
             </div>
           </div>
         </motion.div>
@@ -99,51 +99,51 @@ export default function SettingsClient({ initial }: Props) {
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
           className="rounded-2xl p-5 space-y-4"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+          style={{ background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.06)' }}
         >
-          <h2 className="text-white text-sm font-semibold flex items-center gap-2">
+          <h2 className={`text-sm font-semibold flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             <User className="h-4 w-4 text-emerald-400" /> Shaxsiy ma&apos;lumotlar
           </h2>
 
           <div>
-            <label className="text-white/50 text-xs mb-1.5 flex items-center gap-1">
+            <label className={`text-xs mb-1.5 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
               <User className="h-3 w-3" /> Ism va familiya *
             </label>
             <input
               type="text" value={form.full_name}
               onChange={e => set('full_name')(e.target.value)}
               placeholder="Ism Familiya"
-              className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-emerald-500/50"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+              className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500/50 ${isDark ? 'text-white placeholder-white/25' : 'text-gray-900 placeholder-gray-400'}`}
+              style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.07)' }}
             />
           </div>
 
           <div>
-            <label className="text-white/50 text-xs mb-1.5 flex items-center gap-1">
+            <label className={`text-xs mb-1.5 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
               <Mail className="h-3 w-3" /> Email (o&apos;zgartirib bo&apos;lmaydi)
             </label>
             <input
               type="email" value={initial.email} disabled
-              className="w-full px-4 py-3 rounded-xl text-sm text-white/30 outline-none cursor-not-allowed"
-              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+              className={`w-full px-4 py-3 rounded-xl text-sm outline-none cursor-not-allowed ${isDark ? 'text-white/30' : 'text-gray-400'}`}
+              style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', border: isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.04)' }}
             />
           </div>
 
           <div>
-            <label className="text-white/50 text-xs mb-1.5 flex items-center gap-1">
+            <label className={`text-xs mb-1.5 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
               <Hash className="h-3 w-3" /> Yosh (ixtiyoriy)
             </label>
             <input
               type="number" min={16} max={99} value={form.age}
               onChange={e => set('age')(e.target.value)}
               placeholder="Masalan: 28"
-              className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-emerald-500/50"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+              className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500/50 ${isDark ? 'text-white placeholder-white/25' : 'text-gray-900 placeholder-gray-400'}`}
+              style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.07)' }}
             />
           </div>
 
           <div>
-            <label className="text-white/50 text-xs mb-1.5 flex items-center gap-1">
+            <label className={`text-xs mb-1.5 flex items-center gap-1 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
               <FileText className="h-3 w-3" /> Bio (ixtiyoriy)
             </label>
             <textarea
@@ -151,15 +151,15 @@ export default function SettingsClient({ initial }: Props) {
               onChange={e => set('bio')(e.target.value)}
               placeholder="O'zingiz haqingizda qisqacha..."
               rows={4}
-              className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+              className={`w-full px-4 py-3 rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500/50 resize-none ${isDark ? 'text-white placeholder-white/25' : 'text-gray-900 placeholder-gray-400'}`}
+              style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.07)' }}
             />
           </div>
         </motion.div>
 
         <button
           type="submit" disabled={isPending}
-          className="w-full py-3 rounded-xl text-sm font-medium text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+          className={`w-full py-3 rounded-xl text-sm font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${isDark ? 'text-white' : 'text-gray-900'}`}
           style={{ background: 'linear-gradient(135deg, rgba(5,150,105,0.9), rgba(4,120,87,0.9))' }}
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

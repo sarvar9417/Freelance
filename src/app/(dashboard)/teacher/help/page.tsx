@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HelpCircle, ChevronDown, BookOpen, ClipboardCheck, Users, Settings, MessageCircle } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const FAQS = [
   {
@@ -79,19 +80,19 @@ const FAQS = [
   },
 ]
 
-function FAQ({ question, answer }: { question: string; answer: string }) {
+function FAQ({ question, answer, isDark }: { question: string; answer: string; isDark: boolean }) {
   const [open, setOpen] = useState(false)
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+      style={isDark ? { border: '1px solid rgba(255,255,255,0.07)' } : { border: '1px solid rgba(0,0,0,0.07)' }}
     >
       <button
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-white/[0.02] transition-colors"
+        className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-gray-50'} transition-colors`}
       >
-        <span className="text-white/80 text-sm font-medium">{question}</span>
-        <ChevronDown className={`h-4 w-4 text-white/30 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <span className={`${isDark ? 'text-white/80' : 'text-gray-800'} text-sm font-medium`}>{question}</span>
+        <ChevronDown className={`h-4 w-4 ${isDark ? 'text-white/30' : 'text-gray-400'} flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       <AnimatePresence>
         {open && (
@@ -103,8 +104,8 @@ function FAQ({ question, answer }: { question: string; answer: string }) {
             className="overflow-hidden"
           >
             <div
-              className="px-4 pb-4 text-white/50 text-sm leading-relaxed"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+              className={`px-4 pb-4 ${isDark ? 'text-white/50' : 'text-gray-600'} text-sm leading-relaxed`}
+              style={isDark ? { borderTop: '1px solid rgba(255,255,255,0.05)' } : { borderTop: '1px solid rgba(0,0,0,0.05)' }}
             >
               <div className="pt-3">{answer}</div>
             </div>
@@ -116,11 +117,12 @@ function FAQ({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function HelpPage() {
+  const { isDark } = useMountedTheme()
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Yordam markazi</h1>
-        <p className="text-white/40 text-sm mt-1">Ko&apos;p beriladigan savollar va javoblar</p>
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Yordam markazi</h1>
+        <p className={`${isDark ? 'text-white/40' : 'text-gray-500'} text-sm mt-1`}>Ko&apos;p beriladigan savollar va javoblar</p>
       </div>
 
       {/* Kirish kartochkasi */}
@@ -133,8 +135,8 @@ export default function HelpPage() {
           <HelpCircle className="h-5 w-5 text-emerald-400" />
         </div>
         <div>
-          <p className="text-white font-semibold text-sm mb-1">O&apos;qituvchi bo&apos;limiga xush kelibsiz!</p>
-          <p className="text-white/50 text-sm leading-relaxed">
+          <p className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold text-sm mb-1`}>O&apos;qituvchi bo&apos;limiga xush kelibsiz!</p>
+          <p className={`${isDark ? 'text-white/50' : 'text-gray-600'} text-sm leading-relaxed`}>
             Quyida eng ko&apos;p beriladigan savollarga javoblar berilgan. Savolingizga javob topa olmagan bo&apos;lsangiz,
             admin bilan bog&apos;laning.
           </p>
@@ -154,11 +156,11 @@ export default function HelpPage() {
           >
             <div className="flex items-center gap-2 mb-3">
               <Icon className={`h-4 w-4 ${section.color}`} />
-              <h2 className="text-white font-semibold text-sm">{section.category}</h2>
+              <h2 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold text-sm`}>{section.category}</h2>
             </div>
             <div className="space-y-2">
               {section.questions.map((faq, qi) => (
-                <FAQ key={qi} question={faq.q} answer={faq.a} />
+                <FAQ key={qi} question={faq.q} answer={faq.a} isDark={isDark} />
               ))}
             </div>
           </motion.div>
@@ -169,11 +171,11 @@ export default function HelpPage() {
       <motion.div
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
         className="rounded-2xl p-6 text-center"
-        style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
+        style={isDark ? { background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' } : { background: 'rgba(0,0,0,0.02)', border: '1px dashed rgba(0,0,0,0.08)' }}
       >
-        <MessageCircle className="h-8 w-8 text-white/20 mx-auto mb-3" />
-        <p className="text-white/50 text-sm mb-1">Savolingizga javob topa olmadingizmi?</p>
-        <p className="text-white/25 text-xs">
+        <MessageCircle className={`h-8 w-8 ${isDark ? 'text-white/20' : 'text-gray-300'} mx-auto mb-3`} />
+        <p className={`${isDark ? 'text-white/50' : 'text-gray-600'} text-sm mb-1`}>Savolingizga javob topa olmadingizmi?</p>
+        <p className={`${isDark ? 'text-white/25' : 'text-gray-400'} text-xs`}>
           Admin panel orqali yoki platformaning forum bo&apos;limida savol bering
         </p>
       </motion.div>

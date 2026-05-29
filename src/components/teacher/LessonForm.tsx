@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, PlayCircle, Loader2, Hash, AlignLeft } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 export interface LessonFormData {
   title: string
@@ -26,6 +27,7 @@ export default function LessonForm({ open, onClose, onSubmit, initial, defaultOr
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { isDark } = useMountedTheme()
 
   useEffect(() => {
     if (open) {
@@ -72,7 +74,7 @@ export default function LessonForm({ open, onClose, onSubmit, initial, defaultOr
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
 
             <div className="w-full max-w-lg rounded-2xl p-6 space-y-5 pointer-events-auto"
-              style={{ background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={isDark ? { background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' } : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.1)' }}
               onClick={e => e.stopPropagation()}>
 
               <div className="flex items-center justify-between">
@@ -80,11 +82,11 @@ export default function LessonForm({ open, onClose, onSubmit, initial, defaultOr
                   <div className="bg-blue-500/15 p-2 rounded-lg">
                     <PlayCircle className="h-4 w-4 text-blue-400" />
                   </div>
-                  <h2 className="text-white font-semibold">
+                  <h2 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>
                     {mode === 'create' ? 'Yangi dars qo\'shish' : 'Darsni tahrirlash'}
                   </h2>
                 </div>
-                <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
+                <button onClick={onClose} className={`${isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-900'} transition-colors`}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -93,30 +95,30 @@ export default function LessonForm({ open, onClose, onSubmit, initial, defaultOr
                 {/* Tartib raqami va Dars nomi */}
                 <div className="flex gap-3">
                   <div className="w-24">
-                    <label className="text-white/60 text-xs font-medium mb-1.5 flex items-center gap-1">
+                    <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 flex items-center gap-1`}>
                       <Hash className="h-3 w-3" /> Tartib
                     </label>
                     <input type="number" min={1} value={form.order}
                       onChange={e => set('order')(Number(e.target.value))}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm outline-none focus:border-blue-500/50 transition-colors" />
+                      className={`w-full ${isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-100 border border-gray-300 text-gray-900'} rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500/50 transition-colors`} />
                   </div>
                   <div className="flex-1">
-                    <label className="text-white/60 text-xs font-medium mb-1.5 block">Dars nomi *</label>
+                    <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 block`}>Dars nomi *</label>
                     <input value={form.title} onChange={e => set('title')(e.target.value)}
                       placeholder="Masalan: Figmaga kirish"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-blue-500/50 transition-colors" />
+                      className={`w-full ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400'} rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 transition-colors`} />
                     {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                   </div>
                 </div>
 
                 {/* Video URL */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">
+                  <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 block`}>
                     Video URL (YouTube / Vimeo)
                   </label>
                   <input value={form.video_url} onChange={e => set('video_url')(e.target.value)}
                     placeholder="https://youtube.com/watch?v=..."
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-blue-500/50 transition-colors" />
+                    className={`w-full ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400'} rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 transition-colors`} />
                   {errors.video_url && <p className="text-red-400 text-xs mt-1">{errors.video_url}</p>}
                   {form.video_url && !errors.video_url && (
                     <p className="text-emerald-400/70 text-xs mt-1 flex items-center gap-1">
@@ -127,19 +129,19 @@ export default function LessonForm({ open, onClose, onSubmit, initial, defaultOr
 
                 {/* Matn kontenti */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 flex items-center gap-1">
+                  <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 flex items-center gap-1`}>
                     <AlignLeft className="h-3 w-3" /> Matn kontenti
                   </label>
                   <textarea value={form.content} onChange={e => set('content')(e.target.value)}
                     placeholder="Dars haqida batafsil ma'lumot, qo'shimcha izohlar..."
                     rows={4}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-blue-500/50 transition-colors resize-none" />
+                    className={`w-full ${isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400'} rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500/50 transition-colors resize-none`} />
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={onClose}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white transition-all"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-900'} transition-all`}
+                    style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)' }}>
                     Bekor qilish
                   </button>
                   <button type="submit" disabled={loading}

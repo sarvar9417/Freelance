@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, BookOpen, Loader2 } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 const CATEGORIES = ["Boshlang'ich", "O'rta", 'Yuqori', 'Freelancing', 'Dizayn', 'Marketing', 'Dasturlash', 'Copywriting']
 const EMOJIS = ['🚀', '🎨', '✍️', '📱', '💻', '📊', '🎯', '💡', '🌐', '📸', '🎬', '🏆']
@@ -28,6 +29,7 @@ export default function CourseForm({ open, onClose, onSubmit, initial, mode = 'c
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const { isDark } = useMountedTheme()
 
   useEffect(() => {
     if (open) {
@@ -74,7 +76,7 @@ export default function CourseForm({ open, onClose, onSubmit, initial, mode = 'c
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
 
             <div className="w-full max-w-lg rounded-2xl p-6 space-y-5 pointer-events-auto"
-              style={{ background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={isDark ? { background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' } : { background: '#ffffff', border: '1px solid rgba(0,0,0,0.1)' }}
               onClick={e => e.stopPropagation()}>
 
               <div className="flex items-center justify-between">
@@ -82,11 +84,11 @@ export default function CourseForm({ open, onClose, onSubmit, initial, mode = 'c
                   <div className="bg-emerald-500/15 p-2 rounded-lg">
                     <BookOpen className="h-4 w-4 text-emerald-400" />
                   </div>
-                  <h2 className="text-white font-semibold">
+                  <h2 className={`${isDark ? 'text-white' : 'text-gray-900'} font-semibold`}>
                     {mode === 'create' ? 'Yangi kurs yaratish' : 'Kursni tahrirlash'}
                   </h2>
                 </div>
-                <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
+                <button onClick={onClose} className={`${isDark ? 'text-white/30 hover:text-white' : 'text-gray-400 hover:text-gray-900'} transition-colors`}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -94,33 +96,39 @@ export default function CourseForm({ open, onClose, onSubmit, initial, mode = 'c
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Kurs nomi */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">Kurs nomi *</label>
+                  <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 block`}>Kurs nomi *</label>
                   <input value={form.title} onChange={e => set('title')(e.target.value)}
                     placeholder="Masalan: Figma bilan UI Dizayn"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-colors" />
+                    className={`w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-500/50 transition-colors ${
+                      isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400'
+                    }`} />
                   {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                 </div>
 
                 {/* Tavsif */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">Tavsif *</label>
+                  <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 block`}>Tavsif *</label>
                   <textarea value={form.description} onChange={e => set('description')(e.target.value)}
                     placeholder="Kurs haqida qisqacha ma'lumot..."
                     rows={3}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-colors resize-none" />
+                    className={`w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:border-emerald-500/50 transition-colors resize-none ${
+                      isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400'
+                    }`} />
                   {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description}</p>}
                 </div>
 
                 {/* Kategoriya */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">Kategoriya</label>
+                  <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 block`}>Kategoriya</label>
                   <div className="flex flex-wrap gap-2">
                     {CATEGORIES.map(cat => (
                       <button key={cat} type="button" onClick={() => set('category')(cat)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                           form.category === cat
                             ? 'bg-emerald-600 text-white'
-                            : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10'
+                            : isDark
+                              ? 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10'
+                              : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
                         }`}>
                         {cat}
                       </button>
@@ -130,14 +138,16 @@ export default function CourseForm({ open, onClose, onSubmit, initial, mode = 'c
 
                 {/* Emoji */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">Kurs belgisi</label>
+                  <label className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-xs font-medium mb-1.5 block`}>Kurs belgisi</label>
                   <div className="flex flex-wrap gap-2">
                     {EMOJIS.map(emoji => (
                       <button key={emoji} type="button" onClick={() => set('emoji')(emoji)}
                         className={`h-9 w-9 text-xl rounded-lg transition-all ${
                           form.emoji === emoji
                             ? 'bg-emerald-600/30 border-2 border-emerald-500'
-                            : 'bg-white/5 hover:bg-white/10 border-2 border-transparent'
+                            : isDark
+                              ? 'bg-white/5 hover:bg-white/10 border-2 border-transparent'
+                              : 'bg-gray-100 hover:bg-gray-200 border-2 border-transparent'
                         }`}>
                         {emoji}
                       </button>
@@ -147,8 +157,8 @@ export default function CourseForm({ open, onClose, onSubmit, initial, mode = 'c
 
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={onClose}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white transition-all"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                    style={isDark ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' } : { background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)' }}>
                     Bekor qilish
                   </button>
                   <button type="submit" disabled={loading}

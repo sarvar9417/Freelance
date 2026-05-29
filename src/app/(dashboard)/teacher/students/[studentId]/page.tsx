@@ -51,12 +51,12 @@ export default async function StudentDetailPage({
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
-          <Link href="/teacher/students" className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all">
+          <Link href="/teacher/students" className="p-2 rounded-xl text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <h1 className="text-xl font-bold text-white">{student.full_name}</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{student.full_name}</h1>
         </div>
-        <p className="text-white/40 text-sm">Kurs mavjud emas</p>
+        <p className="text-gray-500 dark:text-white/40 text-sm">Kurs mavjud emas</p>
       </div>
     )
   }
@@ -119,12 +119,12 @@ export default async function StudentDetailPage({
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link href="/teacher/students" className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all">
+        <Link href="/teacher/students" className="p-2 rounded-xl text-gray-500 dark:text-white/40 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-white">{student.full_name}</h1>
-          <p className="text-white/40 text-xs">{student.email}</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{student.full_name}</h1>
+          <p className="text-gray-500 dark:text-white/40 text-xs">{student.email}</p>
         </div>
       </div>
 
@@ -133,25 +133,24 @@ export default async function StudentDetailPage({
         <div className="space-y-4">
           {/* Profil kartochka */}
           <div
-            className="rounded-2xl p-5 space-y-4"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            className="rounded-2xl p-5 space-y-4 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10"
           >
             <div className="flex flex-col items-center text-center gap-3">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500/40 to-blue-600/40 flex items-center justify-center text-xl font-bold text-white">
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500/40 to-blue-600/40 flex items-center justify-center text-xl font-bold text-gray-900 dark:text-white">
                 {initials}
               </div>
               <div>
-                <p className="text-white font-semibold">{student.full_name}</p>
-                <p className="text-white/40 text-xs mt-0.5">{student.email}</p>
+                <p className="text-gray-900 dark:text-white font-semibold">{student.full_name}</p>
+                <p className="text-gray-500 dark:text-white/40 text-xs mt-0.5">{student.email}</p>
                 {student.age && (
-                  <p className="text-white/30 text-xs mt-0.5">{student.age} yosh</p>
+                  <p className="text-gray-400 dark:text-white/30 text-xs mt-0.5">{student.age} yosh</p>
                 )}
               </div>
             </div>
             {student.bio && (
-              <p className="text-white/50 text-xs leading-relaxed border-t border-white/5 pt-3">{student.bio}</p>
+              <p className="text-gray-600 dark:text-white/50 text-xs leading-relaxed border-t border-gray-200 dark:border-white/5 pt-3">{student.bio}</p>
             )}
-            <div className="text-xs text-white/25 border-t border-white/5 pt-3">
+            <div className="text-xs text-gray-300 dark:text-white/25 border-t border-gray-200 dark:border-white/5 pt-3">
               Ro&apos;yxatdan o&apos;tgan:{' '}
               {new Date(student.created_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long', year: 'numeric' })}
             </div>
@@ -159,10 +158,9 @@ export default async function StudentDetailPage({
 
           {/* Umumiy statistika */}
           <div
-            className="rounded-2xl p-5 space-y-3"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            className="rounded-2xl p-5 space-y-3 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10"
           >
-            <p className="text-white/40 text-xs font-medium uppercase tracking-wide">Umumiy statistika</p>
+            <p className="text-gray-500 dark:text-white/40 text-xs font-medium uppercase tracking-wide">Umumiy statistika</p>
             {[
               { label: 'Yozilgan kurslar', value: enrolledCourseIds.length, icon: BookOpen, color: 'text-blue-400' },
               { label: 'Topshiriqlar', value: totalSubs, icon: ClipboardCheck, color: 'text-amber-400' },
@@ -172,7 +170,7 @@ export default async function StudentDetailPage({
               <div key={label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Icon className={`h-3.5 w-3.5 ${color}`} />
-                  <span className="text-white/50 text-sm">{label}</span>
+                  <span className="text-gray-600 dark:text-white/50 text-sm">{label}</span>
                 </div>
                 <span className={`text-sm font-semibold ${color}`}>{value}</span>
               </div>
@@ -184,14 +182,13 @@ export default async function StudentDetailPage({
         <div className="lg:col-span-2 space-y-5">
           {/* Kurslar progress */}
           <div
-            className="rounded-2xl p-5"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            className="rounded-2xl p-5 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10"
           >
-            <p className="text-white/40 text-xs font-medium mb-4 flex items-center gap-1.5">
+            <p className="text-gray-500 dark:text-white/40 text-xs font-medium mb-4 flex items-center gap-1.5">
               <BookOpen className="h-3.5 w-3.5" /> Mening kurslarim bo&apos;yicha holat
             </p>
             {courseStats.length === 0 ? (
-              <p className="text-white/25 text-sm text-center py-4">Bu o&apos;quvchi hali kursga yozilmagan</p>
+              <p className="text-gray-300 dark:text-white/25 text-sm text-center py-4">Bu o&apos;quvchi hali kursga yozilmagan</p>
             ) : (
               <div className="space-y-4">
                 {courseStats.map(cs => {
@@ -201,17 +198,17 @@ export default async function StudentDetailPage({
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-base">{cs.course?.emoji ?? '📚'}</span>
-                          <span className="text-white text-sm font-medium">{cs.course?.title}</span>
+                          <span className="text-gray-900 dark:text-white text-sm font-medium">{cs.course?.title}</span>
                         </div>
                         <div className="flex items-center gap-3 text-xs">
-                          <span className="text-white/40">{cs.submitted}/{cs.taskCount} topshirdi</span>
+                          <span className="text-gray-500 dark:text-white/40">{cs.submitted}/{cs.taskCount} topshirdi</span>
                           {cs.avgScore !== null && (
                             <span className="text-emerald-400 font-semibold">⌀ {cs.avgScore}</span>
                           )}
-                          <span className="text-white/50 font-semibold">{progress}%</span>
+                          <span className="text-gray-600 dark:text-white/50 font-semibold">{progress}%</span>
                         </div>
                       </div>
-                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <div className="h-1.5 rounded-full overflow-hidden bg-gray-200 dark:bg-white/10">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400"
                           style={{ width: `${progress}%` }}
@@ -226,14 +223,13 @@ export default async function StudentDetailPage({
 
           {/* Topshiriqlar tarixi */}
           <div
-            className="rounded-2xl p-5"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+            className="rounded-2xl p-5 bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/10"
           >
-            <p className="text-white/40 text-xs font-medium mb-4 flex items-center gap-1.5">
+            <p className="text-gray-500 dark:text-white/40 text-xs font-medium mb-4 flex items-center gap-1.5">
               <ClipboardCheck className="h-3.5 w-3.5" /> Topshiriqlar tarixi
             </p>
             {(submissions ?? []).length === 0 ? (
-              <p className="text-white/25 text-sm text-center py-4">Hali topshiriq topshirilmagan</p>
+              <p className="text-gray-300 dark:text-white/25 text-sm text-center py-4">Hali topshiriq topshirilmagan</p>
             ) : (
               <div className="space-y-2">
                 {(submissions ?? []).map(sub => {
@@ -244,12 +240,11 @@ export default async function StudentDetailPage({
                   return (
                     <div
                       key={sub.id}
-                      className="flex items-start gap-3 p-3 rounded-xl"
-                      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+                      className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-white text-xs font-medium truncate">{task?.title ?? '—'}</p>
+                          <p className="text-gray-900 dark:text-white text-xs font-medium truncate">{task?.title ?? '—'}</p>
                           {sub.score !== null && (
                             <span className="text-emerald-400 text-xs font-bold flex-shrink-0">
                               {sub.score}/{task?.max_score ?? 100}
@@ -257,10 +252,10 @@ export default async function StudentDetailPage({
                           )}
                         </div>
                         {course && (
-                          <p className="text-white/30 text-xs">{course.emoji} {course.title}</p>
+                          <p className="text-gray-400 dark:text-white/30 text-xs">{course.emoji} {course.title}</p>
                         )}
                         {sub.feedback && (
-                          <p className="text-white/40 text-xs mt-1 line-clamp-1 italic">&ldquo;{sub.feedback}&rdquo;</p>
+                          <p className="text-gray-500 dark:text-white/40 text-xs mt-1 line-clamp-1 italic">&ldquo;{sub.feedback}&rdquo;</p>
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -268,7 +263,7 @@ export default async function StudentDetailPage({
                           <StatusIcon className="h-3 w-3" />
                           {st.label}
                         </span>
-                        <span className="text-white/20 text-xs flex items-center gap-1">
+                        <span className="text-gray-300 dark:text-white/20 text-xs flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {new Date(sub.submitted_at).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' })}
                         </span>

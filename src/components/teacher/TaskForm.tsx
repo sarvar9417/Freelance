@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ClipboardList, Loader2, Calendar, FileText } from 'lucide-react'
+import { useMountedTheme } from '@/hooks/useTheme'
 
 export interface TaskFormData {
   title: string
@@ -29,6 +30,7 @@ export default function TaskForm({ open, onClose, onSubmit, initial, mode = 'cre
     title: '', description: '', deadline: defaultDeadline,
     file_requirements: 'PDF, DOC, ZIP — max 50MB', max_grade: 100,
   })
+  const { isDark } = useMountedTheme()
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -79,7 +81,7 @@ export default function TaskForm({ open, onClose, onSubmit, initial, mode = 'cre
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
 
             <div className="w-full max-w-lg rounded-2xl p-6 space-y-5 pointer-events-auto"
-              style={{ background: '#0e1322', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ background: isDark ? '#0e1322' : '#ffffff', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)' }}
               onClick={e => e.stopPropagation()}>
 
               <div className="flex items-center justify-between">
@@ -87,11 +89,11 @@ export default function TaskForm({ open, onClose, onSubmit, initial, mode = 'cre
                   <div className="bg-amber-500/15 p-2 rounded-lg">
                     <ClipboardList className="h-4 w-4 text-amber-400" />
                   </div>
-                  <h2 className="text-white font-semibold">
+                  <h2 className={isDark ? 'text-white font-semibold' : 'text-gray-900 font-semibold'}>
                     {mode === 'create' ? 'Yangi topshiriq' : 'Topshiriqni tahrirlash'}
                   </h2>
                 </div>
-                <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
+                <button onClick={onClose} className={isDark ? 'text-white/30 hover:text-white transition-colors' : 'text-gray-400 hover:text-gray-900 transition-colors'}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -99,57 +101,57 @@ export default function TaskForm({ open, onClose, onSubmit, initial, mode = 'cre
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Topshiriq nomi */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">Topshiriq nomi *</label>
+                    <label className={(isDark ? 'text-white/60' : 'text-gray-600') + ' text-xs font-medium mb-1.5 block'}>Topshiriq nomi *</label>
                   <input value={form.title} onChange={e => set('title')(e.target.value)}
                     placeholder="Masalan: Figmada mobile mockup yarating"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-amber-500/50 transition-colors" />
+                    className={'w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:border-amber-500/50 transition-colors ' + (isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400')} />
                   {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                 </div>
 
                 {/* Tavsif */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 block">Tavsif *</label>
+                  <label className={(isDark ? 'text-white/60' : 'text-gray-600') + ' text-xs font-medium mb-1.5 block'}>Tavsif *</label>
                   <textarea value={form.description} onChange={e => set('description')(e.target.value)}
                     placeholder="Topshiriq shartlari, ko'rsatmalar va talablar..."
                     rows={4}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-amber-500/50 transition-colors resize-none" />
+                    className={'w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:border-amber-500/50 transition-colors resize-none ' + (isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400')} />
                   {errors.description && <p className="text-red-400 text-xs mt-1">{errors.description}</p>}
                 </div>
 
                 {/* Deadline va Max baho */}
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-white/60 text-xs font-medium mb-1.5 flex items-center gap-1">
+                    <label className={(isDark ? 'text-white/60' : 'text-gray-600') + ' text-xs font-medium mb-1.5 flex items-center gap-1'}>
                       <Calendar className="h-3 w-3" /> Muddat *
                     </label>
                     <input type="date" value={form.deadline}
                       onChange={e => set('deadline')(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-amber-500/50 transition-colors [color-scheme:dark]" />
+                      className={'w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:border-amber-500/50 transition-colors ' + (isDark ? 'bg-white/5 border border-white/10 text-white [color-scheme:dark]' : 'bg-gray-100 border border-gray-300 text-gray-900')} />
                     {errors.deadline && <p className="text-red-400 text-xs mt-1">{errors.deadline}</p>}
                   </div>
                   <div className="w-28">
-                    <label className="text-white/60 text-xs font-medium mb-1.5 block">Maks. baho</label>
+                    <label className={(isDark ? 'text-white/60' : 'text-gray-600') + ' text-xs font-medium mb-1.5 block'}>Maks. baho</label>
                     <input type="number" min={10} max={100} step={5} value={form.max_grade}
                       onChange={e => set('max_grade')(Number(e.target.value))}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm outline-none focus:border-amber-500/50 transition-colors" />
+                      className={'w-full rounded-xl px-3 py-2.5 text-sm outline-none focus:border-amber-500/50 transition-colors ' + (isDark ? 'bg-white/5 border border-white/10 text-white' : 'bg-gray-100 border border-gray-300 text-gray-900')} />
                   </div>
                 </div>
 
                 {/* Fayl talablari */}
                 <div>
-                  <label className="text-white/60 text-xs font-medium mb-1.5 flex items-center gap-1">
+                  <label className={(isDark ? 'text-white/60' : 'text-gray-600') + ' text-xs font-medium mb-1.5 flex items-center gap-1'}>
                     <FileText className="h-3 w-3" /> Fayl talablari
                   </label>
                   <input value={form.file_requirements}
                     onChange={e => set('file_requirements')(e.target.value)}
                     placeholder="PDF, DOC, ZIP — max 50MB"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/20 outline-none focus:border-amber-500/50 transition-colors" />
+                    className={'w-full rounded-xl px-4 py-2.5 text-sm outline-none focus:border-amber-500/50 transition-colors ' + (isDark ? 'bg-white/5 border border-white/10 text-white placeholder:text-white/20' : 'bg-gray-100 border border-gray-300 text-gray-900 placeholder:text-gray-400')} />
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={onClose}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white transition-all"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    className={'flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ' + (isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-900')}
+                    style={{ background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)' }}>
                     Bekor qilish
                   </button>
                   <button type="submit" disabled={loading}
