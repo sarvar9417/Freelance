@@ -232,13 +232,13 @@ export default function TasksPage() {
             const deadlinePast = task.deadline ? new Date(task.deadline) < new Date() : false
 
             return (
+              <Link key={task.id} href={`/tasks/${task.id}`}>
               <motion.div
-                key={task.id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.04 }}
                 whileHover={{ y: -3, transition: { duration: 0.18 } }}
-                className={`rounded-2xl p-5 flex flex-col gap-3 transition-shadow ${
+                className={`rounded-2xl p-5 flex flex-col gap-3 transition-shadow cursor-pointer ${
                   isDark
                     ? 'bg-white/5 border border-white/10 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-900/10'
                     : 'bg-white border border-gray-200 hover:border-blue-200 hover:shadow-md'
@@ -302,6 +302,7 @@ export default function TasksPage() {
                   )}
                 </div>
               </motion.div>
+              </Link>
             )
           })}
         </div>
